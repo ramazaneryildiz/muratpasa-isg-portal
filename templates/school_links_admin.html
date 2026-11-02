@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+
+{% block title %}Okul Veri Giriş Bağlantıları — Muratpaşa İSG{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <!-- Üst Başlık & Eylemler -->
+    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <div class="flex items-center space-x-2 text-xs font-semibold text-blue-600 mb-1">
+                <i class="fa-solid fa-link"></i>
+                <span>OKUL VERİ TOPLAMA SİSTEMİ</span>
+            </div>
+            <h1 class="text-2xl font-extrabold text-slate-800">Okul Veri Giriş & Güncelleme Bağlantıları</h1>
+            <p class="text-xs text-slate-500 mt-1">
+                Okullara resmî yazı, DYS veya e-posta ile gönderebileceğiniz şifresiz doğrudan erişim linkleri ve kurum şifreleri.
+            </p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+            <a href="/export/okul-linkleri" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition shadow flex items-center">
+                <i class="fa-solid fa-file-excel mr-2"></i> Tüm Linkleri Excel Olarak İndir
+            </a>
+            <a href="/okul-portal" target="_blank" class="px-4 py-2.5 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold transition shadow flex items-center">
+                <i class="fa-solid fa-arrow-up-right-from-square mr-2"></i> Okul Portalını Aç
+            </a>
+        </div>
+    </div>
+
+    <!-- İstatistik Kartları -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+            <div>
+                <div class="text-xs text-slate-400 font-semibold uppercase">Toplam Kurum</div>
+                <div class="text-2xl font-black text-slate-800 mt-0.5">{{ total_count }}</div>
+            </div>
+            <div class="w-10 h-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center text-lg">
+                <i class="fa-solid fa-school"></i>
+            </div>
+        </div>
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+            <div>
+                <div class="text-xs text-slate-400 font-semibold uppercase">Veri Girişi Yapan Kurumlar</div>
+                <div class="text-2xl font-black text-emerald-600 mt-0.5">{{ updated_count }}</div>
+            </div>
+            <div class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center text-lg">
+                <i class="fa-solid fa-circle-check"></i>
+            </div>
+        </div>
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+            <div>
+                <div class="text-xs text-slate-400 font-semibold uppercase">Henüz Veri Girmeyen</div>
+                <div class="text-2xl font-black text-amber-600 mt-0.5">{{ total_count - updated_count }}</div>
+            </div>
+            <div class="w-10 h-10 bg-amber-50 text-amber-600 rounded-lg flex items-center justify-center text-lg">
+                <i class="fa-solid fa-hourglass-half"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Okul Tablosu -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+        <div class="overflow-x-auto">
+            <table id="linksTable" class="w-full text-left text-sm border-collapse">
+                <thead>
+                    <tr>
+                        <th class="py-3 px-3">Kod</th>
+                        <th class="py-3 px-3">Kurum Adı</th>
+                        <th class="py-3 px-3">Okul Müdürü & Tel</th>
+                        <th class="py-3 px-3">Son Veri Girişi</th>
+                        <th class="py-3 px-3">Kurum Şifresi</th>
+                        <th class="py-3 px-3 text-center">Doğrudan Erişim Linki</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for s in schools %}
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="py-2.5 px-3 font-mono text-xs font-semibold text-slate-600">{{ s.kurum_kodu }}</td>
+                        <td class="py-2.5 px-3 font-medium text-slate-800">
+                            <div>{{ s.kurum_adi }}</div>
+                            <span class="inline-block text-[10px] font-semibold px-1.5 py-0.5 rounded {% if s.kurum_statusu == 'Resmî' %}bg-blue-50 text-blue-700{% else %}bg-purple-50 text-purple-700{% endif %}">
+                                {{ s.kurum_statusu }} • {{ s.kurum_turu }}
+                            </span>
+                        </td>
+                        <td class="py-2.5 px-3 text-xs">
+                            <div class="font-semibold text-slate-700">{{ s.mudur_ad_soyad or 'Tanımlanmadı' }}</div>
+                            {% if s.mudur_tel %}
+                            <a href="tel:{{ s.mudur_tel }}" class="text-blue-600 font-mono hover:underline text-[11px] flex items-center gap-1 mt-0.5">
+                                <i class="fa-solid fa-phone text-[9px]"></i> {{ s.mudur_tel }}
+                            </a>
+                            {% endif %}
+                        </td>
+                        <td class="py-2.5 px-3 text-xs">
+                            {% if s.son_veri_giris_tarihi %}
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
+                                <i class="fa-solid fa-check mr-1"></i> {{ s.son_veri_giris_tarihi }}
+                            </span>
+                            {% else %}
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-500">
+                                Bekliyor
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td class="py-2.5 px-3 font-mono text-xs text-slate-600">
+                            {{ s.portal_sifre or 'isg2026' }}
+                        </td>
+                        <td class="py-2.5 px-3 text-center">
+                            <div class="flex items-center justify-center space-x-1.5">
+                                <button onclick="copyLink('{{ base_url }}/okul-portal/giris/{{ s.access_token }}', this)" 
+                                        class="px-2.5 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg text-xs font-semibold transition flex items-center">
+                                    <i class="fa-solid fa-copy mr-1 text-blue-500"></i> Kopyala
+                                </button>
+                                <a href="/okul-portal/giris/{{ s.access_token }}" target="_blank"
+                                   class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition flex items-center">
+                                    <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function() {
+        $('#linksTable').DataTable({
+            language: {
+                url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/tr.json'
+            },
+            pageLength: 25,
+            order: [[0, 'asc']]
+        });
+    });
+
+    function copyLink(link, btn) {
+        navigator.clipboard.writeText(link).then(() => {
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-check mr-1 text-emerald-600"></i> Kopyalandı!';
+            btn.classList.add('bg-emerald-100', 'text-emerald-800');
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                btn.classList.remove('bg-emerald-100', 'text-emerald-800');
+            }, 2000);
+        });
+    }
+</script>
+{% endblock %}

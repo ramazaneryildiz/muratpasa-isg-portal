@@ -1,0 +1,248 @@
+{% extends "base.html" %}
+
+{% block title %}Okulum Temiz Dış Tetkik Formu (52 Kriter) — {{ audit.kurum_adi }}{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <!-- Sticky Üst Değerlendirme Çubuğu -->
+    <div class="sticky top-2 z-40 bg-white/95 backdrop-blur-md rounded-2xl p-4 sm:p-5 shadow-lg border border-slate-200/90 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded text-[10px] font-extrabold uppercase bg-emerald-600 text-white">
+                    {{ audit.tetkik_turu }} Tetkiki
+                </span>
+                <span class="text-xs font-mono text-slate-500 font-bold">{{ audit.kurum_kodu }}</span>
+                <span class="text-xs text-slate-400">| {{ audit.tetkik_tarihi }} ({{ audit.tetkik_saati }})</span>
+            </div>
+            <h1 class="text-lg sm:text-xl font-extrabold text-slate-900 mt-1">
+                {{ audit.kurum_adi }}
+            </h1>
+            <div class="text-xs text-slate-500 mt-0.5">
+                <strong>Tetkik Heyeti:</strong> {{ audit.tetkikciler }} | <strong>Okul Müdürü:</strong> {{ audit.mudur_ad_soyad or 'Okul Müdürü' }}
+            </div>
+        </div>
+
+        <!-- Canlı Puanlama Sayaçları -->
+        <div class="flex items-center gap-3">
+            <div class="text-center px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200">
+                <div class="text-[10px] uppercase font-bold text-emerald-700">Uygun (E)</div>
+                <div id="countUygun" class="text-lg font-extrabold text-emerald-800 font-mono">0</div>
+            </div>
+            <div class="text-center px-3 py-1.5 rounded-xl bg-rose-50 border border-rose-200">
+                <div class="text-[10px] uppercase font-bold text-rose-700">DÖF (H)</div>
+                <div id="countDof" class="text-lg font-extrabold text-rose-800 font-mono">0</div>
+            </div>
+            <div class="text-center px-3 py-1.5 rounded-xl bg-slate-100 border border-slate-200">
+                <div class="text-[10px] uppercase font-bold text-slate-500">U/D</div>
+                <div id="countUd" class="text-lg font-extrabold text-slate-700 font-mono">0</div>
+            </div>
+            <div class="text-center px-4 py-1.5 rounded-xl bg-indigo-50 border border-indigo-200">
+                <div class="text-[10px] uppercase font-bold text-indigo-700">Başarı</div>
+                <div id="countScore" class="text-lg font-extrabold text-indigo-800 font-mono">%0</div>
+            </div>
+            <div class="flex flex-col gap-1.5">
+                <button type="button" onclick="document.getElementById('auditForm').submit()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-md transition">
+                    <i class="fa-solid fa-save mr-1"></i> Kaydet
+                </button>
+                <button type="button" onclick="window.print()" class="px-3 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-[11px] border border-slate-300">
+                    <i class="fa-solid fa-print mr-1"></i> Yazdır
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 52 Soruluk Form -->
+    <form id="auditForm" method="POST" action="/okulum-temiz/kaydet/{{ audit.id }}" class="space-y-6">
+
+        {% for sec in sections %}
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 space-y-4">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <h3 class="text-sm font-extrabold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid {{ sec.icon }} text-emerald-600"></i> {{ sec.title }}
+                </h3>
+                <span class="text-xs font-bold text-slate-400">{{ sec.questions|length }} Kriter</span>
+            </div>
+
+            <div class="space-y-4">
+                {% for q_no, q_text in sec.questions %}
+                {% set cur_val = results.get(q_no, {}).get('status', 'Uygun') %}
+                {% set cur_note = results.get(q_no, {}).get('note', '') %}
+                <div class="p-4 rounded-xl border border-slate-200/80 bg-slate-50/50 hover:bg-slate-50 transition space-y-2.5">
+                    <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                        <div class="flex items-start gap-2.5 flex-1">
+                            <span class="w-8 h-6 rounded bg-slate-200 text-slate-700 font-mono font-bold text-xs flex items-center justify-center flex-shrink-0 mt-0.5">
+                                {{ q_no }}
+                            </span>
+                            <span class="text-xs text-slate-800 font-medium leading-relaxed">
+                                {{ q_text }}
+                            </span>
+                        </div>
+
+                        <!-- 3 Puan Butonu -->
+                        <div class="flex items-center gap-1.5 flex-shrink-0">
+                            <label class="cursor-pointer">
+                                <input type="radio" name="q_{{ q_no }}" value="Uygun" class="sr-only q-radio" onchange="calculateScore()" {% if cur_val == 'Uygun' %}checked{% endif %}>
+                                <span class="pill-btn px-3 py-1.5 rounded-lg border text-xs font-bold transition flex items-center gap-1">
+                                    <i class="fa-solid fa-check text-[10px]"></i> Uygun (E)
+                                </span>
+                            </label>
+
+                            <label class="cursor-pointer">
+                                <input type="radio" name="q_{{ q_no }}" value="Uygun Değil" class="sr-only q-radio" onchange="calculateScore()" {% if cur_val == 'Uygun Değil' %}checked{% endif %}>
+                                <span class="pill-btn px-3 py-1.5 rounded-lg border text-xs font-bold transition flex items-center gap-1">
+                                    <i class="fa-solid fa-xmark text-[10px]"></i> Uygun Değil (H)
+                                </span>
+                            </label>
+
+                            <label class="cursor-pointer">
+                                <input type="radio" name="q_{{ q_no }}" value="U/D" class="sr-only q-radio" onchange="calculateScore()" {% if cur_val == 'U/D' %}checked{% endif %}>
+                                <span class="pill-btn px-3 py-1.5 rounded-lg border text-xs font-bold transition flex items-center gap-1">
+                                    <i class="fa-solid fa-minus text-[10px]"></i> U/D
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Açıklama / Bulgu Alanı -->
+                    <div>
+                        <input type="text" name="note_{{ q_no }}" value="{{ cur_note }}" placeholder="Saha gözlemi, bulgu veya DÖF gerekçesi (varsa)..." class="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+
+        <!-- DÖF Özeti ve Karar Bloğu -->
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 space-y-4">
+            <h3 class="text-sm font-extrabold text-slate-800 flex items-center gap-2">
+                <i class="fa-solid fa-scale-balanced text-indigo-600"></i> Tetkik Sonucu ve Karar
+            </h3>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Dış Tetkik Nihai Sonucu:</label>
+                    <select id="sonucSelect" name="sonuc" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs font-bold focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                        <option value="BELGE_VERILMESI_UYGUN" {% if audit.sonuc == 'BELGE_VERILMESI_UYGUN' %}selected{% endif %}>✅ Belge Verilmesi Uygundur (TSE Onaylı Okulum Temiz Belgesi)</option>
+                        <option value="SARTLI_UYGUN_DOF" {% if audit.sonuc == 'SARTLI_UYGUN_DOF' %}selected{% endif %}>⚠️ Şartlı Uygun (DÖF Tutanağı Düzenlendi - 15 Gün Süre Verildi)</option>
+                        <option value="UYGUN_DEGIL" {% if audit.sonuc == 'UYGUN_DEGIL' %}selected{% endif %}>❌ Belge Verilmesi Uygun Değildir (Majör Kusurlar)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">DÖF Kapatma Termini (Azami 15 Takvim Günü):</label>
+                    <input type="text" name="dof_termini" value="{{ audit.dof_termini or '15 Gün' }}" placeholder="Örn: 20.11.2026" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs font-bold focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Genel Tetkik Notları ve Tavsiyeler:</label>
+                <textarea name="notlar" rows="3" placeholder="Saha denetiminde tespit edilen genel hijyen intibaları..." class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">{{ audit.notlar or '' }}</textarea>
+            </div>
+
+            <!-- İmza Bloğu -->
+            <div class="pt-4 border-t border-slate-200 grid grid-cols-1 sm:grid-cols-3 gap-4 text-center text-xs">
+                <div class="p-3 bg-slate-50 rounded-xl border border-slate-200">
+                    <div class="font-bold text-slate-800">TETKİKÇİ (1)</div>
+                    <div class="text-indigo-600 font-extrabold mt-1">Ramazan ERYILDIZ</div>
+                    <div class="text-[10px] text-slate-500">A Sınıfı İş Güvenliği Uzmanı</div>
+                    <div class="mt-4 pt-2 border-t border-slate-200 text-[10px] text-slate-400">İmza: ........................</div>
+                </div>
+
+                <div class="p-3 bg-slate-50 rounded-xl border border-slate-200">
+                    <div class="font-bold text-slate-800">TETKİKÇİ (2)</div>
+                    <div class="text-slate-800 font-bold mt-1">Havva AKSU</div>
+                    <div class="text-[10px] text-slate-500">İSG Uzmanı / Tetkik Görevlisi</div>
+                    <div class="mt-4 pt-2 border-t border-slate-200 text-[10px] text-slate-400">İmza: ........................</div>
+                </div>
+
+                <div class="p-3 bg-slate-50 rounded-xl border border-slate-200">
+                    <div class="font-bold text-slate-800">OKUL MÜDÜRÜ</div>
+                    <div class="text-slate-800 font-bold mt-1">{{ audit.mudur_ad_soyad or 'Okul Müdürü' }}</div>
+                    <div class="text-[10px] text-slate-500">İşveren / Kurum Temsilcisi</div>
+                    <div class="mt-4 pt-2 border-t border-slate-200 text-[10px] text-slate-400">Kaşe / İmza: ........................</div>
+                </div>
+            </div>
+
+            <div class="flex justify-end pt-3">
+                <button type="submit" class="px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-sm shadow-lg shadow-emerald-600/30 transition hover:-translate-y-0.5 flex items-center gap-2">
+                    <i class="fa-solid fa-check"></i>
+                    <span>Tetkik Sonuçlarını Kaydet ve Raporu Onayla</span>
+                </button>
+            </div>
+        </div>
+
+    </form>
+
+</div>
+
+<style>
+    /* Radio pill stilleri */
+    input[type="radio"]:checked + .pill-btn {
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    input[value="Uygun"]:checked + .pill-btn {
+        background-color: #ecfdf5;
+        border-color: #10b981;
+        color: #065f46;
+    }
+    input[value="Uygun"]:not(:checked) + .pill-btn {
+        background-color: #ffffff;
+        border-color: #e2e8f0;
+        color: #64748b;
+    }
+    input[value="Uygun Değil"]:checked + .pill-btn {
+        background-color: #fef2f2;
+        border-color: #ef4444;
+        color: #991b1b;
+    }
+    input[value="Uygun Değil"]:not(:checked) + .pill-btn {
+        background-color: #ffffff;
+        border-color: #e2e8f0;
+        color: #64748b;
+    }
+    input[value="U/D"]:checked + .pill-btn {
+        background-color: #f1f5f9;
+        border-color: #94a3b8;
+        color: #334155;
+    }
+    input[value="U/D"]:not(:checked) + .pill-btn {
+        background-color: #ffffff;
+        border-color: #e2e8f0;
+        color: #64748b;
+    }
+</style>
+
+<script>
+    function calculateScore() {
+        const radios = document.querySelectorAll('.q-radio:checked');
+        let uygun = 0, dof = 0, ud = 0;
+
+        radios.forEach(r => {
+            if (r.value === 'Uygun') uygun++;
+            else if (r.value === 'Uygun Değil') dof++;
+            else if (r.value === 'U/D') ud++;
+        });
+
+        document.getElementById('countUygun').innerText = uygun;
+        document.getElementById('countDof').innerText = dof;
+        document.getElementById('countUd').innerText = ud;
+
+        const effectiveTotal = uygun + dof;
+        const score = effectiveTotal > 0 ? Math.round((uygun / effectiveTotal) * 100) : 0;
+        document.getElementById('countScore').innerText = `%${score}`;
+
+        const sel = document.getElementById('sonucSelect');
+        if (dof === 0 && uygun > 0) {
+            sel.value = 'BELGE_VERILMESI_UYGUN';
+        } else if (dof > 0 && dof <= 8) {
+            sel.value = 'SARTLI_UYGUN_DOF';
+        } else if (dof > 8) {
+            sel.value = 'UYGUN_DEGIL';
+        }
+    }
+
+    calculateScore();
+</script>
+{% endblock %}
+

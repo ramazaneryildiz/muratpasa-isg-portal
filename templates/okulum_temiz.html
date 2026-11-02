@@ -1,0 +1,235 @@
+{% extends "base.html" %}
+
+{% block title %}Okulum Temiz Dış Tetkik ve Belgelendirme Portalı — Muratpaşa İlçe MEM{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <!-- Header Hero -->
+    <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-950 via-teal-900 to-slate-900 p-6 sm:p-8 text-white shadow-xl border border-emerald-800/60">
+        <div class="absolute -right-16 -top-16 w-80 h-80 rounded-full bg-emerald-600/20 blur-3xl pointer-events-none"></div>
+        <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+            <div class="space-y-2">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 text-xs font-semibold backdrop-blur-sm">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span>Modül 4: MEB & TSE Standardı Okulum Temiz Belgelendirme (2026–2027)</span>
+                </div>
+                <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white flex items-center gap-3">
+                    <i class="fa-solid fa-certificate text-emerald-400"></i>
+                    <span>Okulum Temiz Dış Tetkik ve Belgelendirme Portalı</span>
+                </h1>
+                <p class="text-sm text-slate-300 max-w-3xl leading-relaxed">
+                    02–06 Kasım 2026 saha tetkik programı, mobil uyumlu 52 standart soru puanlama motoru, 8 kritik hijyen alanı denetimi ve uygunsuzluk halinde 15 günlük kapatma takvimini başlatan otomatik DÖF yönetim sistemi.
+                </p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2.5">
+                <a href="/dokuman-kutuphanesi" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 transition">
+                    <i class="fa-solid fa-file-zipper text-emerald-400"></i>
+                    <span>Tüm Evrak Paketini İndir</span>
+                </a>
+                <button onclick="document.getElementById('newAuditModal').classList.remove('hidden')" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-lg shadow-emerald-600/30 transition hover:-translate-y-0.5">
+                    <i class="fa-solid fa-calendar-plus text-sm"></i>
+                    <span>Yeni Tetkik Planla</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4 İstatistik Kartı -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+            <div class="flex items-center justify-between">
+                <div>
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Toplam Tetkik</span>
+                    <div class="text-3xl font-extrabold text-slate-900 mt-1">{{ total_audits }}</div>
+                </div>
+                <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl">
+                    <i class="fa-solid fa-list-check"></i>
+                </div>
+            </div>
+            <div class="mt-3 text-xs text-slate-500">02–06 Kasım 2026 Programı</div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+            <div class="flex items-center justify-between">
+                <div>
+                    <span class="text-xs font-bold uppercase tracking-wider text-emerald-600">Ramazan ERYILDIZ</span>
+                    <div class="text-3xl font-extrabold text-emerald-600 mt-1">{{ eryildiz_audits }}</div>
+                </div>
+                <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl">
+                    <i class="fa-solid fa-user-check"></i>
+                </div>
+            </div>
+            <div class="mt-3 text-xs text-emerald-700 font-semibold">Hanım-Ömer / Tez-Tur / Necati Dölen</div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+            <div class="flex items-center justify-between">
+                <div>
+                    <span class="text-xs font-bold uppercase tracking-wider text-amber-600">DÖF Verilen</span>
+                    <div class="text-3xl font-extrabold text-amber-600 mt-1">{{ dof_count }}</div>
+                </div>
+                <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                </div>
+            </div>
+            <div class="mt-3 text-xs text-amber-700 font-semibold">15 Günlük Termin Kapsamında</div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+            <div class="flex items-center justify-between">
+                <div>
+                    <span class="text-xs font-bold uppercase tracking-wider text-purple-600">TSE Kriter Sayısı</span>
+                    <div class="text-3xl font-extrabold text-purple-600 mt-1">52</div>
+                </div>
+                <div class="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center text-xl">
+                    <i class="fa-solid fa-check-double"></i>
+                </div>
+            </div>
+            <div class="mt-3 text-xs text-slate-500">8 Ana Tetkik Bölümü</div>
+        </div>
+    </div>
+
+    <!-- Tetkik Takvimi Tablosu -->
+    <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+            <div>
+                <h2 class="text-base font-extrabold text-slate-900 flex items-center gap-2">
+                    <i class="fa-solid fa-calendar-days text-emerald-600"></i> Okulum Temiz Saha Tetkik Takvimi (Muratpaşa)
+                </h2>
+                <p class="text-xs text-slate-500 mt-0.5">İl Millî Eğitim Müdürlüğü İSG Birimi tarafından onaylanan resmi tetkik heyeti görev dağılımı.</p>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="text-xs text-slate-400 font-medium">Filtre:</span>
+                <a href="/okulum-temiz" class="px-2.5 py-1 rounded-lg text-xs font-bold {% if not filter_auditor %}bg-emerald-600 text-white{% else %}bg-slate-100 text-slate-600 hover:bg-slate-200{% endif %}">
+                    Tümü
+                </a>
+                <a href="/okulum-temiz?auditor=Ramazan" class="px-2.5 py-1 rounded-lg text-xs font-bold {% if filter_auditor == 'Ramazan' %}bg-emerald-600 text-white{% else %}bg-slate-100 text-slate-600 hover:bg-slate-200{% endif %}">
+                    Ramazan ERYILDIZ
+                </a>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+                <thead>
+                    <tr class="bg-slate-50 border-b border-slate-200 text-slate-600 uppercase font-bold text-[11px] tracking-wider">
+                        <th class="py-3 px-3">Tetkik Tarihi</th>
+                        <th class="py-3 px-3">Kurum Kodu</th>
+                        <th class="py-3 px-4">Okul / Kurum Adı</th>
+                        <th class="py-3 px-3">Görevli Tetkikçiler</th>
+                        <th class="py-3 px-3">Tetkik Türü</th>
+                        <th class="py-3 px-3">Sonuç / Durum</th>
+                        <th class="py-3 px-3 text-right">İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for a in audits %}
+                    <tr class="hover:bg-slate-50/80 transition">
+                        <td class="py-3 px-3 font-semibold text-slate-900 whitespace-nowrap">
+                            <i class="fa-regular fa-calendar text-emerald-600 mr-1"></i> {{ a.tetkik_tarihi }}
+                            <div class="text-[10px] text-slate-400 font-mono">{{ a.tetkik_saati }}</div>
+                        </td>
+                        <td class="py-3 px-3 font-mono font-bold text-slate-700">{{ a.kurum_kodu }}</td>
+                        <td class="py-3 px-4">
+                            <div class="font-bold text-slate-900">{{ a.kurum_adi }}</div>
+                            <div class="text-[10px] text-slate-400">{{ a.kademe or a.kurum_turu }}</div>
+                        </td>
+                        <td class="py-3 px-3 text-slate-700 font-medium">
+                            <i class="fa-solid fa-user-tie text-indigo-500 mr-1"></i> {{ a.tetkikciler }}
+                        </td>
+                        <td class="py-3 px-3">
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700">
+                                {{ a.tetkik_turu }}
+                            </span>
+                        </td>
+                        <td class="py-3 px-3">
+                            {% if a.sonuc == 'BELGE_VERILMESI_UYGUN' %}
+                            <span class="px-2 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1 w-max">
+                                <i class="fa-solid fa-circle-check"></i> Belgeye Uygun
+                            </span>
+                            {% elif a.sonuc == 'SARTLI_UYGUN_DOF' %}
+                            <span class="px-2 py-1 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300 flex items-center gap-1 w-max">
+                                <i class="fa-solid fa-triangle-exclamation"></i> Şartlı Uygun ({{ a.dof_sayisi }} DÖF)
+                            </span>
+                            {% elif a.sonuc == 'UYGUN_DEGIL' %}
+                            <span class="px-2 py-1 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800 border border-rose-300 flex items-center gap-1 w-max">
+                                <i class="fa-solid fa-xmark"></i> Uygun Değil
+                            </span>
+                            {% else %}
+                            <span class="px-2 py-1 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200 flex items-center gap-1 w-max">
+                                <i class="fa-solid fa-clock"></i> Planlandı
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td class="py-3 px-3 text-right whitespace-nowrap">
+                            <a href="/okulum-temiz/form/{{ a.id }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition">
+                                <i class="fa-solid fa-file-pen text-[11px]"></i>
+                                <span>Denetim Formunu Aç</span>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<!-- Modal: Yeni Tetkik Planla -->
+<div id="newAuditModal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 space-y-4 border border-slate-200 shadow-2xl">
+        <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+            <h3 class="text-sm font-extrabold text-slate-900 flex items-center gap-2">
+                <i class="fa-solid fa-calendar-plus text-emerald-600"></i> Yeni Okulum Temiz Tetkiki Planla
+            </h3>
+            <button onclick="document.getElementById('newAuditModal').classList.add('hidden')" class="text-slate-400 hover:text-slate-600">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+
+        <form method="POST" action="/okulum-temiz/ekle" class="space-y-3 text-xs">
+            <div>
+                <label class="block font-bold text-slate-700 mb-1">Okul / Kurum:</label>
+                <select name="school_id" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs">
+                    {% for sc in all_schools %}
+                    <option value="{{ sc.id }}">{{ sc.kurum_kodu }} — {{ sc.kurum_adi }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">Tetkik Tarihi:</label>
+                    <input type="text" name="tetkik_tarihi" placeholder="Örn: 06.11.2026" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs">
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">Saat / Zaman:</label>
+                    <input type="text" name="tetkik_saati" value="09:30 - 12:30" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs">
+                </div>
+            </div>
+            <div>
+                <label class="block font-bold text-slate-700 mb-1">Görevli Tetkikçiler:</label>
+                <input type="text" name="tetkikciler" value="Ramazan ERYILDIZ & Havva AKSU" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs">
+            </div>
+            <div>
+                <label class="block font-bold text-slate-700 mb-1">Tetkik Türü:</label>
+                <select name="tetkik_turu" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold">
+                    <option value="Gözetim">Gözetim Tetkiki</option>
+                    <option value="İlk Belgelendirme">İlk Belgelendirme</option>
+                </select>
+            </div>
+
+            <div class="flex items-center justify-end gap-2 pt-2">
+                <button type="button" onclick="document.getElementById('newAuditModal').classList.add('hidden')" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold transition">
+                    İptal
+                </button>
+                <button type="submit" class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold shadow-md transition">
+                    Randevuyu Kaydet
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+

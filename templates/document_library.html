@@ -1,0 +1,291 @@
+{% extends "base.html" %}
+
+{% block title %}Kurumsal İSG Doküman İndirme ve Şablon Kütüphanesi — Muratpaşa İlçe MEM{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <!-- Header Hero -->
+    <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-950 via-slate-900 to-indigo-950 p-6 sm:p-8 text-white shadow-xl border border-blue-800/50">
+        <div class="absolute -right-16 -top-16 w-80 h-80 rounded-full bg-blue-600/20 blur-3xl pointer-events-none"></div>
+        <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+            <div class="space-y-2">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-300 text-xs font-semibold backdrop-blur-sm">
+                    <span class="w-2 h-2 rounded-full bg-blue-400"></span>
+                    <span>Modül 6: Resmî Doküman İndirme ve DYS Şablon Kütüphanesi</span>
+                </div>
+                <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white flex items-center gap-3">
+                    <i class="fa-solid fa-folder-open text-blue-400"></i>
+                    <span>Kurumsal İSG ve Okul Güvenliği Kütüphanesi</span>
+                </h1>
+                <p class="text-sm text-slate-300 max-w-3xl leading-relaxed">
+                    Google Drive kurumsal bulut alanı ile tam entegre; 7 Öncelikli Okul + RAM evrak paketleri, Anadolu Liseleri kalıp setleri, Okulum Temiz 52 soruluk rehberi ve MEB 2024/56 Şiddeti Önleme plan eklerine tek tıkla doğrudan erişim.
+                </p>
+            </div>
+            <div class="flex items-center gap-2">
+                <a href="https://drive.google.com/drive/folders/1Mwyd2JkO5Na4v8h7N_vhvJY1iX-w5bHC" target="_blank" class="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-extrabold shadow-lg shadow-blue-600/30 transition hover:-translate-y-0.5">
+                    <i class="fa-brands fa-google-drive text-base"></i>
+                    <span>Google Drive Kök Klasörü</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtreleme & Arama -->
+    <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-2">
+            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Kategoriler:</span>
+            <button onclick="filterDocs('all')" class="cat-pill active px-3 py-1.5 rounded-lg text-xs font-bold bg-blue-600 text-white transition">Tümü (12 Belge)</button>
+            <button onclick="filterDocs('adep')" class="cat-pill px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition">ADEP & İç Yönerge</button>
+            <button onclick="filterDocs('okulum_temiz')" class="cat-pill px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition">Okulum Temiz</button>
+            <button onclick="filterDocs('denetim')" class="cat-pill px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition">Müfettiş & Çizelgeler</button>
+        </div>
+        <div class="text-xs text-slate-500 font-mono">
+            Doğrulanmış Drive ID Entegrasyonu
+        </div>
+    </div>
+
+    <!-- Doküman Kartları Izgarası -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" id="docsGrid">
+
+        <!-- Kart 1: Öncelikli Okullar ZIP -->
+        <div class="doc-card bg-white rounded-2xl p-5 shadow-sm border border-slate-200 hover:shadow-md transition space-y-3 flex flex-col justify-between" data-cat="adep">
+            <div class="space-y-2.5">
+                <div class="flex items-center justify-between">
+                    <span class="px-2.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200">
+                        ZIP Paketi • 1.8 MB
+                    </span>
+                    <span class="text-[10px] text-slate-400 font-mono">30 Ekim 2026</span>
+                </div>
+                <h3 class="font-extrabold text-sm text-slate-900 leading-snug">
+                    7 Öncelikli Okul + RAM ADEP ve İSG Yönergeleri Tam Entegre Paketi
+                </h3>
+                <p class="text-xs text-slate-500 leading-relaxed">
+                    İnönü, Mevlana AİHL, Sultan Efe, Muratpaşa MTAL, ATB MTAL, Şehit Serkan Çölkesen MTAL, Antalya MTAL ve Muratpaşa RAM eksiksiz 16 resmî dokümanı.
+                </p>
+            </div>
+            <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
+                <span class="text-[10px] font-mono text-slate-400">ID: 1sutcJd...</span>
+                <a href="https://drive.google.com/file/d/1sutcJdWh7hHZXvK4_7r3XU7WUYTXTEHj/view?usp=drivesdk" target="_blank" class="px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-600 hover:text-white text-blue-700 text-xs font-bold transition flex items-center gap-1">
+                    <i class="fa-solid fa-download"></i> İndir
+                </a>
+            </div>
+        </div>
+
+        <!-- Kart 2: Anadolu Liseleri Kalıp Seti ZIP -->
+        <div class="doc-card bg-white rounded-2xl p-5 shadow-sm border border-slate-200 hover:shadow-md transition space-y-3 flex flex-col justify-between" data-cat="adep">
+            <div class="space-y-2.5">
+                <div class="flex items-center justify-between">
+                    <span class="px-2.5 py-0.5 rounded text-[10px] font-bold bg-indigo-100 text-indigo-800 border border-indigo-200">
+                        ZIP Paketi • 262 KB
+                    </span>
+                    <span class="text-[10px] text-slate-400 font-mono">30 Ekim 2026</span>
+                </div>
+                <h3 class="font-extrabold text-sm text-slate-900 leading-snug">
+                    Anadolu Liseleri Kalıp Seti (DYS Üst Yazı, ADEP, Yönerge, EK-3)
+                </h3>
+                <p class="text-xs text-slate-500 leading-relaxed">
+                    Tüm Anadolu Liseleri için 10 birim standartlı ADEP, İSG İç Yönergesi, DYS Resmî Üst Yazısı ve Şiddet/Sabotaj EK-3 plan şablonu.
+                </p>
+            </div>
+            <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
+                <span class="text-[10px] font-mono text-slate-400">ID: 1gS0voq...</span>
+                <a href="https://drive.google.com/file/d/1gS0voqZowsUe_tjlnIQSUPsh_1_wrPQP/view?usp=drivesdk" target="_blank" class="px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-600 hover:text-white text-blue-700 text-xs font-bold transition flex items-center gap-1">
+                    <i class="fa-solid fa-download"></i> İndir
+                </a>
+            </div>
+        </div>
+
+        <!-- Kart 3: Şiddet ve Silahlı Saldırı Acil Durum Eki -->
+        <div class="doc-card bg-white rounded-2xl p-5 shadow-sm border border-slate-200 hover:shadow-md transition space-y-3 flex flex-col justify-between" data-cat="adep">
+            <div class="space-y-2.5">
+                <div class="flex items-center justify-between">
+                    <span class="px-2.5 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-800 border border-rose-200">
+                        Word DOCX • 45 KB
+                    </span>
+                    <span class="text-[10px] text-slate-400 font-mono">MEB 2024/56</span>
+                </div>
+                <h3 class="font-extrabold text-sm text-slate-900 leading-snug">
+                    Okullarda Şiddet, Silahlı/Bıçaklı Saldırı ve Sabotaj Planı Eki
+                </h3>
+                <p class="text-xs text-slate-500 leading-relaxed">
+                    Kilit-Kapıyı Kilitle (Lockdown), Kaç-Saklan-Karşı Koy modeli, 200m sabotaj çemberi ve ilk 60 saniye operasyon prosedürlerini içeren resmi kalıp taslak.
+                </p>
+            </div>
+            <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
+                <span class="text-[10px] font-mono text-slate-400">ID: 1dDx4Tn...</span>
+                <a href="https://docs.google.com/document/d/1dDx4TnHNJPZjdCBlmOO-qRRiK4l7U-GJhSuUDvKDty0/edit?usp=drivesdk" target="_blank" class="px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-600 hover:text-white text-blue-700 text-xs font-bold transition flex items-center gap-1">
+                    <i class="fa-solid fa-up-right-from-square"></i> Aç / Düzenle
+                </a>
+            </div>
+        </div>
+
+        <!-- Kart 4: Okulum Temiz 52 Kriter Soru Listesi -->
+        <div class="doc-card bg-white rounded-2xl p-5 shadow-sm border border-slate-200 hover:shadow-md transition space-y-3 flex flex-col justify-between" data-cat="okulum_temiz">
+            <div class="space-y-2.5">
+                <div class="flex items-center justify-between">
+                    <span class="px-2.5 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                        Google Doc / DOCX
+                    </span>
+                    <span class="text-[10px] text-slate-400 font-mono">2026–2027</span>
+                </div>
+                <h3 class="font-extrabold text-sm text-slate-900 leading-snug">
+                    Okulum Temiz Dış Tetkik Soru Listesi ve Saha Denetim Rehberi
+                </h3>
+                <p class="text-xs text-slate-500 leading-relaxed">
+                    MEB & TSE standardı 8 ana bölüm ve 52 sorunun tam metni, kontrol kriterleri ve tetkik heyeti değerlendirme yönergeleri.
+                </p>
+            </div>
+            <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
+                <span class="text-[10px] font-mono text-slate-400">ID: 1u6CpUs...</span>
+                <a href="https://docs.google.com/document/d/1u6CpUs57k59WdRbs1RZtdVuLsKXzeehl6SU6okpHs_o/edit?usp=drivesdk" target="_blank" class="px-3 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-600 hover:text-white text-emerald-700 text-xs font-bold transition flex items-center gap-1">
+                    <i class="fa-solid fa-up-right-from-square"></i> Görüntüle
+                </a>
+            </div>
+        </div>
+
+        <!-- Kart 5: Okulum Temiz Rapor & DÖF Tutanağı -->
+        <div class="doc-card bg-white rounded-2xl p-5 shadow-sm border border-slate-200 hover:shadow-md transition space-y-3 flex flex-col justify-between" data-cat="okulum_temiz">
+            <div class="space-y-2.5">
+                <div class="flex items-center justify-between">
+                    <span class="px-2.5 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                        Word DOCX • 39 KB
+                    </span>
+                    <span class="text-[10px] text-slate-400 font-mono">15 Gün Termin</span>
+                </div>
+                <h3 class="font-extrabold text-sm text-slate-900 leading-snug">
+                    Okulum Temiz Dış Tetkik Raporu ve DÖF Tutanağı Formu
+                </h3>
+                <p class="text-xs text-slate-500 leading-relaxed">
+                    Tetkik heyetinin uygunsuzlukları kayıt altına aldığı, azami 15 takvim günü kapatma süresi tanımlayan resmi DÖF tutanağı.
+                </p>
+            </div>
+            <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
+                <span class="text-[10px] font-mono text-slate-400">ID: 1FJ5syf...</span>
+                <a href="https://docs.google.com/document/d/1FJ5syfHB_XNWRKMZL3gdYC5xAia56DoqP61vTSECafg/edit?usp=drivesdk" target="_blank" class="px-3 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-600 hover:text-white text-emerald-700 text-xs font-bold transition flex items-center gap-1">
+                    <i class="fa-solid fa-up-right-from-square"></i> İncele
+                </a>
+            </div>
+        </div>
+
+        <!-- Kart 6: Okulum Temiz Evrakları Paketi ZIP -->
+        <div class="doc-card bg-white rounded-2xl p-5 shadow-sm border border-slate-200 hover:shadow-md transition space-y-3 flex flex-col justify-between" data-cat="okulum_temiz">
+            <div class="space-y-2.5">
+                <div class="flex items-center justify-between">
+                    <span class="px-2.5 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                        ZIP Paketi • 124 KB
+                    </span>
+                    <span class="text-[10px] text-slate-400 font-mono">Toplu Paket</span>
+                </div>
+                <h3 class="font-extrabold text-sm text-slate-900 leading-snug">
+                    2026–2027 Okulum Temiz Tetkik ve Belgelendirme Evrakları Paketi
+                </h3>
+                <p class="text-xs text-slate-500 leading-relaxed">
+                    Soru listesi, rapor şablonu, okul hazırlık kılavuzu ve takip icmal çizelgesinin tümünü içeren toplu ZIP arşivi.
+                </p>
+            </div>
+            <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
+                <span class="text-[10px] font-mono text-slate-400">ID: 1SpQmB-...</span>
+                <a href="https://drive.google.com/file/d/1SpQmB-VUwzbIbPEZjtnvRuAOCm3Ese5f/view?usp=drivesdk" target="_blank" class="px-3 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-600 hover:text-white text-emerald-700 text-xs font-bold transition flex items-center gap-1">
+                    <i class="fa-solid fa-download"></i> İndir
+                </a>
+            </div>
+        </div>
+
+        <!-- Kart 7: 268 Okul Canlı E-Tablo -->
+        <div class="doc-card bg-white rounded-2xl p-5 shadow-sm border border-slate-200 hover:shadow-md transition space-y-3 flex flex-col justify-between" data-cat="denetim">
+            <div class="space-y-2.5">
+                <div class="flex items-center justify-between">
+                    <span class="px-2.5 py-0.5 rounded text-[10px] font-bold bg-green-100 text-green-800 border border-green-200">
+                        Google Sheets • 268 Okul
+                    </span>
+                    <span class="text-[10px] text-slate-400 font-mono">Canlı Veri</span>
+                </div>
+                <h3 class="font-extrabold text-sm text-slate-900 leading-snug">
+                    268 Okul Veri Toplama ve Otomatik İcmal E-Tablosu
+                </h3>
+                <p class="text-xs text-slate-500 leading-relaxed">
+                    Google Form üzerinden gelen okul yanıtlarının düştüğü ve Tablo-1'den Tablo-16'ya icmalleri üreten merkezi canlı çalışma tablosu.
+                </p>
+            </div>
+            <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
+                <span class="text-[10px] font-mono text-slate-400">ID: 1-xYvDp...</span>
+                <a href="https://docs.google.com/spreadsheets/d/1-xYvDp4oaV5TciGeSzizJhF76Sh3bsrtRaVCfSGzT-c/edit?usp=drivesdk" target="_blank" class="px-3 py-1.5 rounded-lg bg-green-50 hover:bg-green-600 hover:text-white text-green-700 text-xs font-bold transition flex items-center gap-1">
+                    <i class="fa-solid fa-table"></i> E-Tabloyu Aç
+                </a>
+            </div>
+        </div>
+
+        <!-- Kart 8: Müfettiş Denetim Dosyası & Çizelgeler -->
+        <div class="doc-card bg-white rounded-2xl p-5 shadow-sm border border-slate-200 hover:shadow-md transition space-y-3 flex flex-col justify-between" data-cat="denetim">
+            <div class="space-y-2.5">
+                <div class="flex items-center justify-between">
+                    <span class="px-2.5 py-0.5 rounded text-[10px] font-bold bg-purple-100 text-purple-800 border border-purple-200">
+                        Excel & Word Paketi
+                    </span>
+                    <span class="text-[10px] text-slate-400 font-mono">Mülkiye & MEB</span>
+                </div>
+                <h3 class="font-extrabold text-sm text-slate-900 leading-snug">
+                    Okul Güvenliği Müfettiş Denetim Dosyası ve İlçe Çizelgeleri
+                </h3>
+                <p class="text-xs text-slate-500 leading-relaxed">
+                    Bakanlık müfettiş denetim raporu taslağı, 16 tablo ve Tablo 2-3-4 ilçe doldurulmuş resmi çizelgeleri.
+                </p>
+            </div>
+            <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
+                <span class="text-[10px] font-mono text-slate-400">ID: 1NtlMlz...</span>
+                <a href="https://drive.google.com/drive/folders/1NtlMlzlugxYmNj5eOenR3dt6-audsf4S" target="_blank" class="px-3 py-1.5 rounded-lg bg-purple-50 hover:bg-purple-600 hover:text-white text-purple-700 text-xs font-bold transition flex items-center gap-1">
+                    <i class="fa-solid fa-folder"></i> Klasörü Aç
+                </a>
+            </div>
+        </div>
+
+        <!-- Kart 9: İSG Arşiv Ana İndeksi -->
+        <div class="doc-card bg-white rounded-2xl p-5 shadow-sm border border-slate-200 hover:shadow-md transition space-y-3 flex flex-col justify-between" data-cat="all">
+            <div class="space-y-2.5">
+                <div class="flex items-center justify-between">
+                    <span class="px-2.5 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-800 border border-slate-200">
+                        Master Doküman
+                    </span>
+                    <span class="text-[10px] text-slate-400 font-mono">Ana İndeks</span>
+                </div>
+                <h3 class="font-extrabold text-sm text-slate-900 leading-snug">
+                    İSG Arşiv ve Dokümantasyon Ana İndeksi Belgesi
+                </h3>
+                <p class="text-xs text-slate-500 leading-relaxed">
+                    Tüm yönetmelikler, genelgeler, kanunlar, DYS talimatları ve kurul kararlarının genel ana başvuru ve link haritası.
+                </p>
+            </div>
+            <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
+                <span class="text-[10px] font-mono text-slate-400">ID: 1CH4EKv...</span>
+                <a href="https://docs.google.com/document/d/1CH4EKvXTclLoiPiycndXQ_xpNiRu_8atuQY_kr7UiJo/edit?usp=drivesdk" target="_blank" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-700 hover:text-white text-slate-700 text-xs font-bold transition flex items-center gap-1">
+                    <i class="fa-solid fa-file-lines"></i> İndeksi Oku
+                </a>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+    function filterDocs(cat) {
+        document.querySelectorAll('.cat-pill').forEach(btn => {
+            btn.classList.remove('bg-blue-600', 'text-white');
+            btn.classList.add('bg-slate-100', 'text-slate-700');
+        });
+        event.target.classList.remove('bg-slate-100', 'text-slate-700');
+        event.target.classList.add('bg-blue-600', 'text-white');
+
+        const cards = document.querySelectorAll('.doc-card');
+        cards.forEach(card => {
+            if (cat === 'all' || card.getAttribute('data-cat') === cat) {
+                card.classList.remove('hidden');
+            } else {
+                card.classList.add('hidden');
+            }
+        });
+    }
+</script>
+{% endblock %}
+

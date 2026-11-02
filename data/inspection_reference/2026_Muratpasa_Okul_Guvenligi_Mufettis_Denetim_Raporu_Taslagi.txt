@@ -1,0 +1,2583 @@
+﻿* maddeler ve tablolardaki sayılar ÖRNEK OLUP kuruma ait veriler madde ve tablolara işlenecek, SIRASI ve NUMARALARI DEĞİŞTİRİLMEYECEKTİR.
+*Sarı boyalı kısımlar boş bırakılmayacak, İlin bilgilerine göre doldurulacaktır.
+*TABLOLAR SIRASI, NUMARALARI, ŞEKİL VE FORMATI DEĞİŞTİRİLMEDEN DOLDURULACAKTIR.
+*Maddelerde bulunan bilgiler “İL MERKEZİ VE İLÇELERİ KAPSAYACAK ŞEKİLDE” belirtilecektir.
+I- BAŞLANGIÇ
+1- İçişleri Bakanlık Makamının 26.09.2026 tarihli ve 172 sayılı onayı ile Mülkiye Teftiş Kurulu Başkanlığının 13.10.2026 tarihli ve 35296 sayılı görev emirleri gereğince işbu Denetim Raporu düzenlenmiştir.
+II- DENETİMİN KONUSU VE YÖNTEMİ
+2- Bu raporun konusu Çocukların Eğitim Süreçlerinin Güvenliğine İlişkin Koruyucu ve Önleyici Hizmet ve Tedbirlerin Artırılmasına Yönelik İş Birliği Protokolü ile İçişleri Bakanlığının 24/04/2026 tarihli ve 130906 sayılı “Okul ve Çevresi Güvenlik Tedbirleri” kapsamındaki görev, tedbir ve uygulamaların Antalya ili Muratpaşa ilçesinde etkin şekilde yerine getirilip getirilmediğinin; Valilik ve Kaymakamlıklarca gerçekleştirilen koordinasyon ve izleme faaliyetleri ile İl ve İlçe Eğitim Güvenliği Yürütme Kurullarının işleyişinin, okul bazlı risk değerlendirmelerinin ve alınan tedbirlerin uygulamadaki etkinliğinin, uygulamada karşılaşılan sorunlar ile geliştirilmesi gereken hususların mevzuat, ilgili Protokol ve Genelge hükümleri çerçevesinde incelenmesi ve değerlendirilmesi amacıyla denetlenmesidir.
+3- Denetimde okul güvenliğine yönelik mevcut uygulamaların geliştirilmesi, kurumlar arası iş birliği ve koordinasyonun güçlendirilmesi ve tespit edilen eksikliklerin giderilmesi için rehberlik odaklı yürütülmesi yöntemi benimsenmiş; gerekli görülen hususlarda ilgili kurum ve kuruluşlara yol gösterici değerlendirme ve önerilerde bulunulması ile eğitim paydaşlarına yönelik anket ve mülakat yapılması sağlanmıştır.
+III- DENETİM KONULARI:
+a) Okulların Risk Değerlendirmesi:
+4- İl genelinde okullar için düzenlenen okul değerlendirme ölçekleri ve acil durum planları ile değerlendirmesi risk kategorisine göre sayıları tablo halinde aşağıda sunulmuştur:
+TABLO-1:
+	TABLO-1:
+	TABLO-1:
+	TABLO-1:
+	TABLO-1:
+	TABLO-1:
+	TABLO-1:
+	TABLO-1:
+	TABLO-1:
+	TABLO-1:
+	
+
+	Risk Derecesine Göre Okullar
+	Risk Derecesine Göre Okullar
+	Risk Derecesine Göre Okullar
+	Risk Derecesine Göre Okullar
+	Risk Derecesine Göre Okullar
+	Acil Durum Planı
+	Acil Durum Planı
+	Hakkında Okul Değerlendirme Ölçeği Düzenlenen Okul Sayısı
+	Hakkında Okul Değerlendirme Ölçeği Düzenlenen Okul Sayısı
+	İlçesi
+	1. Derece Öncelikli
+	2. Derece Öncelikli
+	3. Derece Öncelikli
+	4. Derece Öncelikli
+	Toplam
+	Planı Var
+	Planı Yok
+	Değerlendirme Ölçeği Var
+	Değerlendirme Ölçeği Yok
+	Muratpaşa
+	11
+	11
+	39
+	34
+	95 / 122
+	72
+	23
+	63
+	32
+	…ilçesi
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	…ilçesi
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	…ilçesi
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	…ilçesi
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	…ilçesi
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	İl Toplamı
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	Tablonun incelenmesinden, Muratpaşa ilçesinde toplam 122 adet resmî okulun bulunduğu (veri girişi tamamlanan 95 resmî okul üzerinden), bunlardan 11 adedinin 1. derece öncelikli, 11 adedinin 2. derece öncelikli, 39 adedinin 3. derece öncelikli ve 34 adedinin 4. derece öncelikli okul olduğu; 72 okulun güncel acil durum planının hazırlandığı, 63 adet okulun değerlendirme ölçeğinin (EK-7) düzenlendiği, 32 okul için ise değerlendirme ölçeği sürecinin devam ettiği anlaşılmıştır.
+5- Okul Durum Değerlendirme Ölçeği (EK-7) doğrultusunda okul risk değerlendirmelerinin her eğitim-öğretim yılı başında yapıldığı/yapılmadığı, ihtiyaç hâlinde ivedilikle güncellendiği/güncellenmediği incelenmiştir.
+İl merkezinde (XX) tarihinde ve (XX) ilçesinde (XX) tarihinde okul risk değerlendirilmesinin yapılması, konusuna örnektir.
+6- Okulların güvenlik önlemleri ile müdahale stratejilerine ilişkin hususları içeren acil durum planı yapıldığı/yapılmadığı, yapılmış ise güncel tutulup/tutulmadığı, incelenmiştir.
+İl merkezinde (XX) tarihinde ve (XX) ilçesinde (XX) tarihinde müdahale stratejilerine ilişkin hususları içeren acil durum planı yapılması, konusuna örnektir.
+7- Valilik/kaymakamlık sorumluluğunda, il/ilçe millî eğitim müdürlüğü koordinasyonunda ve kolluk birimleriyle müştereken şiddet olayları, silahlı tehditler ve benzeri olağanüstü durumlara yönelik standart müdahale prosedürleri hazırlanıp/hazırlanmadığı, güncellenip/güncellenmediği ve uygulanıp/uygulanmadığı incelenmiştir. (MEB Müfettişi + Kolluk Müfettişi)
+İl merkezinde (XX) tarihinde ve (XX) ilçesinde (XX) tarihinde şiddet olayları, silahlı tehditler ve benzeri olağanüstü durumlara yönelik standart müdahale prosedürleri hazırlanması, konusuna örnektir.
+8- İl/ilçe düzeyinde okul güvenliğini etkileyen risk faktörleri (devamsızlık, asayiş olayları, suça sürüklenme, bağımlılık, siber zorbalık vb.) ilgili kurumlarla iş birliği içinde analiz edilip/edilmediği, periyodik değerlendirme raporları hazırlanıp/hazırlanmadığı, İl/İlçe Eğitim Güvenliği Yürütme Kurullarına sunulup/sunulmadığı incelenmiştir. (MEB Müfettişi)
+İl merkezinde okul güvenliğini etkileyen risk faktörlerinin (XX) tarihinde İl Eğitim Güvenliği Yürütme Kurulunda, (XX) ilçesinde okul güvenliğini etkileyen risk faktörlerinin (XX) tarihinde İlçe Eğitim Güvenliği Yürütme Kurulunda görüşülmesi, konusuna örnektir.
+9- Okul güvenliğine ilişkin risk göstergelerinin erken uyarı amacıyla değerlendirdiği/değerlendirilmediği, risk düzeylerine göre önleyici tedbirlerin belirlendiği/belirlenmediği ve ilgili kurumlarla paylaşıldığı/paylaşılmadığı incelenmiştir.
+İl merkezinde (XX) tarihinde ve (XX) ilçesinde (XX) tarihinde risk göstergelerinin değerlendirilip önleyici tedbirlerin belirlenerek ilgili kurumlarla paylaşılması, konusuna örnektir.
+b) Güvenlik Personeli Görevlendirmesi:
+10- İl genelinde okullara görevlendirilen kolluk personeli, özel güvenlik personeli devriye/ekip sayısına ilişkin tablo aşağıda sunulmuştur:
+TABLO-2:
+	TABLO-2:
+	TABLO-2:
+	TABLO-2:
+	TABLO-2:
+	TABLO-2:
+	TABLO-2:
+	Güvenlik Amaçlı Personel Görevlendirme/İstihdam Durumu
+	Güvenlik Amaçlı Personel Görevlendirme/İstihdam Durumu
+	Güvenlik Amaçlı Personel Görevlendirme/İstihdam Durumu
+	Güvenlik Amaçlı Personel Görevlendirme/İstihdam Durumu
+	Güvenlik Amaçlı Personel Görevlendirme/İstihdam Durumu
+	Güvenlik Amaçlı Personel Görevlendirme/İstihdam Durumu
+	Güvenlik Amaçlı Personel Görevlendirme/İstihdam Durumu
+	İlçesi
+	Özel Güvenlik Görevlisi
+	Okul Bahçe Görevlisi
+	Okul Kolluk Görevlisi
+	Güvenli Eğitim Koordinasyon Görevlisi
+	Toplam Personel Sayısı
+	Giriş/Çıkış Saatlerinde Görevlendirilen Devriye/Ekip Sayısı
+	Muratpaşa
+	18
+	77
+	10
+	122
+	227 (ÖGG+Bahçe: 95)
+	10 Ekip
+	…ilçesi
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	…ilçesi
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	…ilçesi
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	…ilçesi
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	…ilçesi
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	İl Toplamı
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	Tablonun incelenmesinden, Muratpaşa ilçesinde bulunan resmî okullarda 18 Özel Güvenlik Görevlisi, 77 Okul Bahçe Görevlisi (TYP/İŞKUR), 10 Okul Kolluk Görevlisi ve 122 Güvenli Eğitim Koordinasyon Görevlisi olmak üzere toplam 227 (ÖGG + Bahçe Görevlisi: 95) personel görevlendirildiği ve giriş/çıkış saatlerinde 10 devriye ekibinin görev yaptığı anlaşılmıştır.
+11- Okul Durum Değerlendirme Ölçeği doğrultusunda 1. öncelik dereceli okullara ve güvenlik/bahçe görevlisi bulunmayan 2. öncelik dereceli okullara okul kolluk görevlisi; diğer okullara güvenli eğitim koordinasyon görevlisi görevlendirildiği/görevlendirilmediği incelenmiştir.
+İl merkezinde bulunan 1. öncelik dereceli (XX) okuluna okul kolluk görevlisi görevlendirilmesi ile (XX) ilçesinde bulunan (XX) okuluna güvenli eğitim koordinasyon görevlisi görevlendirilmesi, konusuna örnektir.
+12- İl genelinde (XX) adet okulun bulunduğu, bu okullardan (XX) tanesine okul giriş-çıkış saatlerindeki yoğunluğa göre yeterli ekip/devriye görevlendirilmesinin yapıldığı, (XX) tanesine ise yapılmadığı ifade edilmiş ve incelenmiştir. (Kolluk Müfettişi)
+13- Okul kolluk görevlisi, güvenli eğitim koordinasyon görevlisi ve okul/kurum yöneticilerinin iletişim bilgileri eğitim-öğretim yılı başlamadan en geç bir hafta önce; özel güvenlik ve bahçe görevlilerininki ise göreve başlama tarihi itibarıyla İl/İlçe Eğitim Güvenliği Yürütme Kurullarına bildirildiği/bildirilmediği incelenmiştir.
+İl merkezinde (XX) tarihinde okul kolluk görevlisi, güvenli eğitim koordinasyon görevlisi ve okul/kurum yöneticilerinin iletişim bilgilerinin İl Yürütme Kuruluna, (XX) ilçesinde (XX) tarihinde okul kolluk görevlisi, güvenli eğitim koordinasyon görevlisi ve okul/kurum yöneticilerinin iletişim bilgilerinin İlçe Yürütme Kuruluna bildirilmesi, konusuna örnektir.
+14- Okul kolluk görevlileri ve güvenli eğitim koordinasyon görevlilerinin ilgili il/ilçe emniyet-jandarma çocuk/aile içi şiddet birimleri koordinasyonunda görevlendirildiği/görevlendirilmediği, imkânlar ölçüsünde daha önce görev yaptıkları okulda ve eğitim-öğretim yılı başlamadan önce görevlendirilmeleri sağlandığı/sağlanmadığı incelenmiştir.
+İl merkezinde (XX) tarihinde ve (XX) ilçesinde (XX) tarihinde okul kolluk görevlileri ile güvenli eğitim koordinasyon görevlilerinin il/ilçe emniyet-jandarma çocuk/aile içi şiddet birimleri koordinasyonunda görevlendirilmesi, konusuna örnektir.
+15- İl genelinde okul güvenliğinde görev alan personel ile idarecilere yönelik hizmet içi eğitim ve bilgilendirme sayıları aşağıdaki tabloda sunulmuştur:
+TABLO-3:
+	TABLO-3:
+	TABLO-3:
+	TABLO-3:
+	TABLO-3:
+	TABLO-3:
+	Hizmet İçi Eğitim ve Bilgilendirme Sayısı
+	Hizmet İçi Eğitim ve Bilgilendirme Sayısı
+	Hizmet İçi Eğitim ve Bilgilendirme Sayısı
+	Hizmet İçi Eğitim ve Bilgilendirme Sayısı
+	Hizmet İçi Eğitim ve Bilgilendirme Sayısı
+	Hizmet İçi Eğitim ve Bilgilendirme Sayısı
+	İlçesi
+	Hizmet içi eğitim verilen Kolluk/Güvenlik Koordinasyon görevlisi sayısı
+	Hizmet içi eğitim verilen okul güvenliği sorumlu sayısı
+	Bilgilendirme Yapılan Okul İdarecisi Sayısı
+	El Tipi Metal Detektör Eğitimi Verilen Personel Sayısı
+	Toplam
+	Muratpaşa
+	132
+	95
+	122
+	24
+	373
+	…ilçesi
+	
+
+	
+
+	
+
+	
+
+	
+
+	…ilçesi
+	
+
+	
+
+	
+
+	
+
+	
+
+	…ilçesi
+	
+
+	
+
+	
+
+	
+
+	
+
+	…ilçesi
+	
+
+	
+
+	
+
+	
+
+	
+
+	…ilçesi
+	
+
+	
+
+	
+
+	
+
+	
+
+	İl Toplamı
+	
+
+	
+
+	
+
+	
+
+	
+
+	Tablonun incelenmesinden, İl genelinde bulunan okullarda okul güvenliğinde görev alan personel ile idarecilere yönelik (…) adet hizmet içi eğitim verildiği ayrıca bilgilendirme yapılan okul idareci sayısı da (…) olduğu anlaşılmıştır.
+16- Okul kolluk görevlileri ile güvenli eğitim koordinasyon görevlilerine güncel riskler, kriz yönetimi ve çocuk odaklı güvenlik uygulamalarına ilişkin hizmet içi eğitimler düzenlendiği/düzenlenmediği; öğrenciyle pedagojik iletişim eğitimleri verildiği/verilmediği incelenmiştir.
+İl merkezinde (XX) tarihinde ve (XX) ilçesinde (XX) tarihinde konu hakkında eğitim verilmesi, konusuna örnektir.
+17- Okul idarecileri, eğitim-öğretim yılı başlamadan önce okul kolluk görevlileri, güvenli eğitim koordinasyon görevlileri ve ekip/devriyelerin görev tanımı ve çalışma usulü hakkında bilgilendirme yapıldığı/yapılmadığı incelenmiştir.
+İl merkezinde (XX) tarihinde ve (XX) ilçesinde (XX) tarihinde konu hakkında bilgilendirme yapılması, konusuna örnektir.
+18- Okul kolluk görevlileri ile güvenli eğitim koordinasyon görevlilerinin izin/rapor durumları veya zorunlu değişiklikleri okul idaresine bildirildiği/bildirilmediği incelenmiştir.
+İl merkezinde (XX) okul görevlisinin izin rapor durumun (XX) tarihinde ilgili okul idaresine bildirilmesi, konusuna örnektir.
+19- Okullarda görevlendirilen okul kolluk görevlisi, güvenli eğitim koordinasyon görevlisi, özel güvenlik görevlisi ve bahçe görevlisi Protokol hakkında bilgilendirildiği/bilgilendirilmediği,
+Pedagojik iletişim eğitim programları müştereken hazırlandığı/hazırlanmadığı, uygulandığı/uygulanmadığı ve il millî eğitim müdürlüklerince yıllık planlandığı/planlanmadığı,
+İncelenmiştir. (MEM + Kolluk Müfettişi)
+İl merkezinde bulunan görevliler için (XX) tarihli tebliğ belgesi, (XX) ilçesinde bulunan görevliler için ise (XX) tarihli tebliğ belgesi, konusuna örnektir.
+20-Mevcut ve yeni açılacak okulların ve yöneticilerinin iletişim bilgileri, eğitim-öğretim dönemi başlamadan en az bir ay önce öncelikli okul derecelendirme çalışmalarında kullanılmak üzere il/ilçe kolluk birimlerine bildirildiği/bildirilmediği incelenmiştir.
+İl Milli Eğitim Müdürlüğünün/Valiliğin (XX) tarihli ve (XX) sayılı yazısı, konusuna örnektir.
+21- Toplum Yararına Çalışma Programı kapsamında istihdam edilen bahçe görevlilerinin özel güvenlik sertifikası sahiplik durumu aşağıda tabloda sunulmuştur:
+TABLO-4:
+	TABLO-4:
+	Okul Bahçe Görevlileri Sertifika Durumu
+	Okul Bahçe Görevlileri Sertifika Durumu
+	İstihdam Edilen Toplam Bahçe Görevlisi Sayısı
+	77
+	Özel Güvenlik Sertifikası Olan
+	53
+	Özel Güvenlik Sertifikası Olmayan
+	24
+	Oran (%)
+	%68.8
+	Tablonun incelenmesinden, İl genelinde bulunan okullarda toplum yararına çalışma programı kapsamında (…) sayıda bahçe görevlisi istihdam edildiği, istihdam edilen (…) sayıda bahçe görevlisinin güvenlik sertifikasının olduğu incelenmiştir.
+22. Okul idaresine bağlı olarak görev yapan okul bahçe görevlilerinin görev, yetki ve sorumluluklarına ilişkin iş ve işlemler Emniyet Genel Müdürlüğünün 24.08.2026 tarihli ve 140262 sayılı yazısı doğrultusunda yürütüldüğü/yürütülmediği anlaşılmıştır. (Kolluk Müfettişi)
+İl Emniyet Müdürlüğünün (XX) tarihli ve (XX) sayılı yazısıyla okul bahçe görevlilerinin görev, yetki ve sorumluluklarına ilişkin bilgilendirme yapılması, konusuna örnektir.
+c) Okul Gözlem Raporları:
+23- İl genelinde 24 Nisan 2026 tarihinden itibaren okul gözlem raporlarına ilişkin icmal tablosu aşağıda sunulmuştur:
+TABLO-5:
+	TABLO-5:
+	TABLO-5:
+	TABLO-5:
+	24 Nisan 2026 Tarihinden İtibaren Okullar Hakkında Düzenlenen Okul Gözlem Raporları İcmali
+	24 Nisan 2026 Tarihinden İtibaren Okullar Hakkında Düzenlenen Okul Gözlem Raporları İcmali
+	24 Nisan 2026 Tarihinden İtibaren Okullar Hakkında Düzenlenen Okul Gözlem Raporları İcmali
+	24 Nisan 2026 Tarihinden İtibaren Okullar Hakkında Düzenlenen Okul Gözlem Raporları İcmali
+	İlçesi
+	Toplam Okul Sayısı
+	Düzenlenen Toplam Okul Gözlem Raporu Sayısı
+	Okul Başına Düşen Gözlem Raporu Sayısı
+	Muratpaşa
+	122
+	87
+	0.71
+	…ilçesi
+	
+
+	
+
+	
+
+	…ilçesi
+	
+
+	
+
+	
+
+	…ilçesi
+	
+
+	
+
+	
+
+	…ilçesi
+	
+
+	
+
+	
+
+	…ilçesi
+	
+
+	
+
+	
+
+	İl Toplamı
+	
+
+	
+
+	
+
+	Tablonun incelenmesinden, il genelinde 24 Nisan 2026 tarihinden itibaren denetim tarihine kadar (…) sayıda Okul Gözlem Raporunun düzenlendiği, okul başına düşen Gözlem Raporu sayısının da (…) olduğu anlaşılmıştır.
+24- Okul Gözlem Formlarının güvenli eğitim koordinasyon görevlisi ve okul kolluk görevlilerince belirlenen sürelerde ve şekilde doldurulduğu/doldurulmadığı incelenmiştir. (MEB Müfettişi)
+(XX) okul için düzenlenen (XX) tarihli okul gözlem formu, konusuna örnektir.
+25- Okul Güvenliği Yönetim Ekibince Okul Gözlem Formu kapsamında tespit edilen riskler seviyesine göre değerlendirilip ilgili birimlere yönlendirildiği/yönlendirilmediği, okul içinde alınan tedbirlerin izlendiği/izlenmediği incelenmiştir. (MEB + Kolluk Müfettişi)
+İl merkezinde (XX) okulunda (XX) tarihli Okul Gözlem Formunda tespit edilen riskin seviyesine göre (XX) birimine yönlendirilmesi ve alınan tedbirin (XX) tarihinde izlenmesi, konusuna örnektir.
+26- İl merkezi veya ilçelerde tekrarlayan, yüksek riskli veya ağır şiddet olayı yaşandığı/yaşanmadığı, yaşandı ise olay analiz raporlarının hazırlandığı/hazırlanmadığı, hazırlanmış ise ilgili kurumlarla paylaşıldığı/paylaşılmadığı ve tespit edilen eksiklikler doğrultusunda koruyucu/önleyici tedbirler gözden geçirildiği/geçirilmediği incelenmiştir.
+İl merkezinde (XX) tarihinde meydana gelen olay için (XX) tarihli olay analiz raporunun hazırlanarak ilgili kurumlarla paylaşılması, konusuna örnektir.
+d) Fiziki Güvenlik Tedbirleri ile Giriş-Çıkış ve Teknik Güvenlik Sistemleri:
+27- İl genelinde okulların giriş ve çıkışları ile çevre güvenliği bakımından durumuna ilişkin tablo aşağıda sunulmuştur:
+TABLO-6:
+	TABLO-6:
+	TABLO-6:
+	TABLO-6:
+	TABLO-6:
+	TABLO-6:
+	TABLO-6:
+	TABLO-6:
+	TABLO-6:
+	TABLO-6:
+	TABLO-6:
+	TABLO-6:
+	TABLO-6:
+	TABLO-6:
+	TABLO-6:
+	TABLO-6:
+	Bina, Giriş-Çıkış ve Çevre Güvenliği
+	Bina, Giriş-Çıkış ve Çevre Güvenliği
+	Bina, Giriş-Çıkış ve Çevre Güvenliği
+	Bina, Giriş-Çıkış ve Çevre Güvenliği
+	Bina, Giriş-Çıkış ve Çevre Güvenliği
+	Bina, Giriş-Çıkış ve Çevre Güvenliği
+	Bina, Giriş-Çıkış ve Çevre Güvenliği
+	Bina, Giriş-Çıkış ve Çevre Güvenliği
+	Bina, Giriş-Çıkış ve Çevre Güvenliği
+	Bina, Giriş-Çıkış ve Çevre Güvenliği
+	Bina, Giriş-Çıkış ve Çevre Güvenliği
+	Bina, Giriş-Çıkış ve Çevre Güvenliği
+	Bina, Giriş-Çıkış ve Çevre Güvenliği
+	Bina, Giriş-Çıkış ve Çevre Güvenliği
+	Bina, Giriş-Çıkış ve Çevre Güvenliği
+	Bina, Giriş-Çıkış ve Çevre Güvenliği
+	
+
+	Güvenlik Kamera Sistemi
+	Güvenlik Kamera Sistemi
+	Güvenlik Kamera Sistemi
+	Kontrollü-Giriş Çıkış Sistemi
+	Kontrollü-Giriş Çıkış Sistemi
+	Kontrollü-Giriş Çıkış Sistemi
+	Kontrollü-Giriş Çıkış Sistemi
+	Kontrollü-Giriş Çıkış Sistemi
+	Çevre Güvenliğine İlişkin Fiziki Engeller
+	Çevre Güvenliğine İlişkin Fiziki Engeller
+	Çevre Güvenliğine İlişkin Fiziki Engeller
+	Çevre Güvenliğine İlişkin Fiziki Engeller
+	Araç/Servis Aracı Park Yeri
+	Araç/Servis Aracı Park Yeri
+	Araç/Servis Aracı Park Yeri
+	İlçesi
+	Var
+	Yok
+	KGYS'ye Entegre
+	Tek Kapıdan Girişi Olan Okul Sayısı
+	Birden Fazla Kapıdan Girişi Olan Okul Sayısı
+	El Detektörü Olan Okul Sayısı
+	Kapı detektörü Olan Okul Sayısı
+	Turnike Sistemi Tesis Edilen Okul Sayısı
+	Duvar
+	Tel Çit
+	Diğer
+	Fiziki Engel Yok
+	Var
+	Yok
+	Muratpaşa
+	95
+	0
+	7
+	82
+	13
+	24
+	1
+	12
+	14
+	6
+	74
+	1
+	39
+	56
+	…ilçesi
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	…ilçesi
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	…ilçesi
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	…ilçesi
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	…ilçesi
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	İl Toplamı
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	Tablonun incelenmesinden il genelinde bulunan okullarda toplamda;
+(…) okulda güvenlik kamerasının olduğu, (…) okulda güvenlik kamerasının olmadığı ayrıca kamera olan okullardan KGYS’ye entegre olmayan okul sayısının (…) olduğu,
+(…) okulda el detektörü, (…) okulda kapı detektörü olduğu, turnike sistemi olan okul sayısının (…) olduğu,
+(…) okulda fiziki engel olarak duvar, (…) okulda fiziki engel olarak tel çitin olduğu, fiziki engel olmayan okul sayısının ise (…) olduğu,
+(…) okulda araç park yeri, (…) okulda ise araç park yerinin olmadığı,
+Anlaşılmıştır.
+28- İl genelinde (XX) adet okul olduğu, bu okulların (XX) adetine kamera sisteminin kurulduğu, (XX) adetine ise kontrollü giriş-çıkış sisteminin kurulduğu veya kurulmasına yönelik çalışmalar yürütüldüğü incelenmiştir.
+29- İl genelinde okulların bina, giriş ve çıkışları ile çevre güvenliğine ilişkin 24.04.2026 tarihinden itibaren alınan tedbirlere aşağıdaki tabloda yer verilmiştir.
+TABLO-7:
+	TABLO-7:
+	TABLO-7:
+	TABLO-7:
+	TABLO-7:
+	TABLO-7:
+	TABLO-7:
+	TABLO-7:
+	TABLO-7:
+	TABLO-7:
+	24.04.2026 Tarihinden İtibaren Bina, Giriş-Çıkış Ve Çevre Güvenliğine İlişkin Alınan Tedbirler
+	24.04.2026 Tarihinden İtibaren Bina, Giriş-Çıkış Ve Çevre Güvenliğine İlişkin Alınan Tedbirler
+	24.04.2026 Tarihinden İtibaren Bina, Giriş-Çıkış Ve Çevre Güvenliğine İlişkin Alınan Tedbirler
+	24.04.2026 Tarihinden İtibaren Bina, Giriş-Çıkış Ve Çevre Güvenliğine İlişkin Alınan Tedbirler
+	24.04.2026 Tarihinden İtibaren Bina, Giriş-Çıkış Ve Çevre Güvenliğine İlişkin Alınan Tedbirler
+	24.04.2026 Tarihinden İtibaren Bina, Giriş-Çıkış Ve Çevre Güvenliğine İlişkin Alınan Tedbirler
+	24.04.2026 Tarihinden İtibaren Bina, Giriş-Çıkış Ve Çevre Güvenliğine İlişkin Alınan Tedbirler
+	24.04.2026 Tarihinden İtibaren Bina, Giriş-Çıkış Ve Çevre Güvenliğine İlişkin Alınan Tedbirler
+	24.04.2026 Tarihinden İtibaren Bina, Giriş-Çıkış Ve Çevre Güvenliğine İlişkin Alınan Tedbirler
+	24.04.2026 Tarihinden İtibaren Bina, Giriş-Çıkış Ve Çevre Güvenliğine İlişkin Alınan Tedbirler
+	İlçesi
+	Bina Giriş-Çıkış ve Çevre Güvenliği Danışmanlık Verilen Okul Sayısı
+	Çevre Güvenliği Eksikliği Giderilen Okul Sayısı
+	Okul çevresinde tehlike teşkil eden kişi/gruplara yönelik işlem sayısı
+	Okul çevresinde denetlenerek hakkında işlem yapılan seyyar satıcı sayısı
+	Okul Çevresinde Bağımlılık yapıcı madde satışı tespit edilen işletme sayısı
+	Okula 100 metreden yakın olup hakkında işlem yapılan (bar, kahvehane, meyhane vb.) işletme sayısı
+	Okul Çevresinde Bulunup Yıktırılan Metruk Bina Sayısı
+	Ziyaretçi Kayıt Sistemine Geçen Okul Sayısı
+	Araç/Servis Aracı Park Yeri Tesis Edilen Okul Sayısı
+	Muratpaşa
+	95
+	27
+	0
+	0
+	0
+	0
+	0
+	82
+	6
+	…ilçesi
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	…ilçesi
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	…ilçesi
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	…ilçesi
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	…ilçesi
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	İl Toplamı
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	30- İl genelinde bulunan okulların öncelik derecesi, okul türü, öğrenci profili, fiziki şartları ve çevresel riskleri dikkate alınarak ihtiyaç duyulan güvenlik sistemlerinin kurulmasına yönelik çalışmaların il düzeyinde planlandığı/planlanmadığı, ilgili kurumlarla koordinasyon içerisinde yerine getirildiği/getirilmediği incelenmiştir.
+İl merkezinde bulunan (XX) okulu için (XX) tarihli ve (XX) sayılı yazı ile kamera ve kontrollü giriş-çıkış sistemi kurulmasına yönelik planlama yapılması, konusuna örnektir.
+31- İl genelinde, okul giriş-çıkış saatleri ve okul bazlı risk analizleri dikkate alınarak okul çevrelerinde asayiş ve trafik yönünden gerekli önleyici tedbirler alındığı/alınmadığı incelenmiştir. (Kolluk Müfettişi)
+İl merkezinde (XX), (XX) ve (XX) okullarının çevresinde (XX) tarihlerinde yapılan asayiş ve trafik uygulamaları, konusuna örnektir.
+32- Okul önü ve çevresinde eğitim-öğretim faaliyetleri ile öğrenci güvenliği bakımından tehlike oluşturduğu değerlendirilen kişi/gruplara yönelik önleyici tedbirler alındığı/alınmadığı ve gerekli işlemlerin yapıldığı/yapılmadığı incelenmiştir.
+(XX) okulu çevresinde yapılan uygulamada (XX) adlı kişiye uygulanan (XX) tarihli idari yaptırım tutanağı, konusuna örnektir.
+33- İl genelinde eğitim-öğretim ortamını olumsuz etkileyen (XX) adet metruk yapı bulunduğu, bunlardan (XX) adetinin yıkımının sağlandığı, (XX) adetinin ise henüz yıkımın yapılmadığı, can güvenliği riski oluşturan durumlarda koruyucu tedbirlerin alınması hususunun mülki idare amiri koordinasyonunda takip edildiği/edilmediği ifade edilmiş ve incelenmiştir.
+34- Öncelik derecesi dikkate alınarak okul çevresini görecek şekilde kurulan kamera sistemlerinin KGYS'ye entegrasyonuna yönelik çalışmalar yürütüldüğü/yürütülmediği, bu kapsamda XX adet okulun KGYS sistemine entegrasyonunun tamamlandığı ifade edilmiş ve incelenmiştir.
+İl merkezinde (XX) tarihli ve (XX) sayılı yazı ile (XX) okulunun çevre kameralarının KGYS’ye entegrasyonuna yönelik çalışma yürütülmesi, konusuna örnektir.
+35- İl genelinde okulların giriş-çıkışları ve çevre güvenliği bakımından kamera, kontrollü giriş-çıkış, fiziki engeller, araç/servis park yeri ve benzeri güvenlik göstergelerine ilişkin durumun izlendiği/izlenmediği ve raporlandığı/raporlanmadığı incelenmiştir. (MEB Müfettişi)
+İl merkezinde (XX) tarihinde okulların kamera, kontrollü giriş-çıkış ve fiziki engel durumlarına ilişkin hazırlanan (XX) tarihli izleme raporu, konusuna örnektir.
+36- Örnekleme yolu ile seçilen 1. ve 2. risk dereceli 10 okuldaki okul kamera kayıtlarının 19.10.2026 ve 20.10.2026 tarihinde öğrencilerin okula giriş ve okuldan dağılış saatleri ile öğrenci hareketliliğinin yoğunlaştığı zaman dilimleri bakımından geriye dönük olarak incelenmesi neticesinde aşağıdaki tabloda görüleceği üzere alınan güvenlik tedbirlerinin seçilen okullar bakımından fiilen ve etkin bir şekilde uygulanıp uygulanmadığı incelenmiştir.
+Sıra No
+	İlçesi
+	Okul Adı
+	Risk Derecesi
+	Tedbirler
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	Tablodan anlaşılacağı üzere öğrencilerin okula giriş ve okuldan dağılış saatleri ile öğrenci hareketliliğinin yoğunlaştığı zaman dilimleri bakımından alınan güvenlik tedbirlerinin XXX okulları bakımından fiilen ve etkin bir şekilde uygulandığı, XXX okullarında ise uygulanmadığı incelenmiştir. (MEB Müfettişi)
+37- Örnekleme yolu ile seçilen 10 okulda, 19.10.2026 ve 20.10.2026 tarihlerinde Kent Güvenlik Yönetim Sistemi (KGYS) kamera kayıtlarının özellikle okul giriş çıkış saatlerine denk gelen zaman dilimlerinin izlenmesi neticesinde;
+Kolluk birimlerinin gözetim ve müdahale faaliyetleri ile alınan güvenlik tedbirlerinin öğrencilerin yoğun olarak bulunduğu alanlardaki hareketlilik ve olası riskler dikkate alındığında yeterli olup olmadığı aşağıdaki tabloda incelenmiştir.
+Sıra No
+	İlçesi
+	Okul Adı
+	Risk Derecesi
+	Alınan Tedbirler/Tedbirler Yeterli mi?
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	Tablonun incelenmesinden KGYS üzerinden yapılan denetimde XXX okullarında kolluk birimlerince gözetim ve müdahale faaliyetleri kapsamında alınan güvenlik tedbirlerinin yeterli olduğu, XXX okullarında ise yetersiz olduğu incelenmiştir. (Kolluk Müfettişi)
+e) Okullarda ve Okulların Çevresindeki Trafik ve Ulaşım Güvenliği Tedbirleri:
+38- Servis bekleme alanı bulunmayan okullarda servis bekleme alanlarının okul idaresi ve kolluk birimlerince belirlendiği/belirlenmediği incelenmiştir. (MEB Müfettişi)
+İl Merkezindeki XXX, XXX ve XXX okulları için servis bekleme alanının belirlenmemesi, konusuna örnektir.
+39- Özel araçların okul bahçesine girişinin engellendiği/engellenmediği incelenmiştir. (MEB Müfettişi)
+İl merkezinde (XX) ve (XX) okullarında özel araçların okul bahçesine girişinin (XX) tarihinde engellenmesi, konusuna örnektir.
+40- Okul önü ve çevresindeki trafik düzenlemelerinin trafik birimlerince denetlendiği/denetlenmediği; tespit edilen eksikliklerin (levha, korkuluk, yaya geçidi, üst geçit vb.) il/ilçe millî eğitim müdürlüğü takibiyle sorumlu kurumlar tarafından tamamlandığı/tamamlanmadığı incelenmiştir.
+XXX tarihli İl Trafik Komisyonunda XXX okulu için alınan XXX kararının henüz gereğinin yerine getirilmemesi örnektir.
+41- Öğrenci taşımasını gerçekleştiren görevlilere kolluk personelinin de eğitici olarak katıldığı güvenli eğitim iletişimi eğitimleri verildiği/verilmediği; şoför/rehber personel değişim süreçleri takip edilerek yeni personelin eğitime katılımının ve kolluğun bilgilendirilmesinin ise sağlandığı/sağlanmadığı incelenmiştir.
+İl merkezinde XXX tarihinde servis görevlilerine verilen eğitim, konusuna örnektir.
+42- Öğrenci servis araçları, sürücüler ve taşıma faaliyetlerine ilişkin trafik ve güvenlik denetimlerinin yapıldığı/yapılmadığı; şoför/rehber personel değişikliklerinin ilgili birimlere bildirildiği/bildirilmediği incelenmiştir. (KOLLUK MÜFETTİŞİ)
+Şoför/rehber değişikliğine ilişkin İl Emniyet Müdürlüğüne yapılan XXX tarihli bildirim, konusuna örnektir.
+43- Okulla ilişkili hizmet personeli ile servis şoförü/rehber personele; çocuk hakları, mahremiyet, güvenli davranış, ihmal-istismar belirtilerinin bildirimi ve acil durumlarda hareket tarzı konularında eğitim verildiği/verilmediği incelenmiştir.
+İl merkezinde XXX tarihinde verilen eğitim, konusuna örnektir.
+f) Çevresel Suç, Madde Bağımlılığı ve Zararlı Alışkanlıklarla Mücadele Tedbirleri:
+44- İl genelinde 24.04.2026 tarihinden itibaren çevresel suç, madde bağımlılığı ve zararlı alışkanlık risklerinin azaltılmasına yönelik tedbirlere aşağıdaki tabloda yer verilmiştir:
+TABLO-8:
+	TABLO-8:
+	TABLO-8:
+	TABLO-8:
+	TABLO-8:
+	24.04.2026 Tarihinden İtibaren Çevresel Suç ve Zararlı Alışkanlık Risklerinin Azaltılmasına Yönelik Alınan Tedbirler
+	24.04.2026 Tarihinden İtibaren Çevresel Suç ve Zararlı Alışkanlık Risklerinin Azaltılmasına Yönelik Alınan Tedbirler
+	24.04.2026 Tarihinden İtibaren Çevresel Suç ve Zararlı Alışkanlık Risklerinin Azaltılmasına Yönelik Alınan Tedbirler
+	24.04.2026 Tarihinden İtibaren Çevresel Suç ve Zararlı Alışkanlık Risklerinin Azaltılmasına Yönelik Alınan Tedbirler
+	24.04.2026 Tarihinden İtibaren Çevresel Suç ve Zararlı Alışkanlık Risklerinin Azaltılmasına Yönelik Alınan Tedbirler
+	İlçesi
+	Narko-Rehber Eğitimleri Sayısı
+	Ateşli Silahlara Sahip Ailelerin Bilinçlendirme Faaliyetleri Sayısı
+	Milli Eğitime Yönlendirilen Zorunlu Eğitime Tabi Çocuk sayısı
+	Milli Eğitime Bildirilen Hakkında Adli İşlem Yapılan Çocuk Sayısı
+	Muratpaşa
+	14
+	45
+	8
+	11
+	…. İlçesi
+	
+
+	
+
+	
+
+	
+
+	…. İlçesi
+	
+
+	
+
+	
+
+	
+
+	…. İlçesi
+	
+
+	
+
+	
+
+	
+
+	…. İlçesi
+	
+
+	
+
+	
+
+	
+
+	…. İlçesi
+	
+
+	
+
+	
+
+	
+
+	İl Toplamı
+	
+
+	
+
+	
+
+	
+
+	Tablonun incelenmesinden İl genelinde XX adet narko-rehber eğitimi verildiği, ateşli silahlara sahip XX aileye bilinçlendirme faaliyetleri yapıldığı, milli eğitime yönlendirilen zorunlu eğitime tabi çocuk sayısının XX olduğu, hakkında adli işlem yapılarak milli eğitime bildirilen Çocuk Sayısının XX olduğu incelenmiştir.
+45- Okul önü ve çevresindeki seyyar satıcı ve işletmelere yönelik denetim yapıldığı/yapılmadığı; bağımlılık yapıcı madde satışının ve bu maddelere erişimin engellenmesine yönelik tedbirler alındığı/alınmadığı ifade edilmiş ve incelenmiştir. (KOLLUK MÜFETTİŞİ)
+İl merkezinde bulunan (XX) okulunda İl Emniyet Müdürlüğünce/Belediyece (XX) tarihinde yapılan denetim sonucunda düzenlenen (XX) tarihli idari yaptırım tutanağı, konusuna örnektir.
+46- Meyhane, kahvehane, bar, elektronik oyun merkezi ve alkollü içki satılan işletmelerin okul binalarına en az 100 metre uzaklıkta bulunması zorunluluğuna ilişkin denetim yapıldığı/yapılmadığı, aykırılık tespit edilen XX işletme hakkında idari/adli işlem yapıldığı incelenmiştir.
+İl merkezinde XX tarihinde yapılan denetim sonucu yapılan XX tarihli adli/idari işlem, konusuna örnektir.
+47- Okul önü ve çevresindeki park/rekreasyon alanlarına yönelik devriye faaliyetlerinin arttırıldığı/arttırılmadığı; riskli alanlarda güvenlik kamerası ve aydınlatma sistemi kurulmasının yerel yönetimlerle iş birliği içinde takip edildiği/edilmediği, bu kapsamda son 6 ay içerisinde XX adet riskli alana (park, meydan vb.) kamera ve aydınlatma sistemi kurulduğu incelenmiştir.
+48- Okul çevresinde öğrencilerin duygusal, fiziksel ve sağlıklı kimlik gelişimini olumsuz etkileyebilecek unsurlardan korunmasına yönelik olarak XXX çalışmalarının yapıldığı ifade edilmiş ve incelenmiştir.
+49- Okul çevresindeki kamuya açık alanlarda madde kullanımına karşı asayiş denetimlerinin planlı aralıklarla yapıldığı/yapılmadığı; alkol, tütün, kesici/delici/yaralayıcı unsurların taşınması/bulundurulması/satışına karşı önleyici tedbirler alındığı/alınmadığı ifade edilmiş ve incelenmiştir.
+XXX tarihinde okul çevresinde yapılan uygulamalarda alkol, tütün, kesici/delici/yaralayıcı unsurların taşınması/bulundurulması/satışına muhalefetten XX adlı kişiye idari/adli yaptırım uygulanması örnektir.
+50- Öncelikli okullar başta olmak üzere tüm okullarda narko-rehber eğitimlerinin verildiği/verilmediği incelenmiştir.
+İl Emniyet Müdürlüğü/Jandarma Komutanlığı tarafından XXX ve XXX okulunda XXX tarihinde verilen eğitimler, konusuna örnektir.
+51- Çocukların ateşli silahlara erişiminin önlenmesi amacıyla ruhsatlı silah sahibi ebeveynlere yönelik bilinçlendirme çalışmalarının yürütüldüğü/yürütülmediği,
+Bu kapsamda XXX tarihinde bilinçlendirme toplantısı/çalışmaları yapıldığı, ayrıca ruhsat sahiplerine SMS bilgilendirme mesajları gönderildiği,
+İfade edilmiş ve incelenmiştir.
+52- Muhtarlara eğitim ve güvenlik alanında (suç, şiddet, ihmal, istismar, zararlı alışkanlıklar, göç ve sosyal uyum vb.) bilgilendirme faaliyetleri yapıldığı/yapılmadığı; mahalle/köylerdeki eğitim ve güvenlik sorunlarına müdahalede koordinasyon sağlandığı/sağlanmadığı incelenmiştir.
+XXX mahalle ve XXX köylerinde XXX tarihinde yapılan faaliyetler ile, Valilik toplantı salonunda XXX tarihinde yapılan muhtarlar toplantısı, konusuna örnektir.
+53- İl genelinde 24.04.2026 Tarihinden İtibaren Güvenlik Olayları Kayıt ve Bildirim formu ile Bildirilen Olay Sayısına ilişkin tablo aşağıda sunulmuştur:
+TABLO-9:
+	TABLO-9:
+	TABLO-9:
+	TABLO-9:
+	TABLO-9:
+	TABLO-9:
+	TABLO-9:
+	TABLO-9:
+	TABLO-9:
+	TABLO-9:
+	TABLO-9:
+	24.04.2026 Tarihinden İtibaren Güvenlik Olayları Kayıt ve Bildirim Formu ile Bildirilen Olay Sayısı
+	24.04.2026 Tarihinden İtibaren Güvenlik Olayları Kayıt ve Bildirim Formu ile Bildirilen Olay Sayısı
+	24.04.2026 Tarihinden İtibaren Güvenlik Olayları Kayıt ve Bildirim Formu ile Bildirilen Olay Sayısı
+	24.04.2026 Tarihinden İtibaren Güvenlik Olayları Kayıt ve Bildirim Formu ile Bildirilen Olay Sayısı
+	24.04.2026 Tarihinden İtibaren Güvenlik Olayları Kayıt ve Bildirim Formu ile Bildirilen Olay Sayısı
+	24.04.2026 Tarihinden İtibaren Güvenlik Olayları Kayıt ve Bildirim Formu ile Bildirilen Olay Sayısı
+	24.04.2026 Tarihinden İtibaren Güvenlik Olayları Kayıt ve Bildirim Formu ile Bildirilen Olay Sayısı
+	24.04.2026 Tarihinden İtibaren Güvenlik Olayları Kayıt ve Bildirim Formu ile Bildirilen Olay Sayısı
+	24.04.2026 Tarihinden İtibaren Güvenlik Olayları Kayıt ve Bildirim Formu ile Bildirilen Olay Sayısı
+	24.04.2026 Tarihinden İtibaren Güvenlik Olayları Kayıt ve Bildirim Formu ile Bildirilen Olay Sayısı
+	24.04.2026 Tarihinden İtibaren Güvenlik Olayları Kayıt ve Bildirim Formu ile Bildirilen Olay Sayısı
+	İlçesi
+	Narkotik
+	Hırsızlık
+	Gasp
+	Yaralama
+	Saldırı/Silahlı Tehdit
+	Sabotaj
+	Kavga
+	İntihar
+	Diğer
+	TOPLAM
+	Muratpaşa
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	13
+	… İlçesi
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	0
+	… İlçesi
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	0
+	… İlçesi
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	… İlçesi
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	… İlçesi
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	
+
+	İL TOPLAMI
+	0
+	0
+	0
+	0
+	0
+	0
+	0
+	0
+	0
+	0
+	Tablonun incelenmesinden İl genelinde toplam (XX) adet olayın bildirildiği incelenmiştir.
+54- İl genelinde okullarda ve okul çevrelerinde meydana gelen şiddet, tehdit, akran zorbalığı, kesici-delici alet bulundurma, uyuşturucu veya bağımlılık yapıcı madde bulundurma, kullanma, satma, dışarıdan kişilerin okula veya okul çevresine girişi ve benzeri olaylara ilişkin son iki eğitim-öğretim yılına ait kayıtlarının incelenmesi neticesinde;
+Olayların yoğunlaştığı ilk beş okulun XXX, XXX, XXX, XXX ve XXX okulları olduğu, bu okullar bakımından XXX konularında çalışma yapılarak tedbir alındığı incelenmiştir. (KOLLUK MÜFETTİŞİ)
+g) Çocukların Eğitime Devamının Sağlanmasına Yönelik İlişkin Tedbirler:
+55- Kolluğa intikal eden bir olay/vaka üzerine zorunlu eğitim çağında olup okula devam etmediği tespit edilen çocukların il/ilçe millî eğitim müdürlüklerine bildirildiği/bildirilmediği, bu kapsamda son bir yıl içerisinde XX çocuğun bildirildiği ifade edilmiş ve incelenmiştir.
+56- Kolluğa intikal eden bir olay/vaka üzerine hakkında adli işlem başlatılan çocukların eğitim süreçlerinin güvenliği ve devamlılığının sağlanması amacıyla il/ilçe millî eğitim müdürlüklerine bildirildiği/bildirilmediği incelenmiştir.
+İl/İlçe Emniyet Müdürlüğünce XXX tarih ve XX sayılı yazı ile yapılan bildirim örnektir.
+57- Okula devamsızlık yapan çocukları kazandırma amaçlı il/ilçe millî eğitim müdürlüğü koordinasyonunda aile ziyaretleri gerçekleştirildiği/gerçekleştirilmediği, bu ziyaretlerde ihtiyaç hâlinde kamu görevlilerinin güvenliğinin kolluk birimlerince sağlandığı/sağlanmadığı ifade edilmiş ve incelenmiştir.
+İl merkezinde/XXX ilçesinde (XX) tarihinde il/ilçe millî eğitim müdürlüğü koordinasyonunda yapılan aile ziyaretinde kolluk birimlerince güvenliğin sağlanması, konusuna örnektir.
+58- Eğitime erişemeyen çocukların okula devamının sağlanması çalışmalarında İl/İlçe Nüfus Müdürlüklerinden alınan güncel veriler ile muhtar desteğiyle saha taraması yapıldığı/yapılmadığı, gerektiğinde kolluktan yardım talep edilip devam durumunun izlendiği/izlenmediği, bu kapsamda il genelinde 2026 yılında toplam XX adet öğrencinin okula devamının sağlandığı ifade edilmiş ve incelenmiştir.
+59- Çocuk işçiliğinin önlenmesi ve çalışan/çalışma riski altındaki çocukların erken tespiti amacıyla okul yöneticileri, öğretmenler, rehberlik/sosyal hizmet personeli, kolluk, yerel yönetimler ve diğer taraflara yönelik bilgilendirme, farkındalık ve eğitim faaliyetlerinin yapıldığı/yapılmadığı incelenmiştir.
+XXX tarihinde yapılan bilinçlendirme toplantısı/eğitimi örnektir.
+60- İhtiyacı olan çocukların barınma ve diğer ihtiyaçlarının karşılanarak eğitimlerine destek sağlandığı/sağlanmadığı, bu kapsamda Valilik aracılığıyla belediye/il özel idaresinin konukevi açtığı/açmadığı, 2026 yılı itibariyle toplam XX çocuğa barınma hizmeti verildiği incelenmiştir.
+h) Dijital Güvenlik ve Siber Suçlarla Mücadele Tedbirleri:
+61- 24.04.2026 tarihinden itibaren kolluk birimlerince internet ortamında tespit edilip tedbir alınan siber zorbalık, tehdit ve şiddet içeriklerine ilişkin tablo aşağıda sunulmuştur:
+TABLO-10:
+	TABLO-10:
+	TABLO-10:
+	TABLO-10:
+	24.04.2026 Tarihinden İtibaren Sanal Ortamda Tespit Edilen Siber Zorbalık, Tehdit ve Şiddet İçerikleri İcmali
+	24.04.2026 Tarihinden İtibaren Sanal Ortamda Tespit Edilen Siber Zorbalık, Tehdit ve Şiddet İçerikleri İcmali
+	24.04.2026 Tarihinden İtibaren Sanal Ortamda Tespit Edilen Siber Zorbalık, Tehdit ve Şiddet İçerikleri İcmali
+	24.04.2026 Tarihinden İtibaren Sanal Ortamda Tespit Edilen Siber Zorbalık, Tehdit ve Şiddet İçerikleri İcmali
+	Siber Zorbalık
+	Tehdit
+	Şiddet İçeriği
+	Toplam
+	
+
+	
+
+	
+
+	
+
+	Tablonun incelenmesinden, 24.04.2026 tarihinden denetim tarihine kadar kolluk birimlerince internet ortamında tespit edilen siber zorbalık sayısının (…), tehdit sayısının (…) ve şiddet içerikli paylaşım sayısının ise (…) olduğu anlaşılmıştır.
+62- Kolluk birimleri internet ortamında okul, öğrenci ve personeli hedef gösteren, siber zorbalık, tehdit ve şiddet içeren açık kaynak içeriklerinin değerlendirilmesinin etkin ve verimli şekilde yerine getirildiği/getirilmediği, bu kapsamda 2026 yılı içerisinde XX adet içerik tespiti yapılarak XX adet adli/idari işlem yapıldığı ifade edilmiş ve incelenmiştir. (KOLLUK MÜFETTİŞİ)
+63- Okul Güvenliği Yönetim Ekiplerinin, dijital ortamda suç unsuru şüphesi bulunan, şikâyete konu olan veya okul imkânlarıyla doğrulanamayan olayları il/ilçe kolluk birimlerine gecikmeksizin bildirdiği/bildirmediği incelenmiştir.
+(XX) okulunda (XX) tarihinde dijital ortamda tespit edilen olayın il/ilçe kolluk birimlerine (XX) tarihli yazı ile bildirilmesi, konusuna örnektir.
+64- Siber Suçlarla Mücadele birimlerinin, okul, öğrenci ve personel güvenliğini tehdit eden dijital risklere yönelik çalışmalar yürüttüğü/yürütmediği, tespit edilen hususları ilgili kurumlarla yetki/görev alanları çerçevesinde paylaştığı/paylaşmadığı incelenmiştir.
+İl Emniyet Müdürlüğü Siber Suçlarla Mücadele birimince (XX) tarihinde dijital risklere yönelik yapılan çalışmanın ilgili kurumlarla paylaşılmasına ilişkin (XX) tarihli yazı, konusuna örnektir.
+65- Öğrenci, öğretmen ve velilere güvenli internet kullanımı, siber güvenlik, siber zorbalık, çevrim içi riskler ve dijital dolandırıcılık konularında farkındalık eğitimleri planlanıp düzenlendiği/düzenlenmediği incelenmiştir.
+İl merkezinde (XX) okulunda (XX) tarihinde öğrenci, öğretmen ve velilere verilen güvenli internet kullanımı eğitimi, konusuna örnektir.
+66- Kolluk birimlerinin, okul/öğrenci/personeli hedef gösteren siber zorbalık, tehdit veya şiddet içeren açık kaynak içerikleri değerlendirdiği/değerlendirmediği; riskli dijital eğilimleri analiz ederek okul yönetimi ve yetkili birimlerle ölçülü şekilde paylaşıldığı/paylaşılmadığı incelenmiştir (KOLLUK MÜFETTİŞİ)
+İl Emniyet Müdürlüğünce (XX) tarihinde açık kaynak taramasıyla tespit edilen riskli dijital eğilimlere ilişkin okul yönetimi ile paylaşılan (XX) tarihli bilgi notu, konusuna örnektir.
+67- Siber zorbalık, dijital şantaj, mahremiyet ihlali, çevrim içi tehditler bakımından önleme, güvenli bildirim ve gerektiğinde yetkili birimlere yönlendirme süreçleri geliştirildiği/geliştirilmediği, bu kapsamda XXXX çalışmalarının yapıldığı ifade edilmiş ve incelenmiştir.
+(XX) tarihinde siber zorbalık ve mahremiyet ihlali olaylarına yönelik güvenli bildirim ve yönlendirme sürecinin geliştirilmesi amacıyla yapılan (XX) tarihli toplantı, konusuna örnektir.
+68- İlde SİBERAY kulübü kurulduğu/kurulmadığı, bu kapsamda Kolluğun Siber Suçlarla Mücadele Birimleri ile SİBERAY Kulübü ve atölyeleri konusunda iş birliği içerisinde çalışmalar yürütüldüğü/yürütülmediği ifade edilmiş ve incelenmiştir.
+İl Emniyet Müdürlüğü Siber Suçlarla Mücadele birimi ile SİBERAY Kulübü arasında (XX) tarihinde (XX) okulunda yürütülen atölye çalışması, konusuna örnektir.
+69- Okul isimleriyle açılan sosyal medya hesapları, anonim okul sayfaları ve ifşa gruplarındaki hakaret, tehdit, dijital ifşa içeriklerine ilişkin öğrenci ve velilere hukuki sorumluluklar konusunda bilgilendirme yapıldığı/yapılmadığı incelenmiştir.
+İl/İlçe Milli eğitim Müdürlüğünce (XX) tarihinde yapılan hukuki sorumluluk bilgilendirmesi, konusuna örnektir.
+70- Siber zorbalık, dijital ifşa, tehdit, mahremiyet ihlali gibi olaylara hızlı müdahale için siber olay müdahale prosedürü oluşturulduğu/oluşturulmadığı ve tüm okullarda uygulanmasının sağlandığı/sağlanmadığı ifade edilmiş ve incelenmiştir.
+(XX) tarihli ve (XX) sayılı yazı ile tüm okullara tebliğ edilen siber olay müdahale prosedürü, konusuna örnektir.
+71- Şüpheli veya riskli dijital içerik/durumların bildirilmesi amacıyla okul yönetimi ile kolluğun siber birimleri arasında doğrudan ve gecikmesiz işleyen bir bildirim yöntemi belirlendiği/belirlenmediği incelenmiştir.
+72- Bağımlılık yapan dijital zararlı içerik/uygulamalara ilişkin kamuoyunu ve özellikle aileleri bilgilendirici görsel/yazılı medya içerikleri ile kamu spotları hazırlandığı/hazırlanmadığı, internetin güvenli kullanımına ilişkin çalışmalar yapıldığı/yapılmadığı incelenmiştir.
+(XX) tarihinde bağımlılık yapan dijital içeriklere ilişkin ailelere yönelik hazırlanan kamu spotu/bilgilendirme içeriği, konusuna örnektir.
+ı) Eğitim, Farkındalık ve Kamuoyu Bilgilendirme Faaliyetleri
+73- İl genelinde 24.04.2026 tarihinden itibaren okul güvenliğinde görev alan personel ile yöneticilere yönelik hizmet içi eğitim ve bilgilendirme çalışmalarına ilişkin tablo aşağıda sunulmuştur:
+TABLO-11:
+	TABLO-11:
+	TABLO-11:
+	TABLO-11:
+	24.04.2026 Tarihinden İtibaren Hizmet içi Eğitim Alan ve Bilgilendirilen Kişi Sayısı
+	24.04.2026 Tarihinden İtibaren Hizmet içi Eğitim Alan ve Bilgilendirilen Kişi Sayısı
+	24.04.2026 Tarihinden İtibaren Hizmet içi Eğitim Alan ve Bilgilendirilen Kişi Sayısı
+	24.04.2026 Tarihinden İtibaren Hizmet içi Eğitim Alan ve Bilgilendirilen Kişi Sayısı
+	Eğitim Verilen Hedef Grup
+	Toplam Kişi Sayısı
+	38.389 (RAM Bağımlılık Eğitimi)
+	Eğitim Kapsama Oranı (%)
+	İl/İlçe Yöneticileri
+	
+
+	
+
+	
+
+	Okul Yöneticileri
+	
+
+	
+
+	
+
+	Öğretmenler
+	
+
+	
+
+	
+
+	Rehber Öğretmen/Psikolojik Danışmanlar
+	
+
+	
+
+	
+
+	Öğrenciler
+	
+
+	
+
+	
+
+	Veliler
+	
+
+	
+
+	
+
+	Diğer Okul/Kurum Çalışanları
+	
+
+	
+
+	
+
+	Tablonun incelenmesinden, 24.04.2026 tarihinden denetim tarihine kadar okul güvenliğinde görev alan personel ile yöneticilere yönelik hizmet içi eğitim ve bilgilendirme çalışmaları en yüksek olan hedef grubun …., en düşük hedef grubun ise …. olduğu anlaşılmıştır.
+74- Protokol kapsamında görev yapan personele, protokolün yürütülmesi konusunda diğer kurumlarla iş birliği içinde hizmet içi eğitimler düzenlendiği/düzenlenmediği incelenmiştir.
+İl merkezinde (XX) tarihinde Protokol kapsamında görev yapan personele kurumlar arası iş birliği ile verilen hizmet içi eğitim, konusuna örnektir.
+75- Okul güvenliğine yönelik taraflar (okul, kolluk, aile, kantin ve servis yönetimleri vb.) arasındaki iletişim geliştirilmesine il/ilçe millî eğitim müdürlükleri koordinasyonunda toplantı ve eğitimlerin düzenlendiği/düzenlenmediği incelenmiştir.
+İl merkezi/ilçede il/ilçe millî eğitim müdürlüğü koordinasyonunda okul, kolluk, aile, kantin ve servis yönetimlerinin katılımıyla yapılan (XX) tarihli toplantı, konusuna örnektir.
+76- İlgili kurumlarla iş birliği içinde, ihmal, istismar ve suçun önlenmesine yönelik yerel/ulusal etkinlikler (seminer, panel, sempozyum, kamu spotu vb.) düzenlendiği/düzenlenmediği, kamuoyuna etkinliklere ilişkin duyuru yapıldığı/yapılmadığı incelenmiştir.
+(XX) tarihinde ilgili kurumlarla iş birliği içinde düzenlenen ve kamuoyuna duyurulan (XX) konulu seminer/panel, konusuna örnektir.
+77- Eğitim ve güvenlik alanındaki projelerin (Mobil Trafik Eğitim Tırı, Trafik Dedektifleri Eğitim Projesi, SİBERAY vb.) desteklendiği/desteklenmediği ve ihtiyaç hâlinde katılım sağlandığı/sağlanmadığı incelenmiştir.
+(XX) tarihinde il merkezinde Mobil Trafik Eğitim Tırı/SİBERAY projesi kapsamında yapılan etkinliğe destek ve katılım sağlanması, konusuna örnektir.
+78- Okul yöneticileri ve öğretmenlerin acil durumları bildirebilecekleri Okul Acil İhbar uygulaması tanıtımının son olarak XX tarihinde yapıldığı/yapılmadığı incelenmiştir.
+79- Sağlıklı yaşam, güvenli davranış, psikolojik dayanıklılık, bağımlılıkla mücadele ve ruh sağlığını koruma/iyileştirme kapsamındaki eğitim faaliyetlerinin paydaş bakanlıkların merkez ve taşra personeli ortak planlaması ile yapıldığı/yapılmadığı ifade edilmiş ve incelenmiştir.
+(XX) tarihinde paydaş bakanlıkların merkez ve taşra personelinin ortak planlamasıyla ruh sağlığını koruma ve bağımlılıkla mücadele konusunda düzenlenen eğitim, konusuna örnektir.
+i) Erken Uyarı Sistemlerinin Etkinliği:
+80- Okullarda suç işlenmesinin önlenmesi amacıyla veya istismar risklerine karşı okul yönetimleri ile kolluk birimlerince önleyici tedbirlerin müştereken alındığı/alınmadığı incelenmiştir.
+İl merkezinde (XX) okulunda (XX) tarihinde okul yönetimi ve kolluk birimlerince müştereken tutulan istismar risklerine karşı alınan önleyici tedbirlere ilişkin (XX) tarihli tutanak, konusuna örnektir. (KOLLUK VE MEB MÜFETTİŞİ)
+81- İl genelinde 24.04. 2026 tarihinden itibaren okullarda ortaya çıkan ihmal, istismar, şiddet ve benzeri durumlar nedeniyle ilgili mevzuat ve Protokol kapsamında üst makama ve/veya kolluk birimlerine bildirilmesi gereken vakalar aşağıdaki tabloda sunulmuştur:
+TABLO-12:
+	TABLO-12:
+	TABLO-12:
+	24.04. 2026 Tarihinden İtibaren Okullarda Meydana Gelen İhmal, İstismar, Şiddet Vaka Sayısı
+	24.04. 2026 Tarihinden İtibaren Okullarda Meydana Gelen İhmal, İstismar, Şiddet Vaka Sayısı
+	24.04. 2026 Tarihinden İtibaren Okullarda Meydana Gelen İhmal, İstismar, Şiddet Vaka Sayısı
+	56
+	56
+	%100
+	
+
+	
+
+	
+
+	Tablonun incelenmesinden, il genelinde 24.04. 2026 tarihinden denetim tarihine kadar okullarda ortaya çıkan ihmal, istismar ve şiddet sayısının toplamda (…) olduğu, bunlardan üst makamlara ve/veya kolluk birimlerine bildirim yükümlülüğü doğan olay sayısının (…) olduğu, bildirim oranının ise %... olduğu anlaşılmıştır.
+82- İl genelinde erken uyarı ve yönlendirme sistemi kapsamında 24.04.2026 tarihinden itibaren takibi yapılan vaka sayılarına ilişkin veriler aşağıda tabloda sunulmuştur.
+TABLO-13:
+	TABLO-13:
+	TABLO-13:
+	TABLO-13:
+	TABLO-13:
+	24.04.2026 Tarihinden İtibaren Erken Uyarı ve Yönlendirme Kapsamında Takibi Yapılan Vaka Sayısı
+	24.04.2026 Tarihinden İtibaren Erken Uyarı ve Yönlendirme Kapsamında Takibi Yapılan Vaka Sayısı
+	24.04.2026 Tarihinden İtibaren Erken Uyarı ve Yönlendirme Kapsamında Takibi Yapılan Vaka Sayısı
+	24.04.2026 Tarihinden İtibaren Erken Uyarı ve Yönlendirme Kapsamında Takibi Yapılan Vaka Sayısı
+	24.04.2026 Tarihinden İtibaren Erken Uyarı ve Yönlendirme Kapsamında Takibi Yapılan Vaka Sayısı
+	
+
+	Seviye 1
+	Seviye 2
+	Seviye 3
+	Toplam
+	Muratpaşa
+	3
+	1
+	3
+	7
+	…ilçesi
+	
+
+	
+
+	
+
+	
+
+	…ilçesi
+	
+
+	
+
+	
+
+	
+
+	…ilçesi
+	
+
+	
+
+	
+
+	
+
+	…ilçesi
+	
+
+	
+
+	
+
+	
+
+	…ilçesi
+	
+
+	
+
+	
+
+	
+
+	İl Toplamı
+	
+
+	
+
+	
+
+	
+
+	Tablonun incelenmesinden, il genelinde 24.04. 2026 tarihinden denetim tarihine kadar erken uyarı ve yönlendirme kapsamında takibi yapılan 1. Seviye sayısının (…), 2. Seviye sayısının (…) ve 3. Seviye sayısının (…) olduğu anlaşılmıştır.
+83- Her türlü okul güvenliği işleminin güvenli eğitim iletişimi kapsamında değerlendirilerek çok disiplinli müdahale gerektiren durumlarda (Seviye 3) iş ve işlemlerin Çok Disiplinli Değerlendirme Ekibi'nin (ÇDE) değerlendirmesi doğrultusunda yürütüldüğü/yürütülmediği incelenmiştir.
+İl merkezinde (XX) tarihinde Seviye 3 olarak belirlenen vaka için ÇDE’nin değerlendirmesi doğrultusunda yürütülen iş ve işlemler, konusuna örnektir. (MEB MÜFETTİŞİ)
+84- Seviye 3 göstergelerinde somut ve yakın tehlike bulunması hâlinde ÇDE toplantısı beklenmeden kolluk ve acil sağlık birimleri harekete geçirilerek risk altındaki kişi/gruplar için acil durum planı uygulandığı/uygulanmadığı incelenmiştir.
+(XX) tarihinde Seviye 3 göstergesinde somut ve yakın tehlike tespit edilmesi üzerine ÇDE toplantısı beklenmeden kolluk ve acil sağlık birimlerinin harekete geçirilmesi, konusuna örnektir.
+85- Kolluk; somut, yakın ve inandırıcı tehlike, silah/saldırı aracına erişim, suç unsuru ya da acil koruma ihtiyacı bulunduğunda ölçülülük, zorunluluk ve çocuk odaklı müdahale ilkeleriyle devreye girdiği/girmediği incelenmiştir. (KOLLUK MÜFETTİŞİ)
+86- 2026 yılı içerisinde il genelinde, hedefi/zamanı belirli tehdit, silah/saldırı aracına erişim, saldırı hazırlığı gibi toplam XX adet acil durum olayı yaşandığı/yaşanmadığı, söz konusu acil durumlarda okul personelinin ÇDE değerlendirmesinin tamamlanmasını beklemeden kişilerin güvenli alana yönlendirilmesini sağladığı/sağlanmadığı incelenmiştir.
+(XX) tarihinde (XX) okulunda hedefi belirli tehdit nedeniyle okul personelince ÇDE değerlendirmesi beklenmeden kişilerin güvenli alana yönlendirilmesi, konusuna örnektir.
+87- Seviye 3 olarak belirlenen çocuklara yönelik koruyucu, önleyici ve destekleyici hizmetlerin yürütülmesi mülki idare amirlerince takip edildiği/edilmediği incelenmiştir.
+88- İl genelinde Seviye 3 vaka tespiti hâlinde okulun risk derecelendirmesinin yeniden değerlendirilerek güncellendiği/güncellenmediği incelenmiştir.
+(XX) okulunda (XX) tarihinde tespit edilen Seviye 3 vaka nedeniyle okulun risk derecelendirmesinin yeniden değerlendirilerek güncellenmesi, konusuna örnektir. (Kolluk Müfettişi)
+89- Okullarda meydana gelen vakaların kolluğa bildirilmesini müteakip, vakanın tarafı olan kişilerin hanelerinde ruhsatlı silah kaydının bulunup bulunmadığının kolluk tarafından sorgulandığı/sorgulanmadığı, sorgulama sonucu hanede ruhsatlı silah bulunması hâlinde kolluk tarafından hane halkına 6136 sayılı Kanun'a 7593 sayılı Kanun'la eklenen 13/A maddesindeki sorumluluk ve cezai müeyyideler vurgulanarak bilgilendirme yapıldığı/yapılmadığı incelenmiştir. (KOLLUK MÜFETTİŞİ)
+(XX) tarihinde kolluğa bildirilen vakada ruhsatlı silah bulunan haneye 6136 sayılı Kanun’un 13/A maddesi kapsamında yapılan bilgilendirme, konusuna örnektir.
+90- Okul yöneticilerine, öğretmenlerine ve personeline yönelik ciddi bir tehdit hâlinde durum ivedilikle kolluğa bildirilerek tehdidin niteliğine göre gerekli güvenlik tedbirlerinin planlandığı/planlanmadığı incelenmiştir.
+(XX) tarihinde (XX) okulu yöneticisine yönelik ciddi tehdit durumunun kolluğa bildirilerek gerekli güvenlik tedbirlerinin planlanması, konusuna örnektir.
+j) Koordinasyon Kurulları:
+91- İl genelinde 24.04.2026 tarihinden itibaren gerçekleştirilen kurul toplantıları ile görüşülen konulara ilişkin veriler aşağıdaki tabloda sunulmuştur:
+TABLO-14:
+	TABLO-14:
+	TABLO-14:
+	24.04.2026 Tarihinden İtibaren Yapılan Kurul Sayıları ve Görüşülen Konuların İcmali
+	24.04.2026 Tarihinden İtibaren Yapılan Kurul Sayıları ve Görüşülen Konuların İcmali
+	24.04.2026 Tarihinden İtibaren Yapılan Kurul Sayıları ve Görüşülen Konuların İcmali
+	
+
+	214
+	461
+	Okul Güvenliği Yönetim Ekipleri
+	
+
+	
+
+	İl Eğitim Güvenliği Yürütme Kurulu
+	2
+	14
+	İlçe Eğitim Güvenliği Yürütme Kurulu
+	
+
+	
+
+	Tablonun incelenmesinden, il genelinde 24.04. 2026 tarihinden denetim tarihine kadar;
+Okul Güvenliği Yönetim Ekiplerinin yaptığı toplantı sayısının (…), görüşülen konu sayısının (…) olduğu, İl Eğitim Güvenliği Yürütme Kurulunun yaptığı toplantı sayısının (…), görüşülen konu sayısının (…) olduğu, İlçe Eğitim Güvenliği Yürütme Kurulunun yaptığı toplantı sayısının (…), görüşülen konu sayısının (…) olduğu anlaşılmıştır.
+92- İl Eğitim Güvenliği Yürütme Kurulunun vali başkanlığında 2026 yılı içerisinde XX defa toplandığı/toplanmadığı, kurul toplantılarına ihtiyaç hâlinde farklı kurum ve birim temsilcileri ilgili taraf olarak davet edildiği/edilmediği incelenmiştir.
+İl Eğitim Güvenliği Yürütme Kurulunun (XX), (XX), (XX) ve (XX) tarihlerinde vali başkanlığında toplanması, konusuna örnektir.
+93- İlçe Eğitim Güvenliği Yürütme Kurulu toplantılarının bizzat kaymakamlar başkanlığında 2026 yılı içerisinde XX defa toplandığı/toplanmadığı, kurul toplantılarına ihtiyaç hâlinde farklı kurum ve birim temsilcileri ilgili taraf olarak davet edildiği/edilmediği incelenmiştir.
+(XX) İlçe Eğitim Güvenliği Yürütme Kurulunun (XX), (XX), (XX) ve (XX) tarihlerinde kaymakam başkanlığında toplanması, konusuna örnektir.
+94- İl genelinde 24.04.2026 tarihinden itibaren gerçekleştirilen İl/İlçe Eğitim Güvenliği Yürütme Kurulu toplantılarında görüşülen konuların dağılımı aşağıdaki tabloda sunulmuştur:
+TABLO-15:
+	TABLO-15:
+	24.04.2026 Tarihinden İtibaren Yapılan İl/İlçe Eğitim Güvenliği Kurullarında Görüşülen Konuların Dağılımı
+	24.04.2026 Tarihinden İtibaren Yapılan İl/İlçe Eğitim Güvenliği Kurullarında Görüşülen Konuların Dağılımı
+	Konu
+	Sayısı
+	Okul ve okul çevresinde meydana gelen olaylar
+	
+
+	Devamsızlık eğilimleri
+	
+
+	Dijital Riskler
+	
+
+	İhmal
+	
+
+	İstismar
+	
+
+	Şiddet
+	
+
+	Bağımlılık
+	
+
+	Koruyucu, önleyici ve destekleyici hizmetlere yönlendirmede yaşanan sorunlar
+	
+
+	Kurumlar arası iş birliği, koordinasyon sorunları
+	
+
+	Diğer konular
+	
+
+	Toplam
+	
+
+	Tablonun incelenmesinden, il genelinde 24.04. 2026 tarihinden denetim tarihine kadar İl/İlçe Eğitim Güvenliği Yürütme Kurulu toplantılarında en fazla …. konusu hakkında görüşme yapıldığı, en az yapılan görüşme konusunun ise …. olduğu anlaşılmıştır.
+95- İl ve İlçe Eğitim Güvenliği Yürütme Kurullarında; okul ve okul çevresinde meydana gelen olaylar ile devamsızlık eğilimleri, dijital riskler, ihmal, istismar, şiddet, bağımlılık ve benzer risk alanları; koruyucu, önleyici ve destekleyici hizmetlere yönlendirme süreçlerinde yaşanan gecikmeler ile kurumlar arası iş birliği, koordinasyon ve uygulamada karşılaşılan sorunların düzenli olarak değerlendirildiği/değerlendirilmediği, tespit edilen risk ve sorunlara yönelik alınması gereken tedbirlerin uygulama durumunun izlendiği/izlenmediği incelenmiştir.
+İl Eğitim Güvenliği Yürütme Kurulunun (XX) tarihli toplantısında (XX) konusunun görüşülerek alınan (XX) sayılı kararın uygulama durumunun izlenmesi, konusuna örnektir.
+96- Okul Güvenliği Yönetim Ekipleri okul güvenliğini etkileyebilecek olayların önlenmesi ve alınacak tedbirlerin değerlendirilmesi amacıyla okul müdürü başkanlığında rehber öğretmen/psikolojik danışman ve okul müdür yardımcısının ve ihtiyaç durumunda ilgili kurum temsilcilerinin katılımıyla ayda en az bir kez toplandığı/toplanmadığı incelenmiştir. (MEB MÜFETTİŞİ)
+(XX) okulu Okul Güvenliği Yönetim Ekibinin (XX) ayında okul müdürü başkanlığında toplanması, konusuna örnektir.
+k) Birinci Derece Öncelikli Okulların Denetiminde Öne Çıkan Hususlar:
+97- Müfettişliğimizce fiilen denetlenen birinci derece öncelikli okullara ilişkin tespit edilen hususlar aşağıda sıralanmıştır: (Mülkiye Müfettişi + MEB Müfettişi + Kolluk Müfettişi)
+Birinci derece öncelikli okullarda denetimde bakılan hususlar ile bu hususlara ilişkin tespitler (olup olmadığı) aşağıdaki tabloda her okul için ayrı ayrı sunulmuştur:
+TABLO-16:
+	TABLO-16:
+	TABLO-16:
+	TABLO-16:
+	Birinci Derece Öncelikli Okullarda Denetimde Bakılan Hususlar ve Tespitler (ÖRNEK)
+	Birinci Derece Öncelikli Okullarda Denetimde Bakılan Hususlar ve Tespitler (ÖRNEK)
+	Birinci Derece Öncelikli Okullarda Denetimde Bakılan Hususlar ve Tespitler (ÖRNEK)
+	Birinci Derece Öncelikli Okullarda Denetimde Bakılan Hususlar ve Tespitler (ÖRNEK)
+	Okul Adı
+	Denetimde Bakılan Hususlar
+	Tespit
+	Açıklama
+	1. (XX) Okulu
+	Güncel acil durum planı (Md. 6)
+	Var / Yok
+	
+
+	1. (XX) Okulu
+	Okul giriş-çıkış kontrol sistemi (Md. 12)
+	Var / Yok
+	
+
+	1. (XX) Okulu
+	Okul çevresini görecek şekilde kamera sistemi (Md. 28, 34)
+	Var / Yok
+	
+
+	1. (XX) Okulu
+	Kameraların KGYS’ye entegrasyonu (Md. 34)
+	Var / Yok
+	
+
+	1. (XX) Okulu
+	Kamera kayıtlarının yeterli süre saklanması (Md. 36)
+	Var / Yok
+	
+
+	1. (XX) Okulu
+	Okul kolluk görevlisi ve güvenli eğitim koordinasyon görevlisi görevlendirmesi (Md. 14)
+	Var / Yok
+	
+
+	1. (XX) Okulu
+	Okul güvenliğinde görevli personele hizmet içi eğitim verilmesi (Md. 15)
+	Var / Yok
+	
+
+	1. (XX) Okulu
+	Bahçe görevlilerinin görev, yetki ve sorumluluklarına ilişkin bilgilendirilmesi (Md. 21, 22)
+	Var / Yok
+	
+
+	1. (XX) Okulu
+	Okul Gözlem Formunun düzenlenmesi ve tespit edilen risklere yönelik tedbir alınması (Md. 25)
+	Var / Yok
+	
+
+	1. (XX) Okulu
+	Özel araçların okul bahçesine girişinin engellenmesi (Md. 39)
+	Var / Yok
+	
+
+	1. (XX) Okulu
+	Okul giriş-çıkış saatlerinde ve çevresinde devriye faaliyeti (Md. 47)
+	Var / Yok
+	
+
+	1. (XX) Okulu
+	Güvenlik Olayları Kayıt ve Bildirim Formunun düzenlenmesi (Md. 53)
+	Var / Yok
+	
+
+	1. (XX) Okulu
+	Devamsız öğrencilere yönelik aile ziyaretlerinin yapılması (Md. 57)
+	Var / Yok
+	
+
+	1. (XX) Okulu
+	Öğrenci, öğretmen ve velilere güvenli internet/siber güvenlik eğitimi verilmesi (Md. 65)
+	Var / Yok
+	
+
+	1. (XX) Okulu
+	Okul Acil İhbar uygulamasının tanıtılması (Md. 78)
+	Var / Yok
+	
+
+	1. (XX) Okulu
+	Seviye 3 vakalarda ÇDE’ye bildirim ve gerekli müdahalenin yapılması (Md. 84)
+	Var / Yok
+	
+
+	1. (XX) Okulu
+	Okul Güvenliği Yönetim Ekibinin toplanması (Md. 96)
+	Var / Yok
+	
+
+	2. (XX) Okulu
+	Güncel acil durum planı (Md. 6)
+	Var / Yok
+	
+
+	2. (XX) Okulu
+	Okul giriş-çıkış kontrol sistemi (Md. 12)
+	Var / Yok
+	
+
+	2. (XX) Okulu
+	Okul çevresini görecek şekilde kamera sistemi (Md. 28, 34)
+	Var / Yok
+	
+
+	2. (XX) Okulu
+	Kameraların KGYS’ye entegrasyonu (Md. 34)
+	Var / Yok
+	
+
+	2. (XX) Okulu
+	Kamera kayıtlarının yeterli süre saklanması (Md. 36)
+	Var / Yok
+	
+
+	2. (XX) Okulu
+	Okul kolluk görevlisi ve güvenli eğitim koordinasyon görevlisi görevlendirmesi (Md. 14)
+	Var / Yok
+	
+
+	2. (XX) Okulu
+	Okul güvenliğinde görevli personele hizmet içi eğitim verilmesi (Md. 15)
+	Var / Yok
+	
+
+	2. (XX) Okulu
+	Bahçe görevlilerinin görev, yetki ve sorumluluklarına ilişkin bilgilendirilmesi (Md. 21, 22)
+	Var / Yok
+	
+
+	2. (XX) Okulu
+	Okul Gözlem Formunun düzenlenmesi ve tespit edilen risklere yönelik tedbir alınması (Md. 25)
+	Var / Yok
+	
+
+	2. (XX) Okulu
+	Özel araçların okul bahçesine girişinin engellenmesi (Md. 39)
+	Var / Yok
+	
+
+	2. (XX) Okulu
+	Okul giriş-çıkış saatlerinde ve çevresinde devriye faaliyeti (Md. 47)
+	Var / Yok
+	
+
+	2. (XX) Okulu
+	Güvenlik Olayları Kayıt ve Bildirim Formunun düzenlenmesi (Md. 53)
+	Var / Yok
+	
+
+	2. (XX) Okulu
+	Devamsız öğrencilere yönelik aile ziyaretlerinin yapılması (Md. 57)
+	Var / Yok
+	
+
+	2. (XX) Okulu
+	Öğrenci, öğretmen ve velilere güvenli internet/siber güvenlik eğitimi verilmesi (Md. 65)
+	Var / Yok
+	
+
+	2. (XX) Okulu
+	Okul Acil İhbar uygulamasının tanıtılması (Md. 78)
+	Var / Yok
+	
+
+	2. (XX) Okulu
+	Seviye 3 vakalarda ÇDE’ye bildirim ve gerekli müdahalenin yapılması (Md. 84)
+	Var / Yok
+	
+
+	2. (XX) Okulu
+	Okul Güvenliği Yönetim Ekibinin toplanması (Md. 96)
+	Var / Yok
+	
+
+	3. (XX) Okulu
+	Güncel acil durum planı (Md. 6)
+	Var / Yok
+	
+
+	3. (XX) Okulu
+	Okul giriş-çıkış kontrol sistemi (Md. 12)
+	Var / Yok
+	
+
+	3. (XX) Okulu
+	Okul çevresini görecek şekilde kamera sistemi (Md. 28, 34)
+	Var / Yok
+	
+
+	3. (XX) Okulu
+	Kameraların KGYS’ye entegrasyonu (Md. 34)
+	Var / Yok
+	
+
+	3. (XX) Okulu
+	Kamera kayıtlarının yeterli süre saklanması (Md. 36)
+	Var / Yok
+	
+
+	3. (XX) Okulu
+	Okul kolluk görevlisi ve güvenli eğitim koordinasyon görevlisi görevlendirmesi (Md. 14)
+	Var / Yok
+	
+
+	3. (XX) Okulu
+	Okul güvenliğinde görevli personele hizmet içi eğitim verilmesi (Md. 15)
+	Var / Yok
+	
+
+	3. (XX) Okulu
+	Bahçe görevlilerinin görev, yetki ve sorumluluklarına ilişkin bilgilendirilmesi (Md. 21, 22)
+	Var / Yok
+	
+
+	3. (XX) Okulu
+	Okul Gözlem Formunun düzenlenmesi ve tespit edilen risklere yönelik tedbir alınması (Md. 25)
+	Var / Yok
+	
+
+	3. (XX) Okulu
+	Özel araçların okul bahçesine girişinin engellenmesi (Md. 39)
+	Var / Yok
+	
+
+	3. (XX) Okulu
+	Okul giriş-çıkış saatlerinde ve çevresinde devriye faaliyeti (Md. 47)
+	Var / Yok
+	
+
+	3. (XX) Okulu
+	Güvenlik Olayları Kayıt ve Bildirim Formunun düzenlenmesi (Md. 53)
+	Var / Yok
+	
+
+	3. (XX) Okulu
+	Devamsız öğrencilere yönelik aile ziyaretlerinin yapılması (Md. 57)
+	Var / Yok
+	
+
+	3. (XX) Okulu
+	Öğrenci, öğretmen ve velilere güvenli internet/siber güvenlik eğitimi verilmesi (Md. 65)
+	Var / Yok
+	
+
+	3. (XX) Okulu
+	Okul Acil İhbar uygulamasının tanıtılması (Md. 78)
+	Var / Yok
+	
+
+	3. (XX) Okulu
+	Seviye 3 vakalarda ÇDE’ye bildirim ve gerekli müdahalenin yapılması (Md. 84)
+	Var / Yok
+	
+
+	3. (XX) Okulu
+	Okul Güvenliği Yönetim Ekibinin toplanması (Md. 96)
+	Var / Yok
+	
+
+	4. (XX) Okulu
+	Güncel acil durum planı (Md. 6)
+	Var / Yok
+	
+
+	4. (XX) Okulu
+	Okul giriş-çıkış kontrol sistemi (Md. 12)
+	Var / Yok
+	
+
+	4. (XX) Okulu
+	Okul çevresini görecek şekilde kamera sistemi (Md. 28, 34)
+	Var / Yok
+	
+
+	4. (XX) Okulu
+	Kameraların KGYS’ye entegrasyonu (Md. 34)
+	Var / Yok
+	
+
+	4. (XX) Okulu
+	Kamera kayıtlarının yeterli süre saklanması (Md. 36)
+	Var / Yok
+	
+
+	4. (XX) Okulu
+	Okul kolluk görevlisi ve güvenli eğitim koordinasyon görevlisi görevlendirmesi (Md. 14)
+	Var / Yok
+	
+
+	4. (XX) Okulu
+	Okul güvenliğinde görevli personele hizmet içi eğitim verilmesi (Md. 15)
+	Var / Yok
+	
+
+	4. (XX) Okulu
+	Bahçe görevlilerinin görev, yetki ve sorumluluklarına ilişkin bilgilendirilmesi (Md. 21, 22)
+	Var / Yok
+	
+
+	4. (XX) Okulu
+	Okul Gözlem Formunun düzenlenmesi ve tespit edilen risklere yönelik tedbir alınması (Md. 25)
+	Var / Yok
+	
+
+	4. (XX) Okulu
+	Özel araçların okul bahçesine girişinin engellenmesi (Md. 39)
+	Var / Yok
+	
+
+	4. (XX) Okulu
+	Okul giriş-çıkış saatlerinde ve çevresinde devriye faaliyeti (Md. 47)
+	Var / Yok
+	
+
+	4. (XX) Okulu
+	Güvenlik Olayları Kayıt ve Bildirim Formunun düzenlenmesi (Md. 53)
+	Var / Yok
+	
+
+	4. (XX) Okulu
+	Devamsız öğrencilere yönelik aile ziyaretlerinin yapılması (Md. 57)
+	Var / Yok
+	
+
+	4. (XX) Okulu
+	Öğrenci, öğretmen ve velilere güvenli internet/siber güvenlik eğitimi verilmesi (Md. 65)
+	Var / Yok
+	
+
+	4. (XX) Okulu
+	Okul Acil İhbar uygulamasının tanıtılması (Md. 78)
+	Var / Yok
+	
+
+	4. (XX) Okulu
+	Seviye 3 vakalarda ÇDE’ye bildirim ve gerekli müdahalenin yapılması (Md. 84)
+	Var / Yok
+	
+
+	4. (XX) Okulu
+	Okul Güvenliği Yönetim Ekibinin toplanması (Md. 96)
+	Var / Yok
+	
+
+	5. (XX) Okulu
+	Güncel acil durum planı (Md. 6)
+	Var / Yok
+	
+
+	5. (XX) Okulu
+	Okul giriş-çıkış kontrol sistemi (Md. 12)
+	Var / Yok
+	
+
+	5. (XX) Okulu
+	Okul çevresini görecek şekilde kamera sistemi (Md. 28, 34)
+	Var / Yok
+	
+
+	5. (XX) Okulu
+	Kameraların KGYS’ye entegrasyonu (Md. 34)
+	Var / Yok
+	
+
+	5. (XX) Okulu
+	Kamera kayıtlarının yeterli süre saklanması (Md. 36)
+	Var / Yok
+	
+
+	5. (XX) Okulu
+	Okul kolluk görevlisi ve güvenli eğitim koordinasyon görevlisi görevlendirmesi (Md. 14)
+	Var / Yok
+	
+
+	5. (XX) Okulu
+	Okul güvenliğinde görevli personele hizmet içi eğitim verilmesi (Md. 15)
+	Var / Yok
+	
+
+	5. (XX) Okulu
+	Bahçe görevlilerinin görev, yetki ve sorumluluklarına ilişkin bilgilendirilmesi (Md. 21, 22)
+	Var / Yok
+	
+
+	5. (XX) Okulu
+	Okul Gözlem Formunun düzenlenmesi ve tespit edilen risklere yönelik tedbir alınması (Md. 25)
+	Var / Yok
+	
+
+	5. (XX) Okulu
+	Özel araçların okul bahçesine girişinin engellenmesi (Md. 39)
+	Var / Yok
+	
+
+	5. (XX) Okulu
+	Okul giriş-çıkış saatlerinde ve çevresinde devriye faaliyeti (Md. 47)
+	Var / Yok
+	
+
+	5. (XX) Okulu
+	Güvenlik Olayları Kayıt ve Bildirim Formunun düzenlenmesi (Md. 53)
+	Var / Yok
+	
+
+	5. (XX) Okulu
+	Devamsız öğrencilere yönelik aile ziyaretlerinin yapılması (Md. 57)
+	Var / Yok
+	
+
+	5. (XX) Okulu
+	Öğrenci, öğretmen ve velilere güvenli internet/siber güvenlik eğitimi verilmesi (Md. 65)
+	Var / Yok
+	
+
+	5. (XX) Okulu
+	Okul Acil İhbar uygulamasının tanıtılması (Md. 78)
+	Var / Yok
+	
+
+	5. (XX) Okulu
+	Seviye 3 vakalarda ÇDE’ye bildirim ve gerekli müdahalenin yapılması (Md. 84)
+	Var / Yok
+	
+
+	5. (XX) Okulu
+	Okul Güvenliği Yönetim Ekibinin toplanması (Md. 96)
+	Var / Yok
+	
+
+	6. (XX) Okulu
+	Güncel acil durum planı (Md. 6)
+	Var / Yok
+	
+
+	6. (XX) Okulu
+	Okul giriş-çıkış kontrol sistemi (Md. 12)
+	Var / Yok
+	
+
+	6. (XX) Okulu
+	Okul çevresini görecek şekilde kamera sistemi (Md. 28, 34)
+	Var / Yok
+	
+
+	6. (XX) Okulu
+	Kameraların KGYS’ye entegrasyonu (Md. 34)
+	Var / Yok
+	
+
+	6. (XX) Okulu
+	Kamera kayıtlarının yeterli süre saklanması (Md. 36)
+	Var / Yok
+	
+
+	6. (XX) Okulu
+	Okul kolluk görevlisi ve güvenli eğitim koordinasyon görevlisi görevlendirmesi (Md. 14)
+	Var / Yok
+	
+
+	6. (XX) Okulu
+	Okul güvenliğinde görevli personele hizmet içi eğitim verilmesi (Md. 15)
+	Var / Yok
+	
+
+	6. (XX) Okulu
+	Bahçe görevlilerinin görev, yetki ve sorumluluklarına ilişkin bilgilendirilmesi (Md. 21, 22)
+	Var / Yok
+	
+
+	6. (XX) Okulu
+	Okul Gözlem Formunun düzenlenmesi ve tespit edilen risklere yönelik tedbir alınması (Md. 25)
+	Var / Yok
+	
+
+	6. (XX) Okulu
+	Özel araçların okul bahçesine girişinin engellenmesi (Md. 39)
+	Var / Yok
+	
+
+	6. (XX) Okulu
+	Okul giriş-çıkış saatlerinde ve çevresinde devriye faaliyeti (Md. 47)
+	Var / Yok
+	
+
+	6. (XX) Okulu
+	Güvenlik Olayları Kayıt ve Bildirim Formunun düzenlenmesi (Md. 53)
+	Var / Yok
+	
+
+	6. (XX) Okulu
+	Devamsız öğrencilere yönelik aile ziyaretlerinin yapılması (Md. 57)
+	Var / Yok
+	
+
+	6. (XX) Okulu
+	Öğrenci, öğretmen ve velilere güvenli internet/siber güvenlik eğitimi verilmesi (Md. 65)
+	Var / Yok
+	
+
+	6. (XX) Okulu
+	Okul Acil İhbar uygulamasının tanıtılması (Md. 78)
+	Var / Yok
+	
+
+	6. (XX) Okulu
+	Seviye 3 vakalarda ÇDE’ye bildirim ve gerekli müdahalenin yapılması (Md. 84)
+	Var / Yok
+	
+
+	6. (XX) Okulu
+	Okul Güvenliği Yönetim Ekibinin toplanması (Md. 96)
+	Var / Yok
+	
+
+	7. (XX) Okulu
+	Güncel acil durum planı (Md. 6)
+	Var / Yok
+	
+
+	7. (XX) Okulu
+	Okul giriş-çıkış kontrol sistemi (Md. 12)
+	Var / Yok
+	
+
+	7. (XX) Okulu
+	Okul çevresini görecek şekilde kamera sistemi (Md. 28, 34)
+	Var / Yok
+	
+
+	7. (XX) Okulu
+	Kameraların KGYS’ye entegrasyonu (Md. 34)
+	Var / Yok
+	
+
+	7. (XX) Okulu
+	Kamera kayıtlarının yeterli süre saklanması (Md. 36)
+	Var / Yok
+	
+
+	7. (XX) Okulu
+	Okul kolluk görevlisi ve güvenli eğitim koordinasyon görevlisi görevlendirmesi (Md. 14)
+	Var / Yok
+	
+
+	7. (XX) Okulu
+	Okul güvenliğinde görevli personele hizmet içi eğitim verilmesi (Md. 15)
+	Var / Yok
+	
+
+	7. (XX) Okulu
+	Bahçe görevlilerinin görev, yetki ve sorumluluklarına ilişkin bilgilendirilmesi (Md. 21, 22)
+	Var / Yok
+	
+
+	7. (XX) Okulu
+	Okul Gözlem Formunun düzenlenmesi ve tespit edilen risklere yönelik tedbir alınması (Md. 25)
+	Var / Yok
+	
+
+	7. (XX) Okulu
+	Özel araçların okul bahçesine girişinin engellenmesi (Md. 39)
+	Var / Yok
+	
+
+	7. (XX) Okulu
+	Okul giriş-çıkış saatlerinde ve çevresinde devriye faaliyeti (Md. 47)
+	Var / Yok
+	
+
+	7. (XX) Okulu
+	Güvenlik Olayları Kayıt ve Bildirim Formunun düzenlenmesi (Md. 53)
+	Var / Yok
+	
+
+	7. (XX) Okulu
+	Devamsız öğrencilere yönelik aile ziyaretlerinin yapılması (Md. 57)
+	Var / Yok
+	
+
+	7. (XX) Okulu
+	Öğrenci, öğretmen ve velilere güvenli internet/siber güvenlik eğitimi verilmesi (Md. 65)
+	Var / Yok
+	
+
+	7. (XX) Okulu
+	Okul Acil İhbar uygulamasının tanıtılması (Md. 78)
+	Var / Yok
+	
+
+	7. (XX) Okulu
+	Seviye 3 vakalarda ÇDE’ye bildirim ve gerekli müdahalenin yapılması (Md. 84)
+	Var / Yok
+	
+
+	7. (XX) Okulu
+	Okul Güvenliği Yönetim Ekibinin toplanması (Md. 96)
+	Var / Yok
+	
+
+	8. (XX) Okulu
+	Güncel acil durum planı (Md. 6)
+	Var / Yok
+	
+
+	8. (XX) Okulu
+	Okul giriş-çıkış kontrol sistemi (Md. 12)
+	Var / Yok
+	
+
+	8. (XX) Okulu
+	Okul çevresini görecek şekilde kamera sistemi (Md. 28, 34)
+	Var / Yok
+	
+
+	8. (XX) Okulu
+	Kameraların KGYS’ye entegrasyonu (Md. 34)
+	Var / Yok
+	
+
+	8. (XX) Okulu
+	Kamera kayıtlarının yeterli süre saklanması (Md. 36)
+	Var / Yok
+	
+
+	8. (XX) Okulu
+	Okul kolluk görevlisi ve güvenli eğitim koordinasyon görevlisi görevlendirmesi (Md. 14)
+	Var / Yok
+	
+
+	8. (XX) Okulu
+	Okul güvenliğinde görevli personele hizmet içi eğitim verilmesi (Md. 15)
+	Var / Yok
+	
+
+	8. (XX) Okulu
+	Bahçe görevlilerinin görev, yetki ve sorumluluklarına ilişkin bilgilendirilmesi (Md. 21, 22)
+	Var / Yok
+	
+
+	8. (XX) Okulu
+	Okul Gözlem Formunun düzenlenmesi ve tespit edilen risklere yönelik tedbir alınması (Md. 25)
+	Var / Yok
+	
+
+	8. (XX) Okulu
+	Özel araçların okul bahçesine girişinin engellenmesi (Md. 39)
+	Var / Yok
+	
+
+	8. (XX) Okulu
+	Okul giriş-çıkış saatlerinde ve çevresinde devriye faaliyeti (Md. 47)
+	Var / Yok
+	
+
+	8. (XX) Okulu
+	Güvenlik Olayları Kayıt ve Bildirim Formunun düzenlenmesi (Md. 53)
+	Var / Yok
+	
+
+	8. (XX) Okulu
+	Devamsız öğrencilere yönelik aile ziyaretlerinin yapılması (Md. 57)
+	Var / Yok
+	
+
+	8. (XX) Okulu
+	Öğrenci, öğretmen ve velilere güvenli internet/siber güvenlik eğitimi verilmesi (Md. 65)
+	Var / Yok
+	
+
+	8. (XX) Okulu
+	Okul Acil İhbar uygulamasının tanıtılması (Md. 78)
+	Var / Yok
+	
+
+	8. (XX) Okulu
+	Seviye 3 vakalarda ÇDE’ye bildirim ve gerekli müdahalenin yapılması (Md. 84)
+	Var / Yok
+	
+
+	8. (XX) Okulu
+	Okul Güvenliği Yönetim Ekibinin toplanması (Md. 96)
+	Var / Yok
+	
+
+	9. (XX) Okulu
+	Güncel acil durum planı (Md. 6)
+	Var / Yok
+	
+
+	9. (XX) Okulu
+	Okul giriş-çıkış kontrol sistemi (Md. 12)
+	Var / Yok
+	
+
+	9. (XX) Okulu
+	Okul çevresini görecek şekilde kamera sistemi (Md. 28, 34)
+	Var / Yok
+	
+
+	9. (XX) Okulu
+	Kameraların KGYS’ye entegrasyonu (Md. 34)
+	Var / Yok
+	
+
+	9. (XX) Okulu
+	Kamera kayıtlarının yeterli süre saklanması (Md. 36)
+	Var / Yok
+	
+
+	9. (XX) Okulu
+	Okul kolluk görevlisi ve güvenli eğitim koordinasyon görevlisi görevlendirmesi (Md. 14)
+	Var / Yok
+	
+
+	9. (XX) Okulu
+	Okul güvenliğinde görevli personele hizmet içi eğitim verilmesi (Md. 15)
+	Var / Yok
+	
+
+	9. (XX) Okulu
+	Bahçe görevlilerinin görev, yetki ve sorumluluklarına ilişkin bilgilendirilmesi (Md. 21, 22)
+	Var / Yok
+	
+
+	9. (XX) Okulu
+	Okul Gözlem Formunun düzenlenmesi ve tespit edilen risklere yönelik tedbir alınması (Md. 25)
+	Var / Yok
+	
+
+	9. (XX) Okulu
+	Özel araçların okul bahçesine girişinin engellenmesi (Md. 39)
+	Var / Yok
+	
+
+	9. (XX) Okulu
+	Okul giriş-çıkış saatlerinde ve çevresinde devriye faaliyeti (Md. 47)
+	Var / Yok
+	
+
+	9. (XX) Okulu
+	Güvenlik Olayları Kayıt ve Bildirim Formunun düzenlenmesi (Md. 53)
+	Var / Yok
+	
+
+	9. (XX) Okulu
+	Devamsız öğrencilere yönelik aile ziyaretlerinin yapılması (Md. 57)
+	Var / Yok
+	
+
+	9. (XX) Okulu
+	Öğrenci, öğretmen ve velilere güvenli internet/siber güvenlik eğitimi verilmesi (Md. 65)
+	Var / Yok
+	
+
+	9. (XX) Okulu
+	Okul Acil İhbar uygulamasının tanıtılması (Md. 78)
+	Var / Yok
+	
+
+	9. (XX) Okulu
+	Seviye 3 vakalarda ÇDE’ye bildirim ve gerekli müdahalenin yapılması (Md. 84)
+	Var / Yok
+	
+
+	9. (XX) Okulu
+	Okul Güvenliği Yönetim Ekibinin toplanması (Md. 96)
+	Var / Yok
+	
+
+	10. (XX) Okulu
+	Güncel acil durum planı (Md. 6)
+	Var / Yok
+	
+
+	10. (XX) Okulu
+	Okul giriş-çıkış kontrol sistemi (Md. 12)
+	Var / Yok
+	
+
+	10. (XX) Okulu
+	Okul çevresini görecek şekilde kamera sistemi (Md. 28, 34)
+	Var / Yok
+	
+
+	10. (XX) Okulu
+	Kameraların KGYS’ye entegrasyonu (Md. 34)
+	Var / Yok
+	
+
+	10. (XX) Okulu
+	Kamera kayıtlarının yeterli süre saklanması (Md. 36)
+	Var / Yok
+	
+
+	10. (XX) Okulu
+	Okul kolluk görevlisi ve güvenli eğitim koordinasyon görevlisi görevlendirmesi (Md. 14)
+	Var / Yok
+	
+
+	10. (XX) Okulu
+	Okul güvenliğinde görevli personele hizmet içi eğitim verilmesi (Md. 15)
+	Var / Yok
+	
+
+	10. (XX) Okulu
+	Bahçe görevlilerinin görev, yetki ve sorumluluklarına ilişkin bilgilendirilmesi (Md. 21, 22)
+	Var / Yok
+	
+
+	10. (XX) Okulu
+	Okul Gözlem Formunun düzenlenmesi ve tespit edilen risklere yönelik tedbir alınması (Md. 25)
+	Var / Yok
+	
+
+	10. (XX) Okulu
+	Özel araçların okul bahçesine girişinin engellenmesi (Md. 39)
+	Var / Yok
+	
+
+	10. (XX) Okulu
+	Okul giriş-çıkış saatlerinde ve çevresinde devriye faaliyeti (Md. 47)
+	Var / Yok
+	
+
+	10. (XX) Okulu
+	Güvenlik Olayları Kayıt ve Bildirim Formunun düzenlenmesi (Md. 53)
+	Var / Yok
+	
+
+	10. (XX) Okulu
+	Devamsız öğrencilere yönelik aile ziyaretlerinin yapılması (Md. 57)
+	Var / Yok
+	
+
+	10. (XX) Okulu
+	Öğrenci, öğretmen ve velilere güvenli internet/siber güvenlik eğitimi verilmesi (Md. 65)
+	Var / Yok
+	
+
+	10. (XX) Okulu
+	Okul Acil İhbar uygulamasının tanıtılması (Md. 78)
+	Var / Yok
+	
+
+	10. (XX) Okulu
+	Seviye 3 vakalarda ÇDE’ye bildirim ve gerekli müdahalenin yapılması (Md. 84)
+	Var / Yok
+	
+
+	10. (XX) Okulu
+	Okul Güvenliği Yönetim Ekibinin toplanması (Md. 96)
+	Var / Yok
+	
+
+	V- İYİ UYGULAMA ÖRNEKLERİ:
+106- İl genelinde varsa okul güvenliğinin sağlanmasına yönelik yürütülen çalışmalar arasında “etkili ve sonuç odaklı olduğu değerlendirilen uygulamalar” belirtilerek bu uygulamaların niteliği, sağladığı faydalar ve diğer illerde uygulanabilirliğine dair tezler bu bölüme yazılacak.
+109- Denetim tarihi itibarıyla …… Valiliği görevinin ………tarafından yürütüldüğü incelenmiştir.

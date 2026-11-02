@@ -1,0 +1,303 @@
+{% extends "base.html" %}
+
+{% block title %}Müfettiş Denetim İcmal Raporu — Muratpaşa İSG{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <!-- Üst Başlık & Eylemler -->
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <div class="text-xs uppercase font-bold tracking-wider text-red-600 flex items-center gap-1.5">
+                <i class="fa-solid fa-scale-balanced"></i> İçişleri & MEB Mülkiye Teftiş Kurulu Referansı
+            </div>
+            <h1 class="text-2xl font-bold text-slate-800 mt-1 flex items-center">
+                <i class="fa-solid fa-file-shield text-blue-600 mr-2.5"></i> Okul Güvenliği Müfettiş İcmal Tabloları (2026)
+            </h1>
+            <p class="text-xs text-slate-500 mt-1">
+                24.04.2026 Genelgesi ve Çocukların Eğitim Süreçlerinin Güvenliğine İlişkin Protokol uyarınca resmî 16 Tablo özeti ve saha göstergeleri.
+            </p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+            <a href="/raporlar/guvenlik-kamera" class="bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 text-xs font-semibold px-3 py-2 rounded-lg transition flex items-center">
+                <i class="fa-solid fa-video mr-1.5"></i> Kamera Raporu
+            </a>
+            <a href="/raporlar/siginak-afet" class="bg-amber-50 text-amber-800 hover:bg-amber-100 border border-amber-200 text-xs font-semibold px-3 py-2 rounded-lg transition flex items-center">
+                <i class="fa-solid fa-person-shelter mr-1.5"></i> Sığınak Raporu
+            </a>
+            <a href="/raporlar/sifir-atik" class="bg-teal-50 text-teal-800 hover:bg-teal-100 border border-teal-200 text-xs font-semibold px-3 py-2 rounded-lg transition flex items-center">
+                <i class="fa-solid fa-recycle mr-1.5"></i> Sıfır Atık
+            </a>
+            <a href="/export/excel" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-4 py-2 rounded-lg shadow-sm transition flex items-center">
+                <i class="fa-solid fa-file-excel mr-2 text-sm"></i> İcmali Excel İndir
+            </a>
+        </div>
+    </div>
+
+    <!-- Hızlı Gösterge Kartları -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center text-lg">
+                <i class="fa-solid fa-video"></i>
+            </div>
+            <div>
+                <div class="text-[11px] font-bold text-slate-400 uppercase">Montajlı Kamera</div>
+                <div class="text-xl font-bold text-slate-800">{{ kamera_ozet.toplam_montajli }}</div>
+                <div class="text-[10px] text-red-600 font-semibold">{{ kamera_ozet.toplam_arizali }} Arızalı | {{ kamera_ozet.acil_ihtiyac }} İhtiyaç</div>
+            </div>
+        </div>
+
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-lg">
+                <i class="fa-solid fa-person-shelter"></i>
+            </div>
+            <div>
+                <div class="text-[11px] font-bold text-slate-400 uppercase">Sığınak Kapasitesi</div>
+                <div class="text-xl font-bold text-slate-800">{{ siginak_ozet.kapasite_kisi }} Kişi</div>
+                <div class="text-[10px] text-slate-500">{{ siginak_ozet.okul_sayisi }} Okulda ({{ siginak_ozet.alan_m2 }} m²)</div>
+            </div>
+        </div>
+
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center text-lg">
+                <i class="fa-solid fa-recycle"></i>
+            </div>
+            <div>
+                <div class="text-[11px] font-bold text-slate-400 uppercase">Sıfır Atık Belgeli</div>
+                <div class="text-xl font-bold text-emerald-600">{{ sifir_atik_ozet.belgeli_okul }} Okul</div>
+                <div class="text-[10px] text-slate-500">{{ sifir_atik_ozet.egitim_sayisi }} Eğitim ({{ sifir_atik_ozet.katilimci_sayisi }} Kişi)</div>
+            </div>
+        </div>
+
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg">
+                <i class="fa-solid fa-id-badge"></i>
+            </div>
+            <div>
+                <div class="text-[11px] font-bold text-slate-400 uppercase">ÖGG İzin Belgesi</div>
+                <div class="text-xl font-bold text-indigo-700">{{ kamera_ozet.izin_belgeli }} Kurum</div>
+                <div class="text-[10px] text-indigo-600">Valilik / Kaymakamlık Onaylı</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TABLO-1: Risk ve Acil Durum Planı İcmali -->
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+        <h2 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-3 flex items-center text-blue-800">
+            <span class="w-2 h-2 bg-blue-600 rounded-full mr-2"></span> TABLO-1: Okulların Risk Değerlendirmesi ve Acil Durum Planları İcmali
+        </h2>
+        <div class="overflow-x-auto">
+            <table class="w-full text-xs text-center border border-slate-200">
+                <thead class="bg-slate-50 text-slate-700 font-bold border-b">
+                    <tr>
+                        <th class="p-2.5 text-left">İlçesi</th>
+                        <th class="p-2.5">Toplam Okul</th>
+                        <th class="p-2.5 bg-red-50 text-red-700">1. Derece Öncelikli</th>
+                        <th class="p-2.5 bg-amber-50 text-amber-700">2. Derece Öncelikli</th>
+                        <th class="p-2.5">3. Derece Öncelikli</th>
+                        <th class="p-2.5">4. Derece Öncelikli</th>
+                        <th class="p-2.5 bg-emerald-50 text-emerald-800">Acil Durum Planı (ADEP) Olan</th>
+                        <th class="p-2.5">Planı Olmayan</th>
+                        <th class="p-2.5 bg-indigo-50 text-indigo-800">EK-7 Ölçeği Düzenlenen</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 font-medium">
+                    <tr class="hover:bg-slate-50">
+                        <td class="p-2.5 text-left font-bold text-slate-800">MURATPAŞA</td>
+                        <td class="p-2.5 font-bold">{{ t1.total }}</td>
+                        <td class="p-2.5 text-red-600 font-bold bg-red-50/30">{{ t1.p1 }}</td>
+                        <td class="p-2.5 text-amber-600 font-bold bg-amber-50/30">{{ t1.p2 }}</td>
+                        <td class="p-2.5 text-slate-600">{{ t1.p3 }}</td>
+                        <td class="p-2.5 text-slate-400">{{ t1.p4 }}</td>
+                        <td class="p-2.5 text-emerald-700 font-bold bg-emerald-50/30">{{ t1.adep_var }} (%{{ t1.adep_ratio }})</td>
+                        <td class="p-2.5 text-slate-400">{{ t1.adep_yok }}</td>
+                        <td class="p-2.5 text-indigo-700 font-bold bg-indigo-50/30">{{ t1.ek7_var }} (%{{ t1.ek7_ratio }})</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- TABLO-2: Güvenlik Amaçlı Personel İstihdam Durumu -->
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+        <h2 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-3 flex items-center text-blue-800">
+            <span class="w-2 h-2 bg-blue-600 rounded-full mr-2"></span> TABLO-2: Güvenlik Amaçlı Personel Görevlendirme ve İstihdam Durumu
+        </h2>
+        <div class="overflow-x-auto">
+            <table class="w-full text-xs text-center border border-slate-200">
+                <thead class="bg-slate-50 text-slate-700 font-bold border-b">
+                    <tr>
+                        <th class="p-2.5 text-left">İlçesi</th>
+                        <th class="p-2.5">Özel Güvenlik Görevlisi</th>
+                        <th class="p-2.5">Okul Bahçe Görevlisi (TYP)</th>
+                        <th class="p-2.5">Sertifikalı Bahçe Görevlisi</th>
+                        <th class="p-2.5">Okul Kolluk Görevlisi (Emniyet)</th>
+                        <th class="p-2.5">Metal Dedektör Eğitimli Personel</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 font-medium">
+                    <tr class="hover:bg-slate-50">
+                        <td class="p-2.5 text-left font-bold text-slate-800">MURATPAŞA</td>
+                        <td class="p-2.5 font-bold text-blue-700">{{ t2.ozel_guvenlik }} Kişi</td>
+                        <td class="p-2.5 font-bold text-slate-700">{{ t2.bahce_gorevlisi }} Kişi</td>
+                        <td class="p-2.5 text-emerald-700 font-semibold">{{ t2.sertifikali }} Kişi</td>
+                        <td class="p-2.5 text-slate-700 font-semibold">{{ t2.kolluk }} Görevli</td>
+                        <td class="p-2.5 text-indigo-700 font-semibold">{{ t2.dedektor_egitimli }} Personel</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- TABLO-5 & TABLO-7 İkili Bölüm -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- TABLO-5: Okul Gözlem Raporu İcmali -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+            <h2 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-3 flex items-center text-blue-800">
+                <span class="w-2 h-2 bg-blue-600 rounded-full mr-2"></span> TABLO-5: Okul Gözlem Raporları İcmali
+            </h2>
+            <table class="w-full text-xs text-center border border-slate-200">
+                <thead class="bg-slate-50 text-slate-700 font-bold border-b">
+                    <tr>
+                        <th class="p-2 text-left">İlçesi</th>
+                        <th class="p-2">Toplam Okul</th>
+                        <th class="p-2 bg-indigo-50 text-indigo-700">Düzenlenen Gözlem Raporu</th>
+                        <th class="p-2">Okul Başına Düşen Oran</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="p-2 text-left font-bold text-slate-800">MURATPAŞA</td>
+                        <td class="p-2 font-bold">{{ t5.total_schools }}</td>
+                        <td class="p-2 font-black text-indigo-700">{{ t5.toplam_gozlem }} Rapor</td>
+                        <td class="p-2 font-semibold text-slate-600">{{ t5.okul_basi_gozlem }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- TABLO-7: Ziyaretçi Kayıt Sistemi & Çevre Düzenlemesi -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+            <h2 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-3 flex items-center text-blue-800">
+                <span class="w-2 h-2 bg-blue-600 rounded-full mr-2"></span> TABLO-7: Ziyaretçi Kaydı ve Güvenlik Tedbirleri
+            </h2>
+            <table class="w-full text-xs text-center border border-slate-200">
+                <thead class="bg-slate-50 text-slate-700 font-bold border-b">
+                    <tr>
+                        <th class="p-2 text-left">İlçesi</th>
+                        <th class="p-2">Ziyaretçi Kayıt Sistemi</th>
+                        <th class="p-2">Özel Araç Bahçe Engeli</th>
+                        <th class="p-2">El/Kapı Dedektörü</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="p-2 text-left font-bold text-slate-800">MURATPAŞA</td>
+                        <td class="p-2 font-bold text-emerald-700">{{ t7.ziyaretci_var }} Okul (%{{ t7.ziyaretci_ratio }})</td>
+                        <td class="p-2 font-semibold text-slate-700">{{ t7.arac_engel_var }} Okul</td>
+                        <td class="p-2 font-semibold text-indigo-700">{{ t7.dedektor_var }} Okul</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- TABLO-6: Güvenlik Kameraları ve Kontrollü Giriş-Çıkış -->
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+        <h2 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-3 flex items-center text-blue-800">
+            <span class="w-2 h-2 bg-blue-600 rounded-full mr-2"></span> TABLO-6: Güvenlik Kameraları ve Kontrollü Giriş-Çıkış Durumu
+        </h2>
+        <div class="overflow-x-auto">
+            <table class="w-full text-xs text-center border border-slate-200">
+                <thead class="bg-slate-50 text-slate-700 font-bold border-b">
+                    <tr>
+                        <th class="p-2.5 text-left">İlçesi</th>
+                        <th class="p-2.5">Kamera Sistemi Olan Okul</th>
+                        <th class="p-2.5 bg-emerald-50 text-emerald-800">KGYS'ye Entegre Okul</th>
+                        <th class="p-2.5">Tek Kapıdan Giriş Yapan Okul</th>
+                        <th class="p-2.5">Turnike Sistemi Olan</th>
+                        <th class="p-2.5">Fiziki Engeli (Duvar/Tel) Olan</th>
+                        <th class="p-2.5">Servis/Araç Park Yeri Olan</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 font-medium">
+                    <tr class="hover:bg-slate-50">
+                        <td class="p-2.5 text-left font-bold text-slate-800">MURATPAŞA</td>
+                        <td class="p-2.5 font-bold text-slate-800">{{ t6.kamera_var }} (%{{ t6.kamera_ratio }})</td>
+                        <td class="p-2.5 font-bold text-emerald-600 bg-emerald-50/30">{{ t6.kgys_var }} (%{{ t6.kgys_ratio }})</td>
+                        <td class="p-2.5 font-semibold text-slate-700">{{ t6.tek_kapi }} Okul</td>
+                        <td class="p-2.5 font-semibold text-slate-700">{{ t6.turnike_var }} Okul</td>
+                        <td class="p-2.5 font-semibold text-slate-700">{{ t6.fiziki_var }} Okul</td>
+                        <td class="p-2.5 font-semibold text-slate-700">{{ t6.park_var }} Okul</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- TABLO-11: Okul Güvenliği Eğitimleri Hedef Grup İcmali -->
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+        <h2 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-3 flex items-center text-blue-800">
+            <span class="w-2 h-2 bg-blue-600 rounded-full mr-2"></span> TABLO-11: Hedef Gruplara Yönelik Güvenlik ve Farkındalık Eğitim İcmali
+        </h2>
+        <div class="overflow-x-auto">
+            <table class="w-full text-xs text-center border border-slate-200">
+                <thead class="bg-slate-50 text-slate-700 font-bold border-b">
+                    <tr>
+                        <th class="p-2.5 text-left">Eğitim Verilen Hedef Grup</th>
+                        <th class="p-2.5">Toplam Hedef Kişi Sayısı</th>
+                        <th class="p-2.5 bg-indigo-50 text-indigo-800">Eğitim Alan Kişi Sayısı</th>
+                        <th class="p-2.5">Kapsama Oranı (%)</th>
+                        <th class="p-2.5 text-left">İlerleme Çubuğu</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 font-medium">
+                    {% for g in t11 %}
+                    <tr class="hover:bg-slate-50">
+                        <td class="p-2.5 text-left font-bold text-slate-800">{{ g.grup }}</td>
+                        <td class="p-2.5 font-semibold text-slate-600">{{ g.hedef }}</td>
+                        <td class="p-2.5 font-black text-indigo-700 bg-indigo-50/20">{{ g.alan }}</td>
+                        <td class="p-2.5 font-bold text-emerald-700">%{{ g.oran }}</td>
+                        <td class="p-2.5 w-48">
+                            <div class="w-full bg-slate-200 rounded-full h-2">
+                                <div class="bg-emerald-600 h-2 rounded-full" style="width: {{ g.oran }}%"></div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- TABLO-14 & TABLO-15: Yönetim Ekibi ve Güvenlik Olayları İcmali -->
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+        <h2 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-3 flex items-center text-blue-800">
+            <span class="w-2 h-2 bg-blue-600 rounded-full mr-2"></span> TABLO-14 & TABLO-15: Okul Güvenliği Yönetim Ekibi ve Vaka Dağılımı
+        </h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+            <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                <div class="text-[11px] text-slate-500 font-semibold uppercase">Yönetim Ekibi Toplantı Sayısı</div>
+                <div class="text-xl font-black text-blue-900 mt-1">{{ t14.toplanti_sayisi }} Toplantı</div>
+                <div class="text-[10px] text-slate-400 mt-0.5">Ayda en az 1 kez</div>
+            </div>
+            <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                <div class="text-[11px] text-slate-500 font-semibold uppercase">Kaydedilen Güvenlik Olayı</div>
+                <div class="text-xl font-black text-slate-800 mt-1">{{ t14.olay_sayisi }} Olay</div>
+                <div class="text-[10px] text-slate-400 mt-0.5">Okul ve çevresi</div>
+            </div>
+            <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                <div class="text-[11px] text-slate-500 font-semibold uppercase">Ortaya Çıkan İhmal/İstismar</div>
+                <div class="text-xl font-black text-amber-700 mt-1">{{ t14.ihmal_istismar }} Vaka</div>
+                <div class="text-[10px] text-slate-400 mt-0.5">Tespit edilen</div>
+            </div>
+            <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                <div class="text-[11px] text-slate-500 font-semibold uppercase">Kolluğa Bildirilen Vaka</div>
+                <div class="text-xl font-black text-emerald-700 mt-1">{{ t14.bildirilen_ihmal }} Bildirim</div>
+                <div class="text-[10px] text-emerald-600 font-semibold">%100 Bildirim Oranı</div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

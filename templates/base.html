@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="tr" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Muratpaşa İlçe MEM — İSG Bilgi Yönetim Sistemi{% endblock %}</title>
+
+    <!-- Google Fonts: Plus Jakarta Sans & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        slate: {
+                            850: '#151e2e',
+                            900: '#0f172a',
+                            950: '#0b132b',
+                        },
+                        brand: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'Inter', 'system-ui', 'sans-serif'],
+                        mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Font Awesome 6.4.0 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+    
+    <!-- jQuery & DataTables JS -->
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f8fafc;
+            color: #0f172a;
+        }
+
+        /* Modern Scrollbars */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Sidebar Styling */
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.55rem 0.85rem;
+            border-radius: 0.65rem;
+            font-size: 0.8125rem;
+            font-weight: 500;
+            color: #94a3b8;
+            transition: all 0.15s ease-in-out;
+            text-decoration: none;
+        }
+        .sidebar-item:hover {
+            color: #ffffff;
+            background-color: rgba(255, 255, 255, 0.07);
+            transform: translateX(2px);
+        }
+        .sidebar-item.active {
+            color: #ffffff;
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            box-shadow: 0 4px 14px -2px rgba(37, 99, 235, 0.45);
+            font-weight: 600;
+        }
+        .sidebar-item.active i {
+            color: #ffffff !important;
+        }
+
+        /* Glassmorphism Classes */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+
+        /* DataTables Custom Polish */
+        table.dataTable {
+            border-collapse: separate !important;
+            border-spacing: 0 !important;
+            width: 100% !important;
+        }
+        table.dataTable thead th {
+            background-color: #f8fafc !important;
+            color: #475569 !important;
+            font-size: 0.75rem !important;
+            font-weight: 700 !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.05em !important;
+            border-bottom: 2px solid #e2e8f0 !important;
+            padding: 0.75rem 0.875rem !important;
+        }
+        table.dataTable tbody td {
+            padding: 0.75rem 0.875rem !important;
+            border-bottom: 1px solid #f1f5f9 !important;
+        }
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+            background: #2563eb !important;
+            color: #ffffff !important;
+            border-radius: 0.5rem !important;
+            border: none !important;
+            font-weight: 700 !important;
+        }
+        .dataTables_wrapper .dataTables_paginate .paginate_button:hover:not(.current) {
+            background: #e2e8f0 !important;
+            color: #0f172a !important;
+            border: none !important;
+            border-radius: 0.5rem !important;
+        }
+        .dataTables_wrapper .dataTables_filter input {
+            border: 1px solid #cbd5e1 !important;
+            border-radius: 0.6rem !important;
+            padding: 0.4rem 0.8rem !important;
+            font-size: 0.8125rem !important;
+            outline: none !important;
+            background: #ffffff !important;
+        }
+        .dataTables_wrapper .dataTables_filter input:focus {
+            border-color: #3b82f6 !important;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15) !important;
+        }
+    </style>
+</head>
+<body class="h-full bg-slate-50 text-slate-800 antialiased selection:bg-blue-600 selection:text-white">
+
+    {% if user %}
+    <!-- ==================== UYGULAMA İÇİ ANA DÜZEN (SIDEBAR + TOPBAR + İÇERİK) ==================== -->
+    <div class="min-h-full flex flex-col lg:flex-row">
+
+        <!-- MOBİL ARKA PLAN KARARTMASI (OVERLAY) -->
+        <div id="mobileSidebarOverlay" onclick="toggleMobileSidebar()" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40 hidden lg:hidden transition-opacity"></div>
+
+        <!-- SOL KENAR ÇUBUĞU (SIDEBAR) -->
+        <aside id="mainSidebar" class="fixed inset-y-0 left-0 z-50 w-72 bg-slate-950 text-slate-300 flex flex-col border-r border-slate-800 shadow-2xl transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out lg:static lg:h-screen lg:sticky lg:top-0">
+            
+            <!-- Logo & Kurum Başlığı -->
+            <div class="p-5 border-b border-slate-800/80 flex items-center justify-between">
+                <a href="/" class="flex items-center space-x-3 group">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/20 group-hover:scale-105 transition-transform flex-shrink-0">
+                        <i class="fa-solid fa-shield-halved text-lg"></i>
+                    </div>
+                    <div>
+                        <div class="text-[10px] font-bold uppercase tracking-wider text-blue-400">T.C. Muratpaşa İlçe MEM</div>
+                        <div class="text-base font-extrabold text-white tracking-tight flex items-center gap-1.5">
+                            İSG-BYS
+                            <span class="text-[10px] bg-blue-500/20 text-blue-300 px-1.5 py-0.2 rounded font-semibold border border-blue-500/30">v2.6</span>
+                        </div>
+                    </div>
+                </a>
+                <button onclick="toggleMobileSidebar()" class="lg:hidden text-slate-400 hover:text-white p-1">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Durum Hapı -->
+            <div class="px-5 pt-3 pb-1">
+                <div class="bg-slate-900/80 border border-slate-800 rounded-lg px-3 py-1.5 flex items-center justify-between text-xs">
+                    <span class="flex items-center text-emerald-400 font-semibold">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse mr-2"></span> Canlı Veri Sistemi
+                    </span>
+                    <span class="text-blue-400 font-mono text-[11px] font-bold">268 Okul</span>
+                </div>
+            </div>
+
+            <!-- Menü Linkleri (Kaydırılabilir) -->
+            <nav class="flex-1 px-3 py-3 space-y-5 overflow-y-auto">
+                
+                <!-- BÖLÜM 1: GENEL YÖNETİM -->
+                <div>
+                    <div class="px-3 mb-1.5 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
+                        Genel Yönetim
+                    </div>
+                    <div class="space-y-1">
+                        <a href="/" class="sidebar-item {% if active_page == 'dashboard' %}active{% endif %}">
+                            <i class="fa-solid fa-chart-pie w-4 text-center text-blue-400"></i>
+                            <span>Kontrol Paneli (Dashboard)</span>
+                        </a>
+                        <a href="/okullar" class="sidebar-item {% if active_page == 'schools' %}active{% endif %}">
+                            <i class="fa-solid fa-school w-4 text-center text-indigo-400"></i>
+                            <span>Kurum Listesi (268 Okul)</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- BÖLÜM 2: 2026–2027 ENTEGRE OPERASYON MODÜLLERİ -->
+                <div>
+                    <div class="px-3 mb-1.5 text-[10px] font-extrabold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
+                        <i class="fa-solid fa-star text-[9px]"></i> 2026–2027 Modülleri
+                    </div>
+                    <div class="space-y-1">
+                        <a href="/kriz-yonetimi" class="sidebar-item {% if active_page == 'crisis' %}active{% endif %}">
+                            <i class="fa-solid fa-triangle-exclamation w-4 text-center text-rose-500"></i>
+                            <span class="text-white font-semibold">Kriz & Lockdown Portalı</span>
+                        </a>
+                        <a href="/adep-yonerge-motoru" class="sidebar-item {% if active_page == 'adep' %}active{% endif %}">
+                            <i class="fa-solid fa-file-shield w-4 text-center text-indigo-400"></i>
+                            <span>ADEP & Yönerge Motoru</span>
+                        </a>
+                        <a href="/okulum-temiz" class="sidebar-item {% if active_page == 'okulum_temiz' %}active{% endif %}">
+                            <i class="fa-solid fa-certificate w-4 text-center text-emerald-400"></i>
+                            <span>Okulum Temiz Belgelendirme</span>
+                        </a>
+                        <a href="/dof-takip" class="sidebar-item {% if active_page == 'dof_takip' %}active{% endif %}">
+                            <i class="fa-solid fa-clock-rotate-left w-4 text-center text-amber-400"></i>
+                            <span>DÖF & Muayene Takip</span>
+                        </a>
+                        <a href="/dokuman-kutuphanesi" class="sidebar-item {% if active_page == 'library' %}active{% endif %}">
+                            <i class="fa-solid fa-folder-open w-4 text-center text-blue-400"></i>
+                            <span>Doküman Kütüphanesi</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- BÖLÜM 3: DENETİM & MÜFETTİŞ İCMALİ -->
+                <div>
+                    <div class="px-3 mb-1.5 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
+                        Denetim & İcmaller
+                    </div>
+                    <div class="space-y-1">
+                        <a href="/mufettis-raporu" class="sidebar-item {% if active_page == 'inspection' %}active{% endif %}">
+                            <i class="fa-solid fa-table-list w-4 text-center text-amber-400"></i>
+                            <span>Müfettiş İcmali (16 Tablo)</span>
+                        </a>
+                        <a href="/veri-tamamlama" class="sidebar-item {% if active_page == 'completion' %}active{% endif %}">
+                            <i class="fa-solid fa-percent w-4 text-center text-teal-300"></i>
+                            <span>24 Kriterli Veri Matrisi</span>
+                        </a>
+                        <a href="/risk-alarmlari" class="sidebar-item {% if active_page == 'risks' %}active{% endif %}">
+                            <i class="fa-solid fa-bell w-4 text-center text-rose-400"></i>
+                            <span>Risk & Muayene Alarmları</span>
+                        </a>
+                        <a href="/okul/1#checklistTab" class="sidebar-item {% if active_page == 'checklist' %}active{% endif %}">
+                            <i class="fa-solid fa-list-check w-4 text-center text-indigo-300"></i>
+                            <span>44 Maddelik Saha Checklist</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- BÖLÜM 4: TEMATİK İSG RAPORLARI -->
+                <div>
+                    <div class="px-3 mb-1.5 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
+                        Tematik Raporlar & Saha
+                    </div>
+                    <div class="space-y-1">
+                        <a href="/raporlar/guvenlik-kamera" class="sidebar-item {% if active_page == 'report_camera' %}active{% endif %}">
+                            <i class="fa-solid fa-video w-4 text-center text-cyan-400"></i>
+                            <span>Kamera & Güvenlik Raporu</span>
+                        </a>
+                        <a href="/raporlar/siginak-afet" class="sidebar-item {% if active_page == 'report_shelter' %}active{% endif %}">
+                            <i class="fa-solid fa-person-shelter w-4 text-center text-emerald-400"></i>
+                            <span>Sığınak & Afet Kapasitesi</span>
+                        </a>
+                        <a href="/raporlar/sifir-atik" class="sidebar-item {% if active_page == 'report_zero_waste' %}active{% endif %}">
+                            <i class="fa-solid fa-recycle w-4 text-center text-teal-400"></i>
+                            <span>Sıfır Atık Belge & Çevre</span>
+                        </a>
+                        <a href="/dinamik-rapor" class="sidebar-item {% if active_page == 'reports' %}active{% endif %}">
+                            <i class="fa-solid fa-filter w-4 text-center text-purple-400"></i>
+                            <span>Özel Rapor / Filtreleme</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- BÖLÜM 5: KOORDİNASYON & OKUL PORTALI -->
+                <div>
+                    <div class="px-3 mb-1.5 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
+                        Koordinasyon & Okul Portalı
+                    </div>
+                    <div class="space-y-1">
+                        <a href="/igu-gorevlendirme" class="sidebar-item {% if active_page == 'igu' %}active{% endif %}">
+                            <i class="fa-solid fa-user-shield w-4 text-center text-sky-400"></i>
+                            <span>İGU Dağılım Çizelgesi</span>
+                        </a>
+                        <a href="/okul-baglantilari" class="sidebar-item {% if active_page == 'links' %}active{% endif %}">
+                            <i class="fa-solid fa-link w-4 text-center text-emerald-300"></i>
+                            <span>Okul Veri Giriş Linkleri</span>
+                        </a>
+                        <a href="/okul-portal" target="_blank" class="sidebar-item">
+                            <i class="fa-solid fa-school-flag w-4 text-center text-amber-400"></i>
+                            <span>Okul Portalı (Ayrı Sekme)</span>
+                        </a>
+                    </div>
+                </div>
+
+            </nav>
+
+            <!-- Sidebar Alt Bilgi (Kullanıcı Kartı) -->
+            <div class="p-3 border-t border-slate-800 bg-slate-900/90">
+                <div class="flex items-center justify-between p-2 rounded-xl bg-slate-800/60 border border-slate-700/50">
+                    <div class="flex items-center space-x-2.5 truncate">
+                        <div class="w-8 h-8 rounded-lg bg-blue-600/30 text-blue-400 font-bold text-xs flex items-center justify-center border border-blue-500/30 flex-shrink-0">
+                            {{ user.full_name[:2] | upper }}
+                        </div>
+                        <div class="truncate">
+                            <div class="text-xs font-bold text-white truncate leading-tight">{{ user.full_name }}</div>
+                            <div class="text-[10px] text-slate-400 mt-0.5">
+                                {% if user.role == 'koordinator' %}
+                                <span class="text-amber-400 font-bold">Koordinatör</span>
+                                {% else %}
+                                <span class="text-blue-400 font-semibold">İSG Uzmanı</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <a href="/logout" title="Güvenli Çıkış" class="p-2 text-slate-400 hover:text-rose-400 hover:bg-slate-700 rounded-lg transition">
+                        <i class="fa-solid fa-right-from-bracket text-xs"></i>
+                    </a>
+                </div>
+            </div>
+
+        </aside>
+
+        <!-- SAĞ ANA ALAN (TOPBAR + CONTENT + FOOTER) -->
+        <div class="flex-1 flex flex-col min-w-0">
+
+            <!-- ÜST YÖNETİM ÇUBUĞU (GLASSMORPHISM TOPBAR) -->
+            <header class="sticky top-0 z-30 glass-panel border-b border-slate-200/80 shadow-xs">
+                <div class="px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+                    
+                    <!-- Sol: Mobil Menü Butonu & Sayfa Başlığı / Breadcrumb -->
+                    <div class="flex items-center space-x-3">
+                        <button onclick="toggleMobileSidebar()" class="lg:hidden p-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition">
+                            <i class="fa-solid fa-bars text-lg"></i>
+                        </button>
+                        <div class="hidden sm:block">
+                            <div class="text-[11px] font-semibold text-slate-600 uppercase tracking-wider flex items-center gap-1.5">
+                                <span>İSG Yönetim Merkezi</span>
+                                <span>/</span>
+                                <span class="text-blue-600">Muratpaşa</span>
+                            </div>
+                            <h2 class="text-sm font-bold text-slate-800 leading-tight">İş Sağlığı ve Güvenliği Bilgi Sistemi</h2>
+                        </div>
+                    </div>
+
+                    <!-- Orta: Küresel Hızlı Okul Arama (Quick Jump) -->
+                    <div class="flex-1 max-w-md relative hidden md:block">
+                        <div class="relative">
+                            <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-xs"></i>
+                            <input type="text" id="globalSchoolSearch" placeholder="283 okulda ara... (Örn: MTAL, Gazi, 970149)" 
+                                autocomplete="off"
+                                class="w-full pl-9 pr-16 py-2 bg-slate-100/90 hover:bg-slate-100 focus:bg-white text-xs border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition shadow-inner">
+                            <span class="absolute right-2.5 top-2 text-[10px] bg-slate-200 text-slate-500 font-mono px-1.5 py-0.5 rounded border border-slate-300">Ctrl + K</span>
+                        </div>
+                        
+                        <!-- Arama Sonuçları Dropdown -->
+                        <div id="searchResultsDropdown" class="hidden absolute left-0 right-0 top-full mt-1.5 bg-white rounded-xl shadow-2xl border border-slate-200 divide-y divide-slate-100 z-50 max-h-80 overflow-y-auto">
+                        </div>
+                    </div>
+
+                    <!-- Sağ: Hızlı Eylemler & Kullanıcı -->
+                    <div class="flex items-center space-x-2.5">
+                        <a href="/mufettis-raporu" class="hidden sm:flex items-center px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition border border-slate-200">
+                            <i class="fa-solid fa-file-shield mr-1.5 text-blue-600"></i> 16 Tablo
+                        </a>
+                        <a href="/risk-alarmlari" class="flex items-center px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-lg text-xs font-bold transition border border-rose-200">
+                            <i class="fa-solid fa-bell mr-1.5 text-rose-500"></i> Alarmlar
+                        </a>
+                        <div class="h-6 w-px bg-slate-200 hidden sm:block"></div>
+                        <div class="text-right hidden xl:block">
+                            <div class="text-xs font-bold text-slate-800">{{ user.full_name }}</div>
+                            <div class="text-[10px] text-slate-400">Muratpaşa İSG Bürosu</div>
+                        </div>
+                    </div>
+
+                </div>
+            </header>
+
+            <!-- İÇERİK ALANI -->
+            <main class="flex-1 p-4 sm:p-6 lg:p-8">
+                {% block content %}{% endblock %}
+            </main>
+
+            <!-- ALT BİLGİ (FOOTER) -->
+            <footer class="bg-white border-t border-slate-200 py-3.5 px-4 sm:px-6 lg:px-8 text-xs text-slate-500 flex flex-col sm:flex-row justify-between items-center gap-2">
+                <div>
+                    © 2026 T.C. Muratpaşa İlçe Millî Eğitim Müdürlüğü — İş Sağlığı ve Güvenliği Bürosu
+                </div>
+                <div class="flex items-center space-x-4 text-[11px]">
+                    <span class="flex items-center text-slate-600"><i class="fa-solid fa-database text-emerald-500 mr-1.5"></i> 283 Kurum Aktif</span>
+                    <span class="text-slate-300">•</span>
+                    <span>2026-2027 Eğitim Öğretim Yılı</span>
+                </div>
+            </footer>
+
+        </div>
+
+    </div>
+    {% else %}
+    <!-- KULLANICI GİRİŞ YAPMAMIŞSA (LOGIN SAYFASI DÜZENİ) -->
+    <div class="min-h-full flex flex-col justify-center">
+        {{ self.content() }}
+    </div>
+    {% endif %}
+
+    <!-- Global Javascript: Mobile Sidebar & Global Search -->
+    <script>
+        function toggleMobileSidebar() {
+            const sidebar = document.getElementById('mainSidebar');
+            const overlay = document.getElementById('mobileSidebarOverlay');
+            if (!sidebar || !overlay) return;
+            
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+        }
+
+        // Global Okul Arama Fonksiyonu (Ctrl + K)
+        const searchInput = document.getElementById('globalSchoolSearch');
+        const resultsDropdown = document.getElementById('searchResultsDropdown');
+        let searchTimeout = null;
+
+        if (searchInput && resultsDropdown) {
+            // Klavye Kısayolu (Ctrl+K veya Command+K)
+            window.addEventListener('keydown', (e) => {
+                if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                    e.preventDefault();
+                    searchInput.focus();
+                }
+            });
+
+            searchInput.addEventListener('input', (e) => {
+                clearTimeout(searchTimeout);
+                const query = e.target.value.trim();
+                
+                if (query.length < 2) {
+                    resultsDropdown.classList.add('hidden');
+                    resultsDropdown.innerHTML = '';
+                    return;
+                }
+
+                searchTimeout = setTimeout(async () => {
+                    try {
+                        const res = await fetch(`/api/okul-ara?q=${encodeURIComponent(query)}`);
+                        if (!res.ok) return;
+                        const data = await res.json();
+                        
+                        if (data.length === 0) {
+                            resultsDropdown.innerHTML = '<div class="p-3 text-xs text-slate-400 text-center">Kurum bulunamadı.</div>';
+                        } else {
+                            resultsDropdown.innerHTML = data.map(item => `
+                                <a href="/okul/${item.id}" class="flex items-center justify-between p-3 hover:bg-blue-50 transition text-xs">
+                                    <div class="truncate pr-2">
+                                        <div class="font-bold text-slate-800">${item.kurum_adi}</div>
+                                        <div class="text-[11px] text-slate-500 font-mono mt-0.5">Kod: ${item.kurum_kodu} • ${item.kurum_turu || item.kurum_statusu}</div>
+                                    </div>
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold ${item.oncelik_derecesi === 1 ? 'bg-red-100 text-red-800' : 'bg-slate-100 text-slate-600'}">
+                                        ${item.oncelik_derecesi}. Derece
+                                    </span>
+                                </a>
+                            `).join('');
+                        }
+                        resultsDropdown.classList.remove('hidden');
+                    } catch (err) {
+                        console.error('Arama hatası:', err);
+                    }
+                }, 200);
+            });
+
+            // Tıklayınca dışarıyı kapat
+            document.addEventListener('click', (e) => {
+                if (!searchInput.contains(e.target) && !resultsDropdown.contains(e.target)) {
+                    resultsDropdown.classList.add('hidden');
+                }
+            });
+        }
+    </script>
+
+    {% block scripts %}{% endblock %}
+
+</body>
+</html>

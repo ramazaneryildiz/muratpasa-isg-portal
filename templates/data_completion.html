@@ -1,0 +1,572 @@
+{% extends "base.html" %}
+
+{% block title %}Okul İSG Veri Tamamlama & Eksiklik Analizi — Muratpaşa İSG-BYS{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <!-- ÜST BAŞLIK VE HIZLI EYLEMLER -->
+    <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white p-6 rounded-2xl shadow-lg border border-slate-800">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+                <div class="flex items-center space-x-2">
+                    <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-teal-500/20 text-teal-300 border border-teal-500/30">
+                        <i class="fa-solid fa-list-check mr-1"></i> MEB 24 Kriterli Genişletilmiş İSG Veri Matrisi
+                    </span>
+                    <span class="text-xs text-slate-400">Canlı İlçe Denetimi</span>
+                </div>
+                <h1 class="text-2xl font-extrabold text-white mt-1.5 flex items-center">
+                    Okul İSG Veri Tamamlama & Eksiklik Analiz Merkezi
+                </h1>
+                <p class="text-slate-300 text-xs sm:text-sm mt-1 max-w-3xl">
+                    Muratpaşa'ya bağlı 283 okulun yasal ve idari olarak girmesi zorunlu 24 temel İSG göstergesinin tamamlama yüzdeleri, eksik kalan veri kalemleri ve okul bazlı eksiklik karneleri.
+                </p>
+            </div>
+
+            <div class="flex items-center space-x-2 flex-wrap sm:flex-nowrap">
+                <a href="/export/veri-tamamlama?{{ query_string }}" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition shadow-sm flex items-center">
+                    <i class="fa-solid fa-file-excel mr-2 text-sm"></i> Eksiklik Raporunu İndir (Excel)
+                </a>
+                <a href="/okul-baglantilari" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition shadow-sm flex items-center">
+                    <i class="fa-solid fa-link mr-2"></i> Okul Linkleri
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- İLÇE GENEL İCMAL KARTLARI (KPI) -->
+    <div class="grid grid-cols-2 lg:grid-cols-5 gap-3.5">
+        <!-- 1. İlçe Ortalaması -->
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm col-span-2 sm:col-span-1">
+            <div class="flex items-center justify-between">
+                <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">İlçe Veri Ortalaması</span>
+                <i class="fa-solid fa-chart-pie text-indigo-500 text-lg"></i>
+            </div>
+            <div class="flex items-baseline space-x-2 mt-2">
+                <div class="text-3xl font-extrabold text-slate-800">%{{ district_avg_pct }}</div>
+                <div class="text-xs text-slate-500 font-semibold">283 Kurum</div>
+            </div>
+            <div class="w-full bg-slate-100 rounded-full h-2 mt-2.5 overflow-hidden">
+                <div class="bg-indigo-600 h-2 rounded-full" style="width: {{ district_avg_pct }}%"></div>
+            </div>
+        </div>
+
+        <!-- 2. Eksiksiz (%100) -->
+        <div class="bg-white p-4 rounded-xl border border-emerald-200 shadow-sm">
+            <div class="flex items-center justify-between">
+                <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-700">Tam Verili (%100)</span>
+                <i class="fa-solid fa-circle-check text-emerald-500 text-lg"></i>
+            </div>
+            <div class="flex items-baseline space-x-2 mt-2">
+                <div class="text-3xl font-extrabold text-emerald-700">{{ complete_count }}</div>
+                <div class="text-xs text-emerald-600 font-semibold">Okul</div>
+            </div>
+            <div class="text-[11px] text-emerald-600 font-medium mt-1">Tüm verileri eksiksiz</div>
+        </div>
+
+        <!-- 3. Yüksek Durum (≥%80) -->
+        <div class="bg-white p-4 rounded-xl border border-teal-200 shadow-sm">
+            <div class="flex items-center justify-between">
+                <span class="text-[11px] font-bold uppercase tracking-wider text-teal-700">İyi Durumda (≥%80)</span>
+                <i class="fa-solid fa-shield-check text-teal-500 text-lg"></i>
+            </div>
+            <div class="flex items-baseline space-x-2 mt-2">
+                <div class="text-3xl font-extrabold text-teal-700">{{ high_count }}</div>
+                <div class="text-xs text-teal-600 font-semibold">Okul</div>
+            </div>
+            <div class="text-[11px] text-teal-600 font-medium mt-1">Az sayıda eksik kaldı</div>
+        </div>
+
+        <!-- 4. Orta Seviye (%50 - %79) -->
+        <div class="bg-white p-4 rounded-xl border border-amber-200 shadow-sm">
+            <div class="flex items-center justify-between">
+                <span class="text-[11px] font-bold uppercase tracking-wider text-amber-700">Orta Seviye (%50-%79)</span>
+                <i class="fa-solid fa-triangle-exclamation text-amber-500 text-lg"></i>
+            </div>
+            <div class="flex items-baseline space-x-2 mt-2">
+                <div class="text-3xl font-extrabold text-amber-700">{{ medium_count }}</div>
+                <div class="text-xs text-amber-600 font-semibold">Okul</div>
+            </div>
+            <div class="text-[11px] text-amber-600 font-medium mt-1">Eksiklerin tamamlanması gerek</div>
+        </div>
+
+        <!-- 5. Kritik Eksik (<%50) -->
+        <div class="bg-white p-4 rounded-xl border border-red-200 shadow-sm">
+            <div class="flex items-center justify-between">
+                <span class="text-[11px] font-bold uppercase tracking-wider text-red-700">Kritik Eksik (<%50)</span>
+                <i class="fa-solid fa-circle-exclamation text-red-500 text-lg"></i>
+            </div>
+            <div class="flex items-baseline space-x-2 mt-2">
+                <div class="text-3xl font-extrabold text-red-700">{{ critical_count }}</div>
+                <div class="text-xs text-red-600 font-semibold">Okul</div>
+            </div>
+            <div class="text-[11px] text-red-600 font-medium mt-1">Acil veri girişi gerekenler</div>
+        </div>
+    </div>
+
+    <!-- KATEGORİ BAZINDA İLÇE EKSİKLİK KARNESİ -->
+    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center">
+            <i class="fa-solid fa-chart-bar mr-2 text-indigo-600"></i> Kategori Bazında Muratpaşa İlçe Geneli Veri Tamamlama Oranları
+        </h3>
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+            {% for cat_name, cat_data in cat_district_totals.items() %}
+            <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl">
+                <div class="text-[11px] font-bold text-slate-700 truncate" title="{{ cat_name }}">{{ cat_name }}</div>
+                <div class="flex items-baseline justify-between mt-1">
+                    <span class="text-lg font-extrabold text-slate-800">%{{ cat_data.pct }}</span>
+                    <span class="text-[10px] text-slate-500 font-semibold">{{ cat_data.completed }}/{{ cat_data.total }}</span>
+                </div>
+                <div class="w-full bg-slate-200 rounded-full h-1.5 mt-1.5 overflow-hidden">
+                    <div class="h-1.5 rounded-full {% if cat_data.pct >= 80 %}bg-emerald-500{% elif cat_data.pct >= 50 %}bg-amber-500{% else %}bg-red-500{% endif %}" style="width: {{ cat_data.pct }}%"></div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- FİLTRELEME VE ARAMA PANELİ -->
+    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+        <form method="GET" action="/veri-tamamlama" class="space-y-4">
+            <!-- Hızlı Butonlar -->
+            <div class="flex flex-wrap items-center gap-2 pb-3 border-b border-slate-100">
+                <span class="text-xs font-bold text-slate-500 mr-1">Tamamlanma Seviyesi:</span>
+                <a href="/veri-tamamlama" class="px-3 py-1.5 rounded-lg text-xs font-bold transition {% if filters.range == 'all' and filters.missing_field == 'all' %}bg-slate-800 text-white shadow{% else %}bg-slate-100 text-slate-700 hover:bg-slate-200{% endif %}">
+                    Tümü ({{ total_schools }})
+                </a>
+                <a href="/veri-tamamlama?range=critical" class="px-3 py-1.5 rounded-lg text-xs font-bold transition {% if filters.range == 'critical' %}bg-red-600 text-white shadow{% else %}bg-red-50 text-red-700 border border-red-200 hover:bg-red-100{% endif %}">
+                    <i class="fa-solid fa-circle-exclamation mr-1"></i> Kritik Eksik (<%50) ({{ critical_count }})
+                </a>
+                <a href="/veri-tamamlama?range=medium" class="px-3 py-1.5 rounded-lg text-xs font-bold transition {% if filters.range == 'medium' %}bg-amber-600 text-white shadow{% else %}bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100{% endif %}">
+                    <i class="fa-solid fa-triangle-exclamation mr-1"></i> Orta (%50-%79) ({{ medium_count }})
+                </a>
+                <a href="/veri-tamamlama?range=high" class="px-3 py-1.5 rounded-lg text-xs font-bold transition {% if filters.range == 'high' %}bg-teal-600 text-white shadow{% else %}bg-teal-50 text-teal-700 border border-teal-200 hover:bg-teal-100{% endif %}">
+                    <i class="fa-solid fa-shield-check mr-1"></i> Yüksek (≥%80) ({{ high_count }})
+                </a>
+                <a href="/veri-tamamlama?range=complete" class="px-3 py-1.5 rounded-lg text-xs font-bold transition {% if filters.range == 'complete' %}bg-emerald-600 text-white shadow{% else %}bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100{% endif %}">
+                    <i class="fa-solid fa-circle-check mr-1"></i> Eksiksiz (%100) ({{ complete_count }})
+                </a>
+                <a href="/veri-tamamlama?range=missing" class="px-3 py-1.5 rounded-lg text-xs font-bold transition {% if filters.range == 'missing' %}bg-indigo-600 text-white shadow{% else %}bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100{% endif %}">
+                    <i class="fa-solid fa-filter-circle-xmark mr-1"></i> Eksik Verisi Olanlar (<%100)
+                </a>
+            </div>
+
+            <!-- Detaylı Dropdown Filtreler -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-1">
+                <!-- Arama -->
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-600 mb-1">Kurum Adı / MEB Kodu</label>
+                    <div class="relative">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400 text-xs"></i>
+                        <input type="text" name="q" value="{{ filters.q }}" placeholder="Örn: 970149 veya lise adı..." class="w-full pl-8 pr-3 py-2 border border-slate-300 rounded-lg text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <!-- Belirli Bir Alan Eksik Olanlar -->
+                <div>
+                    <label class="block text-[11px] font-bold text-red-700 mb-1">
+                        <i class="fa-solid fa-triangle-exclamation mr-1 text-red-500"></i> Özellikle Bu Verisi Eksik Olanlar:
+                    </label>
+                    <select name="missing_field" class="w-full border border-red-300 bg-red-50/50 rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-red-500 focus:outline-none">
+                        <option value="all">Filtre Yok (Tüm Eksikler)</option>
+                        <optgroup label="Teknik Periyodik Muayeneler">
+                            <option value="kazan_kontrol" {% if filters.missing_field == 'kazan_kontrol' %}selected{% endif %}>⚠️ Kalorifer Kazanı Muayenesi Eksik</option>
+                            <option value="elektrik_topraklama" {% if filters.missing_field == 'elektrik_topraklama' %}selected{% endif %}>⚠️ Elektrik Topraklama Ölçümü Eksik</option>
+                            <option value="paratoner_kontrol" {% if filters.missing_field == 'paratoner_kontrol' %}selected{% endif %}>⚠️ Paratoner Kontrolü Eksik</option>
+                            <option value="yangin_tupleri" {% if filters.missing_field == 'yangin_tupleri' %}selected{% endif %}>⚠️ Yangın Tüpleri (YSC) Kontrolü Eksik</option>
+                        </optgroup>
+                        <optgroup label="Acil Durum & Tatbikat">
+                            <option value="tatbikat_tarihi" {% if filters.missing_field == 'tatbikat_tarihi' %}selected{% endif %}>⚠️ Yangın/Tahliye Tatbikatı Eksik</option>
+                            <option value="adep" {% if filters.missing_field == 'adep' %}selected{% endif %}>⚠️ ADEP Onay/Revizyon Eksik</option>
+                            <option value="ek7_olcek" {% if filters.missing_field == 'ek7_olcek' %}selected{% endif %}>⚠️ EK-7 Ölçek Tarihi Eksik</option>
+                        </optgroup>
+                        <optgroup label="Kapasite & Kurum Bilgisi">
+                            <option value="ogrenci_sayisi" {% if filters.missing_field == 'ogrenci_sayisi' %}selected{% endif %}>⚠️ Öğrenci Sayısı Girilmemiş</option>
+                            <option value="ogretmen_sayisi" {% if filters.missing_field == 'ogretmen_sayisi' %}selected{% endif %}>⚠️ Öğretmen/Personel Sayısı Girilmemiş</option>
+                            <option value="derslik_sayisi" {% if filters.missing_field == 'derslik_sayisi' %}selected{% endif %}>⚠️ Derslik Sayısı Girilmemiş</option>
+                        </optgroup>
+                        <optgroup label="İletişim & Güvenlik">
+                            <option value="isveren_vekili_tel" {% if filters.missing_field == 'isveren_vekili_tel' %}selected{% endif %}>⚠️ İşveren Vekili Telefonu Yok</option>
+                            <option value="mudur_tel" {% if filters.missing_field == 'mudur_tel' %}selected{% endif %}>⚠️ Müdür Cep Telefonu Yok</option>
+                            <option value="iletisim_genel" {% if filters.missing_field == 'iletisim_genel' %}selected{% endif %}>⚠️ E-Posta / Telefon Yok</option>
+                        </optgroup>
+                        <optgroup label="Afet, Çevre & Özel Güvenlik">
+                            <option value="sifir_atik" {% if filters.missing_field == 'sifir_atik' %}selected{% endif %}>⚠️ Sıfır Atık Belgesi Eksik</option>
+                            <option value="siginak" {% if filters.missing_field == 'siginak' %}selected{% endif %}>⚠️ Sığınak Varlık/Kapasite Eksik</option>
+                            <option value="guvenlik_izni" {% if filters.missing_field == 'guvenlik_izni' %}selected{% endif %}>⚠️ Güvenlik İzin Belgesi Eksik</option>
+                            <option value="emniyet_puani" {% if filters.missing_field == 'emniyet_puani' %}selected{% endif %}>⚠️ Emniyet/Kolluk Puanı Eksik</option>
+                        </optgroup>
+                    </select>
+                </div>
+
+                <!-- Sorumlu Uzman -->
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-600 mb-1">Sorumlu İGU Uzmanı</label>
+                    <select name="expert_id" class="w-full border border-slate-300 rounded-lg p-2 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                        <option value="all">Tüm Uzmanlar</option>
+                        {% for exp in experts %}
+                        <option value="{{ exp.id }}" {% if filters.expert_id == exp.id|string %}selected{% endif %}>{{ exp.full_name }} ({{ exp.igu_sinifi }})</option>
+                        {% endfor %}
+                        <option value="atanmadi" {% if filters.expert_id == 'atanmadi' %}selected{% endif %}>Genel Havuz (Atanmadı)</option>
+                    </select>
+                </div>
+
+                <!-- Statü & Buton -->
+                <div class="flex items-end space-x-2">
+                    <div class="flex-1">
+                        <label class="block text-[11px] font-bold text-slate-600 mb-1">Kurum Statüsü</label>
+                        <select name="status" class="w-full border border-slate-300 rounded-lg p-2 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                            <option value="all">Tümü (Resmî + Özel)</option>
+                            <option value="Resmî" {% if filters.status == 'Resmî' %}selected{% endif %}>Sadece Resmî Okullar</option>
+                            <option value="Özel" {% if filters.status == 'Özel' %}selected{% endif %}>Sadece Özel Okullar</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition shadow flex items-center h-[34px]">
+                        <i class="fa-solid fa-filter mr-1.5"></i> Filtrele
+                    </button>
+                    <a href="/veri-tamamlama" title="Filtreleri Temizle" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg text-xs font-bold transition border border-slate-200 h-[34px] flex items-center justify-center">
+                        <i class="fa-solid fa-rotate-right"></i>
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- KURUM LİSTESİ VE EKSİKLİK TABLOSU -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden p-5">
+        <div class="flex flex-col sm:flex-row justify-between sm:items-center pb-4 border-b border-slate-200 gap-2 mb-4">
+            <div>
+                <h2 class="text-base font-bold text-slate-800 flex items-center">
+                    <i class="fa-solid fa-clipboard-list mr-2 text-indigo-600"></i> Okul Veri Tamamlama & Eksiklik Listesi
+                </h2>
+                <div class="text-xs text-slate-500 mt-0.5">
+                    Filtre kriterlerinize uyan <span class="font-bold text-slate-800">{{ schools|length }}</span> kurum listeleniyor.
+                </div>
+            </div>
+            <div class="text-xs text-slate-400">
+                Sütun başlıklarına tıklayarak en çok eksiği olan okullara göre sıralayabilirsiniz.
+            </div>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table id="completionTable" class="w-full text-left text-xs border-collapse">
+                <thead>
+                    <tr class="bg-slate-50 text-slate-700 border-b-2 border-slate-200">
+                        <th class="py-3 px-3">Kod</th>
+                        <th class="py-3 px-3">Kurum Adı</th>
+                        <th class="py-3 px-3">Statü / Tür</th>
+                        <th class="py-3 px-3">Sorumlu İGU</th>
+                        <th class="py-3 px-3" style="min-width: 170px;">Veri Tamamlama (%)</th>
+                        <th class="py-3 px-3" style="min-width: 250px;">Eksik Olan Veri Kalemleri</th>
+                        <th class="py-3 px-3 text-center">İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for item in schools %}
+                    {% set s = item.school %}
+                    {% set c = item.completion %}
+                    <tr class="hover:bg-slate-50 transition" id="row-{{ s.id }}">
+                        <!-- Kod -->
+                        <td class="py-3 px-3 font-mono font-bold text-slate-700">
+                            {{ s.kurum_kodu }}
+                        </td>
+
+                        <!-- Kurum Adı & Müdür & İletişim -->
+                        <td class="py-3 px-3">
+                            <div class="font-bold text-slate-900 text-xs">
+                                <a href="/okul/{{ s.id }}" class="hover:text-blue-600 transition">{{ s.kurum_adi }}</a>
+                            </div>
+                            <div class="text-[11px] text-slate-500 mt-0.5 flex items-center gap-2 flex-wrap">
+                                {% if s.mudur_ad_soyad %}
+                                <span><i class="fa-solid fa-user-tie text-[10px] text-slate-400"></i> {{ s.mudur_ad_soyad }}</span>
+                                {% endif %}
+                                {% if s.mudur_tel %}
+                                <a href="tel:{{ s.mudur_tel }}" class="text-blue-600 hover:underline font-mono text-[10px]">
+                                    <i class="fa-solid fa-phone text-[9px]"></i> {{ s.mudur_tel }}
+                                </a>
+                                {% endif %}
+                                {% if s.son_veri_giris_tarihi %}
+                                <span class="text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.2 rounded text-[10px] font-medium" title="Okul son veri giriş tarihi">
+                                    <i class="fa-solid fa-clock-rotate-left mr-0.5 text-[9px]"></i> {{ s.son_veri_giris_tarihi }}
+                                </span>
+                                {% endif %}
+                            </div>
+                        </td>
+
+                        <!-- Statü & Tür -->
+                        <td class="py-3 px-3">
+                            <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold {% if s.kurum_statusu == 'Resmî' %}bg-blue-50 text-blue-700{% else %}bg-purple-50 text-purple-700{% endif %}">
+                                {{ s.kurum_statusu }}
+                            </span>
+                            <div class="text-[11px] text-slate-400 mt-0.5 truncate max-w-[130px]" title="{{ s.kurum_turu }}">
+                                {{ s.kurum_turu }}
+                            </div>
+                        </td>
+
+                        <!-- Sorumlu Uzman -->
+                        <td class="py-3 px-3">
+                            <span class="font-medium text-slate-700">{{ s.uzman_adi or 'Atanmadı' }}</span>
+                        </td>
+
+                        <!-- Tamamlanma Oranı (Progress Bar + Badge) -->
+                        <td class="py-3 px-3">
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="px-2 py-0.5 rounded-full text-[11px] font-extrabold {{ c.color_class }}">
+                                    %{{ c.percentage }}
+                                </span>
+                                <span class="text-[11px] font-semibold text-slate-500">
+                                    {{ c.completed_count }} / {{ c.total_count }} Veri
+                                </span>
+                            </div>
+                            <div class="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
+                                <div class="{{ c.bar_class }} h-2 rounded-full" style="width: {{ c.percentage }}%"></div>
+                            </div>
+                            <div class="text-[10px] text-slate-400 mt-1 font-medium">
+                                {% if c.missing_count == 0 %}
+                                <span class="text-emerald-600 font-bold"><i class="fa-solid fa-circle-check mr-1"></i> Tüm veriler girildi</span>
+                                {% else %}
+                                <span>{{ c.missing_count }} eksik veri kalemi</span>
+                                {% endif %}
+                            </div>
+                        </td>
+
+                        <!-- Eksik Veri Kalemleri (Badges) -->
+                        <td class="py-3 px-3">
+                            {% if c.missing_count == 0 %}
+                            <span class="inline-flex items-center px-2 py-1 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-lg text-[11px] font-bold">
+                                <i class="fa-solid fa-check-double mr-1.5 text-emerald-600"></i> Eksik Veri Yok (Tam)
+                            </span>
+                            {% else %}
+                            <div class="flex flex-wrap gap-1 items-center">
+                                {% for m_item in c.missing_items[:3] %}
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-red-50 text-red-800 border border-red-200" title="{{ m_item.category }}: {{ m_item.label }}">
+                                    <i class="fa-solid {{ m_item.icon }} mr-1 text-[9px] text-red-500"></i> {{ m_item.label }}
+                                </span>
+                                {% endfor %}
+                                {% if c.missing_items|length > 3 %}
+                                <button type="button" onclick="openScorecardModal('{{ s.id }}')" class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 transition">
+                                    +{{ c.missing_items|length - 3 }} eksik daha
+                                </button>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        </td>
+
+                        <!-- İşlemler -->
+                        <td class="py-3 px-3 text-center">
+                            <div class="flex items-center justify-center space-x-1.5">
+                                <!-- Eksiklik Karnesi Modal Butonu -->
+                                <button type="button" onclick="openScorecardModal('{{ s.id }}')" title="Detaylı İSG Veri Karnesini Aç" class="px-2.5 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg text-xs font-bold transition flex items-center">
+                                    <i class="fa-solid fa-list-check mr-1"></i> Karnesi
+                                </button>
+                                <!-- Okul Giriş Portalı Linki -->
+                                <a href="/okul-portal/giris/{{ s.access_token }}" target="_blank" title="Okul Portalı Veri Giriş Sayfası" class="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs transition">
+                                    <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                                </a>
+                                <!-- Şifresiz Linki Kopyala -->
+                                <button type="button" onclick="copySchoolLink('{{ s.access_token }}', this)" title="Okula Özel Şifresiz Linki Kopyala" class="p-1.5 bg-slate-100 hover:bg-emerald-100 text-slate-700 hover:text-emerald-700 rounded-lg text-xs transition">
+                                    <i class="fa-solid fa-copy"></i>
+                                </button>
+                            </div>
+
+                            <!-- Her okulun JSON verisi modal için gizli saklanır -->
+                            <script type="application/json" id="school-data-{{ s.id }}">
+                                {
+                                    "id": {{ s.id }},
+                                    "kurum_kodu": "{{ s.kurum_kodu }}",
+                                    "kurum_adi": "{{ s.kurum_adi|replace('"', '\\"') }}",
+                                    "kurum_statusu": "{{ s.kurum_statusu or '' }}",
+                                    "kurum_turu": "{{ s.kurum_turu or '' }}",
+                                    "mudur_ad_soyad": "{{ s.mudur_ad_soyad or 'Tanımlanmadı' }}",
+                                    "mudur_tel": "{{ s.mudur_tel or 'Telefon Yok' }}",
+                                    "isveren_vekili_ad_soyad": "{{ s.isveren_vekili_ad_soyad or 'Tanımlanmadı' }}",
+                                    "isveren_vekili_tel": "{{ s.isveren_vekili_tel or 'Telefon Yok' }}",
+                                    "uzman_adi": "{{ s.uzman_adi or 'Atanmadı' }}",
+                                    "access_token": "{{ s.access_token }}",
+                                    "percentage": {{ c.percentage }},
+                                    "completed_count": {{ c.completed_count }},
+                                    "missing_count": {{ c.missing_count }},
+                                    "color_class": "{{ c.color_class }}",
+                                    "bar_class": "{{ c.bar_class }}",
+                                    "completed_items": {{ c.completed_items|tojson }},
+                                    "missing_items": {{ c.missing_items|tojson }}
+                                }
+                            </script>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<!-- DETAYLI İSG VERİ KARNESİ MODAL -->
+<div id="scorecardModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in duration-150">
+        <!-- Modal Başlık -->
+        <div class="px-6 py-4 bg-gradient-to-r from-slate-900 to-indigo-900 text-white flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="p-2 bg-white/10 rounded-xl text-lg text-amber-300">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </div>
+                <div>
+                    <div class="text-[11px] text-indigo-200 font-bold uppercase tracking-wider">Okul İSG Veri Karnesi & Kontrol Listesi</div>
+                    <h3 id="modalSchoolName" class="text-base sm:text-lg font-bold text-white">Kurum Adı</h3>
+                </div>
+            </div>
+            <button onclick="closeScorecardModal()" class="text-slate-300 hover:text-white p-2 rounded-lg hover:bg-white/10 transition">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+
+        <!-- Modal Gövde (Kaydırılabilir) -->
+        <div class="p-6 overflow-y-auto space-y-5 flex-1">
+            <!-- Özet Bar & Bilgiler -->
+            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+                <div>
+                    <div class="flex items-center space-x-2">
+                        <span id="modalSchoolCode" class="font-mono text-xs font-bold bg-slate-200 text-slate-800 px-2 py-0.5 rounded">Kod</span>
+                        <span id="modalSchoolStatus" class="text-xs font-bold px-2 py-0.5 rounded bg-blue-100 text-blue-800">Statü</span>
+                        <span id="modalSchoolType" class="text-xs text-slate-600">Tür</span>
+                    </div>
+                    <div class="text-xs text-slate-600 mt-2 flex flex-wrap gap-x-4 gap-y-1">
+                        <div><strong>Müdür:</strong> <span id="modalMudur"></span></div>
+                        <div><strong>İşveren Vekili:</strong> <span id="modalVekil"></span></div>
+                        <div><strong>Sorumlu Uzman:</strong> <span id="modalUzman"></span></div>
+                    </div>
+                </div>
+
+                <div class="text-right">
+                    <div class="flex items-baseline justify-end space-x-2">
+                        <span id="modalPct" class="text-3xl font-extrabold text-slate-800">%0</span>
+                        <span id="modalCounts" class="text-xs font-semibold text-slate-500">0 / 20 Veri</span>
+                    </div>
+                    <div class="w-40 bg-slate-200 rounded-full h-2.5 mt-2 overflow-hidden ml-auto">
+                        <div id="modalProgressBar" class="h-2.5 rounded-full bg-indigo-600" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Eksik Veriler Vurgusu -->
+            <div id="missingSection" class="border border-red-200 bg-red-50/60 rounded-xl p-4">
+                <h4 class="text-xs font-bold text-red-900 uppercase tracking-wider flex items-center mb-2.5">
+                    <i class="fa-solid fa-triangle-exclamation mr-2 text-red-600"></i> Doldurulması / Girilmesi Gereken Eksik Veriler (<span id="modalMissingCount">0</span> Kalem)
+                </h4>
+                <div id="modalMissingList" class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                    <!-- Dinamik doldurulur -->
+                </div>
+            </div>
+
+            <!-- Tamamlanmış Veriler -->
+            <div id="completedSection" class="border border-emerald-200 bg-emerald-50/60 rounded-xl p-4">
+                <h4 class="text-xs font-bold text-emerald-900 uppercase tracking-wider flex items-center mb-2.5">
+                    <i class="fa-solid fa-circle-check mr-2 text-emerald-600"></i> Sistemde Mevcut & Tamamlanmış Veriler (<span id="modalCompletedCount">0</span> Kalem)
+                </h4>
+                <div id="modalCompletedList" class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                    <!-- Dinamik doldurulur -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Alt Çubuk -->
+        <div class="px-6 py-3.5 bg-slate-100 border-t border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-2">
+            <div class="text-xs text-slate-500">
+                Bu okulun eksik verilerini tamamlamak için doğrudan portal formunu açabilirsiniz.
+            </div>
+            <div class="flex items-center space-x-2">
+                <button type="button" onclick="closeScorecardModal()" class="px-4 py-2 bg-white hover:bg-slate-200 text-slate-700 border border-slate-300 rounded-xl text-xs font-bold transition">
+                    Kapat
+                </button>
+                <a id="modalPortalLink" href="#" target="_blank" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition shadow flex items-center">
+                    <i class="fa-solid fa-arrow-up-right-from-square mr-1.5"></i> Bu Okulun Veri Formunu Aç
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+$(document).ready(function() {
+    $('#completionTable').DataTable({
+        "pageLength": 25,
+        "language": {
+            "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/tr.json"
+        },
+        "order": [[4, "asc"]] // En çok eksiği olandan (en düşük yüzden başlayarak) sırala
+    });
+});
+
+function openScorecardModal(schoolId) {
+    var raw = document.getElementById('school-data-' + schoolId).textContent;
+    var data = JSON.parse(raw);
+
+    document.getElementById('modalSchoolName').textContent = data.kurum_adi;
+    document.getElementById('modalSchoolCode').textContent = data.kurum_kodu;
+    document.getElementById('modalSchoolStatus').textContent = data.kurum_statusu;
+    document.getElementById('modalSchoolType').textContent = data.kurum_turu;
+    document.getElementById('modalMudur').textContent = data.mudur_ad_soyad + ' (' + data.mudur_tel + ')';
+    document.getElementById('modalVekil').textContent = data.isveren_vekili_ad_soyad + ' (' + data.isveren_vekili_tel + ')';
+    document.getElementById('modalUzman').textContent = data.uzman_adi;
+
+    document.getElementById('modalPct').textContent = '%' + data.percentage;
+    document.getElementById('modalCounts').textContent = data.completed_count + ' / 20 Veri Tamam';
+    
+    var pb = document.getElementById('modalProgressBar');
+    pb.style.width = data.percentage + '%';
+    pb.className = 'h-2.5 rounded-full ' + (data.bar_class || 'bg-indigo-600');
+
+    document.getElementById('modalMissingCount').textContent = data.missing_count;
+    document.getElementById('modalCompletedCount').textContent = data.completed_count;
+
+    // Eksik Listesini Oluştur
+    var missingContainer = document.getElementById('modalMissingList');
+    missingContainer.innerHTML = '';
+    if (data.missing_items.length === 0) {
+        missingContainer.innerHTML = '<div class="text-xs text-emerald-700 font-bold p-2">Tebrikler! Kurumun hiçbir eksik verisi bulunmamaktadır.</div>';
+    } else {
+        data.missing_items.forEach(function(item) {
+            var div = document.createElement('div');
+            div.className = 'flex items-center space-x-2 bg-white p-2 rounded-lg border border-red-200 text-slate-800';
+            div.innerHTML = '<span class="w-6 h-6 rounded-full bg-red-100 text-red-600 flex items-center justify-center text-xs shrink-0"><i class="fa-solid fa-xmark"></i></span>' +
+                            '<div class="truncate"><div class="font-bold text-[11px] text-red-900">' + item.label + '</div><div class="text-[10px] text-slate-400">' + item.category + '</div></div>';
+            missingContainer.appendChild(div);
+        });
+    }
+
+    // Tamamlanan Listesini Oluştur
+    var completedContainer = document.getElementById('modalCompletedList');
+    completedContainer.innerHTML = '';
+    if (data.completed_items.length === 0) {
+        completedContainer.innerHTML = '<div class="text-xs text-red-600 p-2">Henüz girilmiş veri bulunmuyor.</div>';
+    } else {
+        data.completed_items.forEach(function(item) {
+            var div = document.createElement('div');
+            div.className = 'flex items-center space-x-2 bg-white p-2 rounded-lg border border-emerald-200 text-slate-800';
+            div.innerHTML = '<span class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-xs shrink-0"><i class="fa-solid fa-check"></i></span>' +
+                            '<div class="truncate"><div class="font-bold text-[11px] text-emerald-900">' + item.label + '</div><div class="text-[10px] text-slate-400">' + item.category + '</div></div>';
+            completedContainer.appendChild(div);
+        });
+    }
+
+    document.getElementById('modalPortalLink').href = '/okul-portal/giris/' + data.access_token;
+    document.getElementById('scorecardModal').classList.remove('hidden');
+}
+
+function closeScorecardModal() {
+    document.getElementById('scorecardModal').classList.add('hidden');
+}
+
+function copySchoolLink(token, btn) {
+    var url = window.location.origin + '/okul-portal/giris/' + token;
+    navigator.clipboard.writeText(url).then(function() {
+        var original = btn.innerHTML;
+        btn.innerHTML = '<i class="fa-solid fa-check text-emerald-600"></i>';
+        setTimeout(function() {
+            btn.innerHTML = original;
+        }, 1500);
+    });
+}
+</script>
+{% endblock %}

@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block title %}Okul Sığınak & Afet Kapasitesi Raporu — Muratpaşa İSG{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <!-- Üst Başlık & Eylemler -->
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <div class="text-xs uppercase font-bold tracking-wider text-amber-600 flex items-center gap-1.5">
+                <i class="fa-solid fa-person-shelter"></i> Sivil Savunma & Afet Hazırlığı
+            </div>
+            <h1 class="text-2xl font-bold text-slate-800 mt-1 flex items-center">
+                Okul Sığınak Verileri ve Kapasite İcmal Raporu
+            </h1>
+            <p class="text-xs text-slate-500 mt-1">
+                Muratpaşa ilçesindeki tüm resmî ve özel okul/kurumların sığınak varlığı, koruma kişi kapasiteleri ve toplam metrekare alan dökümü.
+            </p>
+        </div>
+        <div class="flex items-center gap-2">
+            <button onclick="window.print()" class="bg-slate-700 hover:bg-slate-800 text-white text-xs font-semibold px-4 py-2.5 rounded-lg shadow-sm transition flex items-center">
+                <i class="fa-solid fa-print mr-2"></i> Raporu Yazdır
+            </button>
+            <a href="/mufettis-raporu" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2.5 rounded-lg shadow-sm transition flex items-center">
+                <i class="fa-solid fa-arrow-left mr-2"></i> Müfettiş İcmaline Dön
+            </a>
+        </div>
+    </div>
+
+    <!-- Özet İstatistik Kartları -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm text-center">
+            <div class="text-xs font-bold text-slate-400 uppercase">Toplam Taranan Kurum</div>
+            <div class="text-3xl font-black text-slate-800 mt-1">{{ stats.total_schools }}</div>
+            <div class="text-xs text-slate-500 mt-1">Resmî & Özel Tüm Kurumlar</div>
+        </div>
+        <div class="bg-white p-5 rounded-xl border border-emerald-200 shadow-sm text-center bg-emerald-50/20">
+            <div class="text-xs font-bold text-emerald-600 uppercase">Sığınağı Olan Okul</div>
+            <div class="text-3xl font-black text-emerald-600 mt-1">{{ stats.shelter_schools }}</div>
+            <div class="text-xs text-emerald-700 mt-1">%{{ stats.shelter_ratio }} Kapsama Oranı</div>
+        </div>
+        <div class="bg-white p-5 rounded-xl border border-indigo-200 shadow-sm text-center bg-indigo-50/20">
+            <div class="text-xs font-bold text-indigo-600 uppercase">Toplam Koruma Kapasitesi</div>
+            <div class="text-3xl font-black text-indigo-600 mt-1">{{ stats.total_capacity_persons }}</div>
+            <div class="text-xs text-indigo-700 mt-1">Kişi (Öğrenci & Personel)</div>
+        </div>
+        <div class="bg-white p-5 rounded-xl border border-blue-200 shadow-sm text-center bg-blue-50/20">
+            <div class="text-xs font-bold text-blue-600 uppercase">Toplam Sığınak Alanı</div>
+            <div class="text-3xl font-black text-blue-600 mt-1">{{ stats.total_area_m2 }} m²</div>
+            <div class="text-xs text-blue-700 mt-1">Kapalı ve Korunaklı Alan</div>
+        </div>
+    </div>
+
+    <!-- Detaylı Sığınak Tablosu -->
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+        <h2 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-4 flex items-center">
+            <span class="w-2.5 h-2.5 bg-amber-600 rounded-full mr-2"></span> Okul Sığınak Listesi ve Adres Detayları
+        </h2>
+        <div class="overflow-x-auto">
+            <table id="shelterTable" class="w-full text-xs text-left border border-slate-200">
+                <thead class="bg-slate-50 text-slate-700 font-bold border-b">
+                    <tr>
+                        <th class="p-2.5">Kod</th>
+                        <th class="p-2.5">Kurum Adı</th>
+                        <th class="p-2.5 text-center">Statü</th>
+                        <th class="p-2.5 text-center">Sığınak Durumu</th>
+                        <th class="p-2.5 text-center bg-indigo-50/50">Kapasite (Kişi)</th>
+                        <th class="p-2.5 text-center bg-blue-50/50">Alan (m²)</th>
+                        <th class="p-2.5">Adres</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 font-medium">
+                    {% for r in schools %}
+                    <tr class="hover:bg-slate-50">
+                        <td class="p-2.5 font-mono text-slate-500">{{ r.kurum_kodu }}</td>
+                        <td class="p-2.5 font-bold text-slate-800">
+                            <a href="/okul/{{ r.id }}" class="hover:text-blue-600 hover:underline">{{ r.kurum_adi }}</a>
+                        </td>
+                        <td class="p-2.5 text-center">
+                            <span class="px-2 py-0.5 rounded text-[10px] font-semibold {% if r.kurum_statusu == 'Resmî' %}bg-blue-50 text-blue-700{% else %}bg-purple-50 text-purple-700{% endif %}">
+                                {{ r.kurum_statusu or 'Resmî' }}
+                            </span>
+                        </td>
+                        <td class="p-2.5 text-center">
+                            {% if r.siginak_var_mi == 'Var' %}
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                                <i class="fa-solid fa-circle-check mr-1"></i> Sığınak Var
+                            </span>
+                            {% else %}
+                            <span class="px-2 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-500">
+                                Bilgi Yok / Yok
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td class="p-2.5 text-center font-bold text-indigo-700">
+                            {{ r.siginak_kapasite_kisi or 0 }} Kişi
+                        </td>
+                        <td class="p-2.5 text-center font-bold text-blue-700">
+                            {{ r.siginak_alan_m2 or 0 }} m²
+                        </td>
+                        <td class="p-2.5 text-slate-600 text-[11px] max-w-xs truncate" title="{{ r.adres or '' }}">
+                            {{ r.adres or 'Adres Belirtilmemiş' }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<script>
+$(document).ready(function() {
+    $('#shelterTable').DataTable({
+        pageLength: 25,
+        language: {
+            url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/tr.json'
+        }
+    });
+});
+</script>
+{% endblock %}

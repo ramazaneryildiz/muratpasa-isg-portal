@@ -1,0 +1,548 @@
+{% extends "base.html" %}
+
+{% block title %}Kriz ve Aktif Saldırgan Müdahale Portalı — Muratpaşa İlçe MEM{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <!-- Hero / Acil Durum Başlığı -->
+    <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-slate-950 via-rose-950 to-slate-900 p-6 sm:p-8 text-white shadow-xl border border-rose-900/50">
+        <div class="absolute -right-16 -top-16 w-80 h-80 rounded-full bg-rose-600/20 blur-3xl pointer-events-none"></div>
+        <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+            <div class="space-y-2">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/20 border border-rose-400/30 text-rose-300 text-xs font-semibold backdrop-blur-sm">
+                    <span class="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
+                    <span>Modül 3: MEB 2024/56 Şiddetin Önlenmesi & ÇDE Karar Destek Sistemi</span>
+                </div>
+                <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white flex items-center gap-3">
+                    <i class="fa-solid fa-triangle-exclamation text-rose-500"></i>
+                    <span>Kriz ve Aktif Saldırgan Müdahale Portalı</span>
+                </h1>
+                <p class="text-sm text-slate-300 max-w-3xl leading-relaxed">
+                    Okullarda meydana gelebilecek aktif saldırgan, kesici/silahlı tehdit ve sabotaj durumlarında 8 adımlı Lockdown prosedürünü tetikleyen; Seviye 3 vakalarda ÇDE için 24 ve 48 saatlik yasal geri sayım sayaçlarını işleten karar destek merkezi.
+                </p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2.5">
+                <button onclick="triggerLockdownModal()" class="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-extrabold shadow-lg shadow-rose-600/40 transition hover:scale-105 animate-pulse">
+                    <i class="fa-solid fa-bell text-sm"></i>
+                    <span>ACİL LOCKDOWN BAŞLAT</span>
+                </button>
+                <button onclick="openSilentLocationModal()" class="inline-flex items-center gap-2 px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 transition">
+                    <i class="fa-solid fa-comment-sms text-emerald-400"></i>
+                    <span>Sessiz Konum Bildir</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4 Kritik Hızlı Metrik Kartı -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+            <div class="flex items-center justify-between">
+                <div>
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Aktif ÇDE Vakaları</span>
+                    <div class="text-3xl font-extrabold text-slate-900 mt-1">{{ active_cde_count }}</div>
+                </div>
+                <div class="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center text-xl">
+                    <i class="fa-solid fa-user-shield"></i>
+                </div>
+            </div>
+            <div class="mt-3 text-xs text-rose-600 font-semibold flex items-center gap-1">
+                <i class="fa-solid fa-clock"></i> 24h & 48h Termin Takibinde
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+            <div class="flex items-center justify-between">
+                <div>
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Kritik Olay Türü</span>
+                    <div class="text-3xl font-extrabold text-indigo-600 mt-1">20</div>
+                </div>
+                <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl">
+                    <i class="fa-solid fa-shield-virus"></i>
+                </div>
+            </div>
+            <div class="mt-3 text-xs text-slate-500">
+                Protokol 8.1.2–8.1.3 Kapsamı
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+            <div class="flex items-center justify-between">
+                <div>
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-400">KVKK Güvencesi</span>
+                    <div class="text-3xl font-extrabold text-emerald-600 mt-1">%100</div>
+                </div>
+                <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl">
+                    <i class="fa-solid fa-lock"></i>
+                </div>
+            </div>
+            <div class="mt-3 text-xs text-emerald-700 font-semibold">
+                Tam Anonimleştirilmiş Veri
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+            <div class="flex items-center justify-between">
+                <div>
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Sabotaj Çemberi</span>
+                    <div class="text-3xl font-extrabold text-amber-600 mt-1">200m</div>
+                </div>
+                <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl">
+                    <i class="fa-solid fa-compass-drafting"></i>
+                </div>
+            </div>
+            <div class="mt-3 text-xs text-slate-500">
+                Emniyet Şeridi Standardı
+            </div>
+        </div>
+    </div>
+
+    <!-- 2 Büyük Kolon: ÇDE Geri Sayım Sayaçları ve Olay Bildirim Formu -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <!-- Sol 2 Kolon: ÇDE Canlı Geri Sayım Sayaçları ve Vaka Listesi -->
+        <div class="lg:col-span-2 bg-white rounded-2xl p-6 shadow-sm border border-slate-200 space-y-5">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div>
+                    <h2 class="text-base font-extrabold text-slate-900 flex items-center gap-2">
+                        <i class="fa-solid fa-hourglass-half text-rose-600"></i> ÇDE (Çok Disiplinli Değerlendirme Ekibi) Geri Sayım Sayaçları
+                    </h2>
+                    <p class="text-xs text-slate-500 mt-0.5">Yakın tehlike sonrası azami 24 saat, diğer Seviye 3 vakalarda azami 48 saat karar alma süresi.</p>
+                </div>
+                <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                    Canlı Takip
+                </span>
+            </div>
+
+            <!-- Vaka Kartları -->
+            <div class="space-y-4">
+                {% for inc in incidents %}
+                <div class="p-4 rounded-xl border border-slate-200 bg-slate-50/60 hover:bg-slate-50 transition space-y-3">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <div class="flex items-center gap-2">
+                            <span class="px-2 py-0.5 rounded text-[10px] font-extrabold uppercase bg-rose-600 text-white">
+                                {{ inc.cde_seviye }}
+                            </span>
+                            <span class="font-extrabold text-sm text-slate-900">
+                                {{ inc.kurum_adi }} ({{ inc.kurum_kodu }})
+                            </span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs text-slate-500 font-mono">{{ inc.bildirim_112_saati }}</span>
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold {% if inc.durum == 'Açık' %}bg-amber-100 text-amber-800 border border-amber-300{% else %}bg-emerald-100 text-emerald-800{% endif %}">
+                                {{ inc.durum }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Canlı Geri Sayım Sayacı Çubuğu -->
+                    <div class="bg-white p-3 rounded-lg border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div>
+                            <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                                <i class="fa-solid fa-stopwatch text-rose-500 mr-1"></i> ÇDE Toplanma Termini:
+                            </div>
+                            <div class="text-xs text-slate-700 font-mono font-bold mt-0.5">{{ inc.cde_toplanma_termini }}</div>
+                        </div>
+
+                        <!-- Geri Sayım Sayacı -->
+                        <div class="flex items-center gap-2">
+                            <div class="px-3 py-1.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 font-mono font-extrabold text-sm countdown-box" data-target="{{ inc.cde_toplanma_termini }}">
+                                <i class="fa-solid fa-spinner fa-spin text-xs mr-1"></i> Hesaplanıyor...
+                            </div>
+                            <form method="POST" action="/kriz-yonetimi/olay-durum-guncelle/{{ inc.id }}">
+                                <input type="hidden" name="yeni_durum" value="ÇDE Toplandı">
+                                <button type="submit" class="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition">
+                                    <i class="fa-solid fa-check mr-1"></i> Toplantı Yapıldı
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Açıklama ve KVKK Şerhi -->
+                    <div class="text-xs text-slate-600 leading-relaxed bg-white/70 p-2.5 rounded-lg border border-slate-100">
+                        <strong>Olay Türü:</strong> <span class="text-rose-700 font-semibold">{{ inc.olay_turu }}</span> |
+                        <strong>Bildiren:</strong> {{ inc.bildiren_kisi or 'Okul Yetkilisi' }}<br>
+                        <strong>Açıklama:</strong> {{ inc.aciklama }}
+                        <div class="mt-1.5 pt-1.5 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
+                            <span><i class="fa-solid fa-shield-cat text-emerald-500 mr-1"></i> 6698 s. KVKK uyarınca kişisel/adli kimlik bilgileri anonim tutulmaktadır.</span>
+                            <span><strong>72 Saat Takibi:</strong> {% if inc.olay_sonrasi_degerlendirme_72h %}Tamamlandı{% else %}Bekliyor{% endif %}</span>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="p-8 text-center text-slate-400">
+                    <i class="fa-solid fa-circle-check text-4xl text-emerald-400 mb-2"></i>
+                    <p class="text-sm font-semibold text-slate-600">İlçede aktif Seviye 3 ÇDE krizi bulunmamaktadır.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Sağ Kolon: Yeni Güvenlik Olayı / ÇDE Bildirim Formu -->
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 space-y-4">
+            <div class="pb-3 border-b border-slate-100">
+                <h3 class="text-base font-extrabold text-slate-900 flex items-center gap-2">
+                    <i class="fa-solid fa-pen-to-square text-indigo-600"></i> Yeni Güvenlik Bildirimi
+                </h3>
+                <p class="text-xs text-slate-500 mt-0.5">20 Kritik Olay Kategorisi & ÇDE Seviyesi</p>
+            </div>
+
+            <form method="POST" action="/kriz-yonetimi/olay-ekle" class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">Okul / Kurum Seçimi:</label>
+                    <select name="school_id" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                        {% for sc in all_schools %}
+                        <option value="{{ sc.id }}">{{ sc.kurum_kodu }} — {{ sc.kurum_adi }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">Olay Türü (20 Kritik Kategori):</label>
+                    <select name="olay_turu" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                        <option value="BICAKLAMA_KESICI">Bıçaklama / Kesici Aletli Saldırı</option>
+                        <option value="SILAHLI_SALDIRI_TEHDIT">Silahlı Saldırı / Tehdit</option>
+                        <option value="AGIR_KAVGA">Toplu veya Ağır Yaralamalı Kavga</option>
+                        <option value="IZINSIZ_GIRIS_SALDIRGAN_VELI">İzinsiz Giriş / Saldırgan Şahıs / Veli</option>
+                        <option value="SUPHELI_PAKET_SABOTAJ">Şüpheli Paket / Sabotaj Girişimi</option>
+                        <option value="SIBER_ZORBALIK_MAHREM">Siber Zorbalık / Mahremiyet İhlali</option>
+                        <option value="UYUSTURUCU_MADDE">Uyuşturucu / Zararlı Madde Vakası</option>
+                        <option value="MADDE_ETKISINDE_OLMA">Madde Etkisinde Kuruma Giriş</option>
+                        <option value="INTIHAR_GIRISIMI">İntihar Girişimi / Kendine Zarar Verme</option>
+                        <option value="INTIHAR_DUSUNCESI">İntihar Düşüncesi / Psikososyal Acil</option>
+                        <option value="CINSEL_ISTISMAR">Cinsel İstismar Şüphesi</option>
+                        <option value="COCUK_IHMALI_SIDDET">Çocuk İhmali ve Aile İçi Şiddet</option>
+                        <option value="KAYIP_COCUK">Kayıp Çocuk Vakası</option>
+                        <option value="KACIRILMA_GIRISIMI">Kaçırılma Teşebbüsü</option>
+                        <option value="GASP">Gasp ve Yağma Olayı</option>
+                        <option value="HIRSIZLIK">Nitelikli Hırsızlık Vakası</option>
+                        <option value="TEHDIT_SANTAJ">Tehdit ve Şantaj</option>
+                        <option value="MALA_ZARAR_VANDALIZM">Mala Zarar Verme / Vandalizm</option>
+                        <option value="TOPLU_PANIK">Toplu Panik / İzdiham</option>
+                        <option value="OLUM_SUPHELI_OLUM">Şüpheli Ölüm / Acil Vaka</option>
+                    </select>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">Erken Uyarı Seviyesi:</label>
+                        <select name="cde_seviye" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                            <option value="SEVIYE_3_CDE">Seviye 3 (ÇDE Zorunlu)</option>
+                            <option value="SEVIYE_2">Seviye 2 (Rehberlik/PDR)</option>
+                            <option value="SEVIYE_1">Seviye 1 (İdari Takip)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">ÇDE Termin Süresi:</label>
+                        <select name="termin_saat" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                            <option value="24">Azami 24 Saat (Yakın Tehlike)</option>
+                            <option value="48">Azami 48 Saat (Diğer Seviye 3)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">Bildiren Kişi / Görev:</label>
+                    <input type="text" name="bildiren_kisi" placeholder="Örn: Nöbetçi Öğretmen / Müdür Yrd." required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                </div>
+
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">Olay Özeti (Özel Kişisel Veri Girmeden):</label>
+                    <textarea name="aciklama" rows="3" placeholder="Olay yeri, alınan ilk güvenlik önlemleri..." required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none"></textarea>
+                </div>
+
+                <div class="p-2 rounded-lg bg-emerald-50 border border-emerald-200 flex items-start gap-2">
+                    <input type="checkbox" name="kvkk_onay" value="1" required checked class="mt-0.5 rounded text-emerald-600 focus:ring-emerald-500">
+                    <label class="text-[11px] text-emerald-900 leading-snug">
+                        İsim, kimlik ve özel nitelikli sağlık/adli verilerin anonimleştirildiğini ve KVKK kısıtlarına uyulduğunu teyit ediyorum.
+                    </label>
+                </div>
+
+                <button type="submit" class="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md transition">
+                    <i class="fa-solid fa-paper-plane mr-1.5"></i> Bildirimi Kaydet ve Süreci Başlat
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Sabotaj ve 200m Yarıçap Hesaplayıcı İnteraktif Paneli -->
+    <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+        <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+            <div>
+                <h3 class="text-base font-extrabold text-slate-900 flex items-center gap-2">
+                    <i class="fa-solid fa-compass-drafting text-rose-600"></i> Sabotaj & Şüpheli Paket 200 Metre Emniyet Yarıçapı Hesaplayıcı
+                </h3>
+                <p class="text-xs text-slate-500 mt-0.5">Sabotajlara Karşı Koruma Yönetmeliği ve MEB 2024/56 Protokolü uyarınca tahliye perimetresi hesabı.</p>
+            </div>
+            <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800">
+                Fiziki Emniyet Standardı
+            </span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+            <div class="md:col-span-2 flex flex-col items-center justify-center p-6 bg-slate-900 rounded-2xl text-white relative overflow-hidden min-h-[220px]">
+                <!-- Dairesel Radar Animasyonu -->
+                <div class="absolute w-64 h-64 rounded-full border border-rose-500/30 animate-ping"></div>
+                <div class="absolute w-44 h-44 rounded-full border border-amber-500/40"></div>
+                <div class="absolute w-24 h-24 rounded-full border border-blue-500/50 bg-rose-500/10"></div>
+                
+                <div class="relative z-10 text-center space-y-2">
+                    <div class="w-12 h-12 rounded-full bg-rose-600 flex items-center justify-center mx-auto text-xl shadow-lg shadow-rose-600/50 animate-bounce">
+                        <i class="fa-solid fa-box text-white"></i>
+                    </div>
+                    <div class="text-lg font-extrabold text-white">ŞÜPHELİ PAKET / SABOTAJ ODAĞI</div>
+                    <div class="text-xs text-rose-300 font-mono">
+                        Emniyet Yarıçapı: <span class="text-white font-extrabold text-sm">R = 200 Metre</span> (Güvenlik Kordonu)
+                    </div>
+                    <div class="text-[11px] text-slate-400 max-w-md mx-auto">
+                        Telsiz, cep telefonu veya RF sinyali yayan cihazlar 200m çemberi içinde kesinlikle kullanılmaz!
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-3 text-xs">
+                <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                    <div class="font-bold text-slate-800 flex items-center gap-1.5 mb-1">
+                        <i class="fa-solid fa-hand text-rose-600"></i> 1. Kesinlikle Dokunma
+                    </div>
+                    <div class="text-slate-600 text-[11px]">Şüpheli paketi açmaya, kurcalamaya veya taşımaya kalkışmayın.</div>
+                </div>
+
+                <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                    <div class="font-bold text-slate-800 flex items-center gap-1.5 mb-1">
+                        <i class="fa-solid fa-phone-volume text-blue-600"></i> 2. 112 Acil İhbar
+                    </div>
+                    <div class="text-slate-600 text-[11px]">Derhal 112 Acil Çağrı Merkezini arayarak bomba imha uzmanı talep edin.</div>
+                </div>
+
+                <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                    <div class="font-bold text-slate-800 flex items-center gap-1.5 mb-1">
+                        <i class="fa-solid fa-tape text-amber-600"></i> 3. 200 Metre Emniyet Şeridi
+                    </div>
+                    <div class="text-slate-600 text-[11px]">Kolluk kuvveti intikal edene kadar alanı güvenlik şeridiyle kapatın.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== KAÇ - SAKLAN - KARŞI KOY (RUN - HIDE - FIGHT) PROTOKOLÜ ==================== -->
+    <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 space-y-4">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+            <div>
+                <h3 class="text-base font-extrabold text-slate-900 flex items-center gap-2">
+                    <i class="fa-solid fa-person-running text-blue-600"></i> Kaç - Saklan - Karşı Koy (Run - Hide - Fight) Acil Müdahale Modeli
+                </h3>
+                <p class="text-xs text-slate-500 mt-0.5">MEB 2024/56 sayılı Genelge ve Okul Güvenliği Protokolü aktif saldırgan uluslararası müdahale standardı.</p>
+            </div>
+            <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                Pedagojik & Masa Başı Model
+            </span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            
+            <!-- Adım 1: KAÇ -->
+            <div class="p-5 rounded-2xl bg-blue-50/60 border border-blue-200 space-y-2">
+                <div class="flex items-center justify-between">
+                    <span class="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center font-black text-sm">1</span>
+                    <i class="fa-solid fa-person-running text-blue-600 text-xl"></i>
+                </div>
+                <h4 class="font-extrabold text-slate-900 text-sm uppercase text-blue-900">KAÇ (RUN)</h4>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                    Tehlike anında güvenli bir kaçış güzergâhı varsa tereddüt etmeden alandan uzaklaşın. Eşyalarınızı bırakın, başkalarını ikaz edin ancak çıkışınızı geciktirmeyin.
+                </p>
+                <div class="pt-2 text-[11px] font-semibold text-blue-700">
+                    ✓ Güvenli çıkış önceliği • Kişisel eşyaları bırak • 112 bildirimi
+                </div>
+            </div>
+
+            <!-- Adım 2: SAKLAN -->
+            <div class="p-5 rounded-2xl bg-amber-50/60 border border-amber-200 space-y-2">
+                <div class="flex items-center justify-between">
+                    <span class="w-8 h-8 rounded-xl bg-amber-600 text-white flex items-center justify-center font-black text-sm">2</span>
+                    <i class="fa-solid fa-door-closed text-amber-600 text-xl"></i>
+                </div>
+                <h4 class="font-extrabold text-slate-900 text-sm uppercase text-amber-900">SAKLAN (HIDE)</h4>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                    Kaçış imkânsızsa en yakın odaya geçip kapıyı içeriden kilitleyin. Sıra, masa ve ağır dolaplarla kapıya barikat kurun. Işıkları kapatın, telefonları sessize alın ve pencerelerden uzak durun.
+                </p>
+                <div class="pt-2 text-[11px] font-semibold text-amber-700">
+                    ✓ Kapı barikatı kur • Tam sessizlik sağla • Işıkları söndür
+                </div>
+            </div>
+
+            <!-- Adım 3: KARŞI KOY -->
+            <div class="p-5 rounded-2xl bg-rose-50/60 border border-rose-200 space-y-2">
+                <div class="flex items-center justify-between">
+                    <span class="w-8 h-8 rounded-xl bg-rose-600 text-white flex items-center justify-center font-black text-sm">3</span>
+                    <i class="fa-solid fa-shield-halved text-rose-600 text-xl"></i>
+                </div>
+                <h4 class="font-extrabold text-slate-900 text-sm uppercase text-rose-900">KARŞI KOY (FIGHT)</h4>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                    Yalnızca hayati tehlikenin kaçınılmaz olduğu ve kaçma/saklanma şansının kalmadığı son çare durumunda; mevcut araçlarla (yangın söndürme tüpü, sandalye) toplu ve kararlı direnç gösterin.
+                </p>
+                <div class="pt-2 text-[11px] font-semibold text-rose-700">
+                    ✓ Yalnızca son çare • Yangın tüpü/sandalye ile caydır • Toplu hareket
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<!-- MODAL: Acil Lockdown Tetikleyici -->
+<div id="lockdownModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-8 space-y-5 border-2 border-rose-600 shadow-2xl animate-in zoom-in-95">
+        <div class="text-center space-y-2">
+            <div class="w-16 h-16 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mx-auto text-2xl animate-pulse">
+                <i class="fa-solid fa-bell"></i>
+            </div>
+            <h3 class="text-xl font-extrabold text-slate-900">ACİL DURUM KİLİT-KAPIYI KİLİTLE (LOCKDOWN)</h3>
+            <p class="text-xs text-slate-500">Bu işlem seçilen okul için acil aktif saldırgan prosedürünü ve bildirimleri devreye alır.</p>
+        </div>
+
+        <form method="POST" action="/kriz-yonetimi/lockdown-tetikle" class="space-y-4 text-xs">
+            <div>
+                <label class="block font-bold text-slate-700 mb-1">Okul Seçiniz:</label>
+                <select name="school_id" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 text-xs font-semibold focus:ring-2 focus:ring-rose-500 focus:outline-none">
+                    {% for sc in all_schools %}
+                    <option value="{{ sc.id }}">{{ sc.kurum_kodu }} — {{ sc.kurum_adi }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-900 text-xs space-y-1.5">
+                <div class="font-bold flex items-center gap-1.5 text-rose-700">
+                    <i class="fa-solid fa-triangle-exclamation"></i> Tetiklendiğinde Başlayacak Adımlar:
+                </div>
+                <div class="text-[11px] leading-relaxed">
+                    1. Okul içi Lockdown alarmı verilir.<br>
+                    2. Tüm sınıflar kapıyı kilitler, masa/sıralarla barikat kurar.<br>
+                    3. Işıklar söndürülür, perdeler çekilir, yere alçak yatılır.<br>
+                    4. 112 Acil ve İlçe MEM Güvenlik Koordinasyonuna anlık alarm iletilir.
+                </div>
+            </div>
+
+            <div class="flex items-center justify-end gap-3 pt-2">
+                <button type="button" onclick="closeLockdownModal()" class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold transition">
+                    İptal
+                </button>
+                <button type="submit" class="px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-extrabold shadow-lg shadow-rose-600/30 transition">
+                    Onayla ve Alarmı Başlat
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL: Sessiz Konum Bildir -->
+<div id="silentModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 space-y-4 border border-slate-200 shadow-2xl">
+        <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+            <h3 class="text-sm font-extrabold text-slate-900 flex items-center gap-2">
+                <i class="fa-solid fa-comment-sms text-emerald-600"></i> Sessiz SMS / Konum Bildirme
+            </h3>
+            <button onclick="closeSilentModal()" class="text-slate-400 hover:text-slate-600">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+
+        <form id="silentForm" onsubmit="submitSilentLocation(event)" class="space-y-3 text-xs">
+            <div>
+                <label class="block font-bold text-slate-700 mb-1">Okul Adı / Kodu:</label>
+                <select id="silentSchool" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs">
+                    {% for sc in all_schools %}
+                    <option value="{{ sc.kurum_adi }}">{{ sc.kurum_kodu }} — {{ sc.kurum_adi }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">Blok / Kat / Oda / Sınıf:</label>
+                    <input type="text" id="silentRoom" placeholder="Örn: B Blok 2. Kat 10-A" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs">
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">İçerideki Kişi Sayısı:</label>
+                    <input type="number" id="silentPeople" placeholder="Örn: 28" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs">
+                </div>
+            </div>
+            <div>
+                <label class="block font-bold text-slate-700 mb-1">Güvenlik Durumu:</label>
+                <select id="silentStatus" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold">
+                    <option value="Kapı kilitli ve barikat kurulu, güvendeyiz">Kapı kilitli ve barikat kurulu, güvendeyiz</option>
+                    <option value="Yaralı var, acil ilk yardım gerekiyor">Yaralı var, acil ilk yardım gerekiyor</option>
+                    <option value="Saldırgan kapıyı zorluyor, acil müdahale!">Saldırgan kapıyı zorluyor, acil müdahale!</option>
+                </select>
+            </div>
+
+            <button type="submit" class="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-md transition">
+                <i class="fa-solid fa-paper-plane mr-1.5"></i> Sessiz Bildirimi İlet
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+    function triggerLockdownModal() {
+        document.getElementById('lockdownModal').classList.remove('hidden');
+    }
+    function closeLockdownModal() {
+        document.getElementById('lockdownModal').classList.add('hidden');
+    }
+
+    function openSilentLocationModal() {
+        document.getElementById('silentModal').classList.remove('hidden');
+    }
+    function closeSilentModal() {
+        document.getElementById('silentModal').classList.add('hidden');
+    }
+
+    function submitSilentLocation(e) {
+        e.preventDefault();
+        const school = document.getElementById('silentSchool').value;
+        const room = document.getElementById('silentRoom').value;
+        const count = document.getElementById('silentPeople').value;
+        const status = document.getElementById('silentStatus').value;
+
+        alert(`SESSİZ BİLDİRİM İLETİLDİ!\nOkul: ${school}\nKonum: ${room}\nKişi Sayısı: ${count}\nDurum: ${status}\n\n112 ve Okul Kriz Masasına konumunuz ulaştırıldı. Sessiz kalın ve kapıyı açmayın.`);
+        closeSilentModal();
+    }
+
+    // Countdown Sayaçları
+    function updateCountdowns() {
+        const boxes = document.querySelectorAll('.countdown-box');
+        const now = new Date().getTime();
+
+        boxes.forEach(box => {
+            const targetStr = box.getAttribute('data-target');
+            if (!targetStr) return;
+            const target = new Date(targetStr.replace(' ', 'T')).getTime();
+            const diff = target - now;
+
+            if (diff <= 0) {
+                box.innerHTML = '<span class="text-rose-600 font-extrabold animate-pulse"><i class="fa-solid fa-triangle-exclamation mr-1"></i> SÜRE DOLDU</span>';
+                box.className = 'px-3 py-1.5 rounded-lg bg-rose-100 border border-rose-300 text-rose-800 font-mono font-extrabold text-sm countdown-box';
+            } else {
+                const hours = Math.floor(diff / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+                let colorClass = 'bg-emerald-50 border-emerald-200 text-emerald-800';
+                if (hours < 6) {
+                    colorClass = 'bg-rose-50 border-rose-300 text-rose-700 animate-pulse';
+                } else if (hours < 24) {
+                    colorClass = 'bg-amber-50 border-amber-200 text-amber-800';
+                }
+
+                box.innerHTML = `<i class="fa-solid fa-stopwatch mr-1.5"></i> ${hours} sa ${minutes} dk ${seconds} sn`;
+                box.className = `px-3 py-1.5 rounded-lg border font-mono font-extrabold text-sm countdown-box ${colorClass}`;
+            }
+        });
+    }
+
+    setInterval(updateCountdowns, 1000);
+    updateCountdowns();
+</script>
+{% endblock %}

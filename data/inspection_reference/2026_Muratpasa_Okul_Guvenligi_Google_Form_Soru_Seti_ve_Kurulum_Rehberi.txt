@@ -1,0 +1,203 @@
+﻿T.C. ANTALYA MURATPAŞA İLÇE MİLLÎ EĞİTİM MÜDÜRLÜĞÜ
+Bakanlık Müfettişleri Okul Güvenliği Denetimi — 268 Resmî ve Özel Okul İçin Google Form Soru Seti ve Tablo Eşleştirme Rehberi
+Hazırlayan: Ramazan ERYILDIZ — İş Güvenliği Uzmanı | Kapsam: Yurtlar Hariç 122 Resmî Okul/Kurum + 146 Özel Okul = 268 Okul/Kurum
+________________
+1. GOOGLE FORM KURULUM BİLGİLERİ (KOPYALA - YAPIŞTIR)
+* Form Başlığı: T.C. Muratpaşa İlçe MEM — 2026 Okul ve Çevresi Güvenlik Tedbirleri Müfettiş Denetimi Veri Giriş Formu
+* Form Açıklaması (Üst Bilgi): "İçişleri Bakanlığı Mülkiye Müfettişleri, MEB Müfettişleri ve Kolluk Müfettişleri tarafından yürütülen denetim kapsamında; 24.04.2026 tarihli ve 130906 sayılı 'Okul ve Çevresi Güvenlik Tedbirleri' Genelgesi ile İş Birliği Protokolü gereğince aşağıdaki verilerin ivedilikle ve belgeye dayalı olarak girilmesi gerekmektedir. Sayısal sorularda kaydınız yoksa '0' yazınız, boş bırakmayınız."
+* Bağlı E-Tablo: 2026_Muratpasa_Okul_Guvenligi_Ilce_Cizelgeleri_Sablonu
+________________
+2. BÖLÜM BAZLI GOOGLE FORM SORULARI VE RAPORDAKİ TABLO KARŞILIKLARI
+BÖLÜM 1: KURUM KİMLİK BİLGİLERİ
+Soru No
+	Google Form Sorusu
+	Soru Tipi / Seçenekler
+	Beslediği Tablo / Madde
+ 
+	Kimlik-1
+	Kurum Kodunuz: (8 haneli veya 6 haneli MEBBİS Kurum Kodu)
+	Kısa Yanıt (Sayı doğrulamalı - Zorunlu)
+	268 Okul Eşleştirmesi
+	Kimlik-2
+	Okul / Kurum Adınız:
+	Açılır Liste (268 okul listesi) veya Kısa Yanıt
+	Tüm Tablolar
+	Kimlik-3
+	Kurum Statünüz:
+	Çoktan Seçmeli: Resmî Okul/Kurum | Özel Okul
+	Kapsam Ayrımı
+	Kimlik-4
+	Formu Dolduran Okul Müdürü / İSG-Güvenlik Md. Yrd. Adı Soyadı ve Cep Telefonu:
+	Kısa Yanıt (Zorunlu)
+	Teyit ve İletişim
+	BÖLÜM 2: OKUL RİSK DEĞERLENDİRMESİ VE ACİL DURUM PLANI (TABLO-1 & MD. 4, 5, 6)
+Soru No
+	Google Form Sorusu
+	Soru Tipi / Seçenekler
+	Beslediği Tablo / Madde
+ 
+	S1
+	Okulunuzun belirlenen Güvenlik Öncelik / Risk Derecesi nedir?
+	Çoktan Seçmeli:
+• 1. Derece Öncelikli
+• 2. Derece Öncelikli
+• 3. Derece Öncelikli
+• 4. Derece Öncelikli
+	Tablo-1 (Sütun 1–5) & Tablo-16
+	S2
+	Okulunuzun güvenlik önlemleri ve müdahale stratejilerini içeren güncel Acil Durum Planı var mı?
+	Çoktan Seçmeli:
+• Planı Var
+• Planı Yok
+	Tablo-1 (Sütun 6–7) & Md. 6
+	S3
+	Acil Durum Planınızın son hazırlanma / güncellenme tarihi nedir?
+	Tarih (GG.AA.YYYY)
+	Md. 6 Somut Örnek Kanıtı
+	S4
+	2026–2027 eğitim-öğretim yılı başında Okul Durum Değerlendirme Ölçeği (EK-7) düzenlendi mi?
+	Çoktan Seçmeli:
+• Değerlendirme Ölçeği Var
+• Değerlendirme Ölçeği Yok
+	Tablo-1 (Sütun 8–9) & Md. 5
+	S5
+	Okul Durum Değerlendirme Ölçeğinin (EK-7) düzenlenme tarihi nedir?
+	Tarih (GG.AA.YYYY)
+	Md. 5 Somut Örnek Kanıtı
+	BÖLÜM 3: GÜVENLİK VE BAHÇE GÖREVLİLERİ İLE GÖZLEM RAPORLARI (TABLO-2, 4, 5 & MD. 10–25)
+Soru No
+	Google Form Sorusu
+	Soru Tipi / Seçenekler
+	Beslediği Tablo / Madde
+ 
+	S6
+	Okulunuzda fiilen görev yapan Özel Güvenlik Görevlisi sayısı kaçtır? (Yoksa 0 yazınız)
+	Kısa Yanıt (Sayı)
+	Tablo-2 (Sütun 1)
+	S7
+	Okulunuzda görev yapan Okul Bahçe Görevlisi (TYP / İŞKUR / Kadrolu) sayısı kaçtır? (Yoksa 0 yazınız)
+	Kısa Yanıt (Sayı)
+	Tablo-2 (Sütun 2) & Tablo-4
+	S8
+	Görev yapan bahçe görevlilerinizden kaç tanesinin Özel Güvenlik Sertifikası (Kimliği) vardır? (Yoksa 0 yazınız)
+	Kısa Yanıt (Sayı)
+	Tablo-4 (Sertifika Oranı)
+	S9
+	Okul kolluk görevlisi, güvenli eğitim koordinasyon görevlisi, özel güvenlik ve bahçe görevlilerine Protokol ve görev/yetki tebliği (EGM 24.08.2026 yazısı kapsamında) yapıldı mı? Yapıldıysa tebliğ tarihi nedir?
+	Kısa Yanıt (Evet - GG.AA.YYYY / Görevli Yok)
+	Md. 19, 21, 22 & Tablo-16
+	S10
+	Okulunuzda El Tipi Metal Dedektör Eğitimi verilen personel sayısı kaçtır? (Yoksa 0 yazınız)
+	Kısa Yanıt (Sayı)
+	Tablo-3 (Sütun 4)
+	S11
+	24 Nisan 2026 tarihinden bugüne kadar okulunuz hakkında düzenlenen toplam Okul Gözlem Formu / Raporu sayısı kaçtır? (Varsa örnek form tarihini parantez içinde belirtiniz)
+	Kısa Yanıt (Sayı - Örn: 4)
+	Tablo-5 & Md. 23, 24, 25
+	BÖLÜM 4: BİNA, KAMERA, KONTROLLÜ GİRİŞ-ÇIKIŞ VE ÇEVRE GÜVENLİĞİ (TABLO-6, TABLO-7 & MD. 27–39)
+Soru No
+	Google Form Sorusu
+	Soru Tipi / Seçenekler
+	Beslediği Tablo / Madde
+ 
+	S12
+	Okulunuzda Güvenlik Kamera Sistemi var mı?
+	Çoktan Seçmeli: Var | Yok
+	Tablo-6 (Kamera Var/Yok)
+	S13
+	Okulunuzun güvenlik kameraları KGYS'ye (Kent Güvenlik Yönetim Sistemi) Entegre mi?
+	Çoktan Seçmeli: Evet (KGYS'ye Entegre) | Hayır (Entegre Değil) | Kamera Yok
+	Tablo-6 & Md. 34
+	S14
+	Kamera kayıtlarınız mevzuatta öngörülen yeterli süreyle (en az 30 gün) saklanıyor mu ve okul çevresini/giriş-çıkışı tam görüyor mu?
+	Çoktan Seçmeli: Evet | Hayır
+	Md. 28, 36 & Tablo-16
+	S15
+	Okulunuzun Giriş-Çıkış Kapısı durumu hangisidir?
+	Çoktan Seçmeli:
+• Tek Kapıdan Girişi Olan Okul
+• Birden Fazla Kapıdan Girişi Olan Okul
+	Tablo-6 (Sütun 4–5)
+	S16
+	Okulunuzda El Dedektörü var mı?
+	Çoktan Seçmeli: Var | Yok
+	Tablo-6 (Sütun 6)
+	S17
+	Okulunuzda Kapı Dedektörü var mı?
+	Çoktan Seçmeli: Var | Yok
+	Tablo-6 (Sütun 7)
+	S18
+	Okulunuzda Turnike Sistemi tesis edilmiş mi?
+	Çoktan Seçmeli: Var | Yok
+	Tablo-6 (Sütun 8)
+	S19
+	Okulunuzun çevre güvenliğine ilişkin Fiziki Engel türü hangisidir?
+	Çoktan Seçmeli:
+• Duvar
+• Tel Çit
+• Diğer (Duvar + Tel Çit / Korkuluk)
+• Fiziki Engel Yok
+	Tablo-6 (Sütun 9–12)
+	S20
+	Okulunuzda tanımlı Araç / Servis Aracı Park Yeri (veya Servis Bekleme Alanı) var mı?
+	Çoktan Seçmeli: Var | Yok
+	Tablo-6 (Sütun 13–14) & Md. 38
+	S21
+	Özel araçların okul bahçesine girişi engellendi mi?
+	Çoktan Seçmeli: Evet | Hayır
+	Md. 39 & Tablo-16
+	S22
+	Okulunuzda Ziyaretçi Kayıt Sistemine (Ziyaretçi Defteri / Kartı / Dijital Kayıt) geçildi mi?
+	Çoktan Seçmeli: Evet | Hayır
+	Tablo-7 (Sütun 8)
+	S23
+	24.04.2026 tarihinden itibaren okulunuzda çevre güvenliği eksikliği giderildi mi veya yeni araç/servis park yeri tesis edildi mi?
+	Çoktan Seçmeli:
+• Çevre Güvenliği Eksikliği Giderildi
+• Yeni Araç/Servis Park Yeri Tesis Edildi
+• Her İkisi de Yapıldı
+• Eksiklik Yoktu / İşlem Yapılmadı
+	Tablo-7 (Sütun 2 ve 9)
+	BÖLÜM 5: GÜVENLİK OLAYLARI, ERKEN UYARI (SEVİYE 1-2-3 / ÇDE) VE DEVAMSIZLIK (TABLO-9, 12, 13 & MD. 53–90)
+Soru No
+	Google Form Sorusu
+	Soru Tipi / Seçenekler
+	Beslediği Tablo / Madde
+ 
+	S24
+	24.04.2026 tarihinden itibaren okulunuzca "Güvenlik Olayları Kayıt ve Bildirim Formu" ile bildirilen olay sayısı kaçtır? (Varsa türünü belirtiniz: Kavga, Yaralama, Hırsızlık, Narkotik, Tehdit vb. Yoksa 0 yazınız)
+	Kısa Yanıt
+	Tablo-9 & Md. 53
+	S25
+	24.04.2026 tarihinden itibaren okulunuzda ortaya çıkan İhmal, İstismar, Şiddet toplam vaka sayısı kaçtır ve kaç tanesi üst makama/kolluğa bildirilmiştir? (Örn: Toplam: 2 / Bildirilen: 2. Yoksa 0 yazınız)
+	Kısa Yanıt
+	Tablo-12 & Md. 81
+	S26
+	24.04.2026 tarihinden itibaren Erken Uyarı ve Yönlendirme Sistemi kapsamında okulunuzda takibi yapılan vaka sayıları kaçtır?
+(Format: Seviye 1: X, Seviye 2: Y, Seviye 3 (ÇDE): Z — Yoksa 0, 0, 0 yazınız)
+	Kısa Yanıt
+	Tablo-13 & Md. 82–88
+	S26-Ek
+	24.04.2026'dan beri devamsız öğrencileri okula kazandırmak amacıyla yapılan aile ziyareti sayısı ve Okul Acil İhbar Uygulaması tanıtım tarihiniz nedir?
+	Kısa Yanıt
+	Md. 57, Md. 78 & Tablo-16
+	BÖLÜM 6: EĞİTİM SAYILARI VE OKUL GÜVENLİĞİ YÖNETİM EKİBİ TOPLANTILARI (TABLO-11, TABLO-14 & MD. 65, 73, 96)
+Soru No
+	Google Form Sorusu
+	Soru Tipi / Seçenekler
+	Beslediği Tablo / Madde
+ 
+	S27
+	24.04.2026 tarihinden itibaren okulunuzda (okul güvenliği, güvenli internet/siber zorbalık, bağımlılıkla mücadele, çocuk hakları/mahremiyet konularında) Toplam Kişi Sayısı / Eğitim Verilen Kişi Sayısı bilgilerini aşağıdaki 6 hedef grup için yazınız:
+1. Okul Yöneticileri (Toplam / Eğitim Alan)
+2. Öğretmenler (Toplam / Eğitim Alan)
+3. Rehber Öğretmen/Psikolojik Danışmanlar (Toplam / Eğitim Alan)
+4. Öğrenciler (Toplam / Eğitim Alan)
+5. Veliler (Toplam / Eğitim Alan)
+6. Diğer Okul/Kurum Çalışanları - Servis/Kantin/Hizmetli (Toplam / Eğitim Alan)
+	Paragraf / Kısa Yanıt
+	Tablo-11 & Md. 43, 65, 73
+	S28
+	24.04.2026 tarihinden itibaren okul müdürü başkanlığında toplanan "Okul Güvenliği Yönetim Ekibi" (ayda en az 1 kez) toplam kaç toplantı yapmıştır ve bu toplantılarda toplam kaç gündem/konu görüşülmüştür? (Örn: Toplantı: 4, Görüşülen Konu: 16)
+	Kısa Yanıt
+	Tablo-14 (Satır 1) & Md. 91, 96

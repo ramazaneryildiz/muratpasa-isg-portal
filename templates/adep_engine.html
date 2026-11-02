@@ -1,0 +1,319 @@
+{% extends "base.html" %}
+
+{% block title %}Okula Özgü ADEP ve İSG İç Yönergesi Üretim Motoru — Muratpaşa İlçe MEM{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <!-- Header & Hero -->
+    <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 p-6 sm:p-8 text-white shadow-xl border border-slate-800">
+        <div class="absolute -right-16 -top-16 w-80 h-80 rounded-full bg-blue-600/20 blur-3xl pointer-events-none"></div>
+        <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+            <div class="space-y-2">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/15 border border-indigo-400/30 text-indigo-300 text-xs font-semibold backdrop-blur-sm">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span>Modül 2: Dinamik Doküman Üretim Motoru (MEB 2024/56 Tam Entegre)</span>
+                </div>
+                <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white flex items-center gap-3">
+                    <i class="fa-solid fa-file-shield text-indigo-400"></i>
+                    <span>Okula Özgü ADEP ve İSG İç Yönergesi Motoru</span>
+                </h1>
+                <p class="text-sm text-slate-300 max-w-3xl leading-relaxed">
+                    268 okulun tehlike sınıfı ve çalışan kotasına göre otomatik hesaplanan, MTAL 12 Atölye / Anadolu Lisesi 10 Birim / RAM 10 Özel Eğitim modülleri ve Aktif Saldırgan Lockdown protokollerini tek tıkla Word (.docx) olarak üreten kurumsal motor.
+                </p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2.5">
+                <a href="/dokuman-kutuphanesi" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 transition">
+                    <i class="fa-solid fa-folder-open text-amber-400"></i>
+                    <span>Drive Doküman Kütüphanesi</span>
+                </a>
+                <a href="/kriz-yonetimi" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold shadow-lg shadow-rose-600/30 transition">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <span>Kriz & Lockdown Portalı</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Okul Seçim Barı -->
+    <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div class="flex-1">
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">
+                <i class="fa-solid fa-school text-indigo-600 mr-1.5"></i> Doküman Üretilecek Okulu / Kurumu Seçiniz:
+            </label>
+            <form method="GET" action="/adep-yonerge-motoru" class="flex gap-2">
+                <select name="school_id" onchange="this.form.submit()" class="w-full text-sm font-semibold text-slate-800 bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    {% for sc in all_schools %}
+                    <option value="{{ sc.id }}" {% if sc.id == selected_school.id %}selected{% endif %}>
+                        {{ sc.kurum_kodu }} — {{ sc.kurum_adi }} ({{ sc.kademe or sc.kurum_turu }}) - [{{ sc.tehlike_sinifi }}]
+                    </option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl transition">
+                    Yükle
+                </button>
+            </form>
+        </div>
+
+        <div class="flex items-center gap-2 pt-2 md:pt-0">
+            <a href="/api/adep-belge-indir/{{ selected_school.id }}" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-md shadow-blue-500/20 transition hover:-translate-y-0.5">
+                <i class="fa-solid fa-file-word text-sm"></i>
+                <span>Word (.docx) İndir</span>
+            </a>
+            <button onclick="window.print()" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold border border-slate-300 transition">
+                <i class="fa-solid fa-print text-sm"></i>
+                <span>Yazdır / PDF</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- 3 Kolonlu Bilgi ve Kota Panelleri -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <!-- Kolon 1: Kurumsal Künye -->
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 space-y-4">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-500 flex items-center gap-2">
+                    <i class="fa-solid fa-id-card text-indigo-600"></i> Kurum Bilgileri
+                </h3>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold {% if quotas.is_tehlikeli %}bg-rose-100 text-rose-700 border border-rose-300{% else %}bg-blue-100 text-blue-700 border border-blue-300{% endif %}">
+                    {{ quotas.tehlike_str }}
+                </span>
+            </div>
+
+            <div class="space-y-3 text-xs">
+                <div>
+                    <span class="text-slate-400 font-medium">Kurum Adı:</span>
+                    <div class="text-slate-900 font-bold text-sm">{{ selected_school.kurum_adi }}</div>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <span class="text-slate-400 font-medium">Kurum Kodu:</span>
+                        <div class="text-slate-900 font-bold font-mono">{{ selected_school.kurum_kodu }}</div>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 font-medium">Öncelik Derecesi:</span>
+                        <div class="text-amber-600 font-bold">{{ selected_school.oncelik_derecesi }}. Derece Öncelik</div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <span class="text-slate-400 font-medium">Toplam Çalışan:</span>
+                        <div class="text-slate-900 font-bold">{{ staff_count }} Personel</div>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 font-medium">Öğrenci Sayısı:</span>
+                        <div class="text-slate-900 font-bold">{{ selected_school.ogrenci_sayisi or '0' }} Öğrenci</div>
+                    </div>
+                </div>
+                <div>
+                    <span class="text-slate-400 font-medium">İşveren (Müdür):</span>
+                    <div class="text-slate-900 font-bold">{{ selected_school.mudur_ad_soyad or 'Okul Müdürü' }} ({{ selected_school.mudur_tel or 'İletişim Girilmedi' }})</div>
+                </div>
+                <div>
+                    <span class="text-slate-400 font-medium">İşveren Vekili (İSG Md. Yrd.):</span>
+                    <div class="text-slate-900 font-bold">{{ selected_school.isveren_vekili_ad_soyad or 'İSG Md. Yrd.' }} ({{ selected_school.isveren_vekili_tel or 'İletişim Girilmedi' }})</div>
+                </div>
+                <div>
+                    <span class="text-slate-400 font-medium">İSG Koordinatörü:</span>
+                    <div class="text-indigo-600 font-bold">Ramazan ERYILDIZ (A Sınıfı İSG Uzmanı)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Kolon 2: Yasal Acil Durum Ekipleri Kotaları -->
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 space-y-4">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-500 flex items-center gap-2">
+                    <i class="fa-solid fa-users-gear text-emerald-600"></i> Yasal Ekipler & Kotalar
+                </h3>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700 border border-emerald-300">
+                    Toplam {{ quotas.toplam_ekip }} Kişi
+                </span>
+            </div>
+
+            <div class="space-y-2.5 text-xs">
+                <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center justify-between">
+                    <div>
+                        <div class="font-bold text-slate-800 flex items-center gap-1.5">
+                            <i class="fa-solid fa-fire-extinguisher text-rose-500"></i> Söndürme Ekibi
+                        </div>
+                        <div class="text-[10px] text-slate-400 mt-0.5">{{ quotas.oran_yangin }}</div>
+                    </div>
+                    <span class="text-base font-extrabold text-slate-900 font-mono">{{ quotas.sondurme }} Kişi</span>
+                </div>
+
+                <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center justify-between">
+                    <div>
+                        <div class="font-bold text-slate-800 flex items-center gap-1.5">
+                            <i class="fa-solid fa-person-walking-arrow-right text-blue-500"></i> Kurtarma Ekibi
+                        </div>
+                        <div class="text-[10px] text-slate-400 mt-0.5">{{ quotas.oran_yangin }}</div>
+                    </div>
+                    <span class="text-base font-extrabold text-slate-900 font-mono">{{ quotas.kurtarma }} Kişi</span>
+                </div>
+
+                <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center justify-between">
+                    <div>
+                        <div class="font-bold text-slate-800 flex items-center gap-1.5">
+                            <i class="fa-solid fa-shield-halved text-amber-500"></i> Koruma Ekibi
+                        </div>
+                        <div class="text-[10px] text-slate-400 mt-0.5">{{ quotas.oran_yangin }}</div>
+                    </div>
+                    <span class="text-base font-extrabold text-slate-900 font-mono">{{ quotas.koruma }} Kişi</span>
+                </div>
+
+                <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center justify-between">
+                    <div>
+                        <div class="font-bold text-slate-800 flex items-center gap-1.5">
+                            <i class="fa-solid fa-kit-medical text-emerald-500"></i> İlk Yardım Ekibi
+                        </div>
+                        <div class="text-[10px] text-slate-400 mt-0.5">{{ quotas.oran_ilkyardim }}</div>
+                    </div>
+                    <span class="text-base font-extrabold text-emerald-700 font-mono">{{ quotas.ilkyardim }} Sertifikalı</span>
+                </div>
+
+                <div class="p-2 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-900 text-[11px] leading-relaxed">
+                    <i class="fa-solid fa-circle-info mr-1 text-indigo-600"></i>
+                    <strong>ADEP Geçerlilik Üst Sınırı:</strong> {{ quotas.gecerlilik }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Kolon 3: Mimari Modül ve Birim Dağılımı -->
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 space-y-4">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-500 flex items-center gap-2">
+                    <i class="fa-solid fa-cubes text-blue-600"></i> Mimari Birim Modülleri
+                </h3>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-700 border border-blue-300">
+                    {{ units|length }} Kritik Birim
+                </span>
+            </div>
+
+            <div class="max-h-64 overflow-y-auto space-y-2 pr-1 text-xs">
+                {% for title, desc in units %}
+                <div class="p-2 rounded-lg bg-slate-50 border border-slate-200/70">
+                    <div class="font-bold text-slate-800">{{ title }}</div>
+                    <div class="text-[11px] text-slate-500 mt-0.5 leading-snug">{{ desc }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- MEB 2024/56 Protokolleri Görsel Özeti -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        <!-- Lockdown 8 Adım -->
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-rose-200">
+            <div class="flex items-center justify-between pb-3 mb-4 border-b border-rose-100">
+                <h3 class="text-sm font-extrabold text-rose-700 flex items-center gap-2">
+                    <i class="fa-solid fa-lock text-rose-600"></i> 'Kilit-Kapıyı Kilitle' (Lockdown) 8 Adımlı Prosedürü
+                </h3>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-rose-100 text-rose-800">MEB 2024/56</span>
+            </div>
+            <div class="space-y-2 text-xs">
+                <div class="flex items-start gap-2.5">
+                    <span class="w-5 h-5 rounded-full bg-rose-600 text-white flex items-center justify-center font-bold text-[10px] flex-shrink-0 mt-0.5">1</span>
+                    <div><strong>Güvenli Alana Giriş:</strong> Koridor ve bahçedeki tüm öğrenci/personel derhal sınıfa alınır.</div>
+                </div>
+                <div class="flex items-start gap-2.5">
+                    <span class="w-5 h-5 rounded-full bg-rose-600 text-white flex items-center justify-center font-bold text-[10px] flex-shrink-0 mt-0.5">2</span>
+                    <div><strong>Kapıyı Kilitle & Barikat:</strong> Kapı kilitlenir; kilit yoksa masa ve sıralarla ağır barikat yığılır.</div>
+                </div>
+                <div class="flex items-start gap-2.5">
+                    <span class="w-5 h-5 rounded-full bg-rose-600 text-white flex items-center justify-center font-bold text-[10px] flex-shrink-0 mt-0.5">3</span>
+                    <div><strong>Işık ve Görüşü Kapat:</strong> Sınıf ışıkları söndürülür, perdeler ve panjurlar tamamen çekilir.</div>
+                </div>
+                <div class="flex items-start gap-2.5">
+                    <span class="w-5 h-5 rounded-full bg-rose-600 text-white flex items-center justify-center font-bold text-[10px] flex-shrink-0 mt-0.5">4</span>
+                    <div><strong>Alçak Koruma Pozisyonu:</strong> Pencerelerden uzak, ana taşıyıcı duvar diplerinde yere uzanılır.</div>
+                </div>
+                <div class="flex items-start gap-2.5">
+                    <span class="w-5 h-5 rounded-full bg-rose-600 text-white flex items-center justify-center font-bold text-[10px] flex-shrink-0 mt-0.5">5</span>
+                    <div><strong>Tam Sessizlik & Telefon:</strong> Asla ses çıkarılmaz; telefonlar titreşimsiz sessize alınır.</div>
+                </div>
+                <div class="flex items-start gap-2.5">
+                    <span class="w-5 h-5 rounded-full bg-rose-600 text-white flex items-center justify-center font-bold text-[10px] flex-shrink-0 mt-0.5">6</span>
+                    <div><strong>Kapıyı Açmama Kuralı:</strong> Saldırgan zorlasa, tehdit etse dahi kapı kesinlikle açılmaz.</div>
+                </div>
+                <div class="flex items-start gap-2.5">
+                    <span class="w-5 h-5 rounded-full bg-rose-600 text-white flex items-center justify-center font-bold text-[10px] flex-shrink-0 mt-0.5">7</span>
+                    <div><strong>Sessiz Konum Bildirimi:</strong> SMS veya WhatsApp ile sınıf no ve kişi sayısı 112'ye iletilir.</div>
+                </div>
+                <div class="flex items-start gap-2.5">
+                    <span class="w-5 h-5 rounded-full bg-rose-600 text-white flex items-center justify-center font-bold text-[10px] flex-shrink-0 mt-0.5">8</span>
+                    <div><strong>Güvenli Çıkış:</strong> Resmî kolluk kuvveti 'Tehlike Geçti' diyene kadar oda terk edilmez.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Kaç - Saklan - Karşı Koy & Sabotaj 200m -->
+        <div class="space-y-6">
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+                <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
+                    <h3 class="text-sm font-extrabold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-person-running text-amber-500"></i> Kaç - Saklan - Karşı Koy (Run - Hide - Fight)
+                    </h3>
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-800">Hayatta Kalma Doktrini</span>
+                </div>
+                <div class="grid grid-cols-3 gap-2 text-center text-xs">
+                    <div class="p-3 rounded-xl bg-amber-50 border border-amber-200">
+                        <div class="font-extrabold text-amber-700 text-sm mb-1">1. KAÇ</div>
+                        <div class="text-[11px] text-slate-600">Güvenli yol varsa eşyaları bırak ve hızla binadan uzaklaş. 112'yi ara.</div>
+                    </div>
+                    <div class="p-3 rounded-xl bg-blue-50 border border-blue-200">
+                        <div class="font-extrabold text-blue-700 text-sm mb-1">2. SAKLAN</div>
+                        <div class="text-[11px] text-slate-600">Görüşten çık, kapıyı kilitle ve barikat kur, ışığı söndür, sessiz kal.</div>
+                    </div>
+                    <div class="p-3 rounded-xl bg-rose-50 border border-rose-200">
+                        <div class="font-extrabold text-rose-700 text-sm mb-1">3. KARŞI KOY</div>
+                        <div class="text-[11px] text-slate-600">Son çare olarak organize ol, yangın tüpü/sert cisimlerle diren.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
+                <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
+                    <h3 class="text-sm font-extrabold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-radiation text-rose-500"></i> Sabotaj & Şüpheli Paket 200m Çemberi
+                    </h3>
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700">Protokol Md. 51</span>
+                </div>
+                <div class="flex items-center gap-4 text-xs">
+                    <div class="w-16 h-16 rounded-2xl bg-rose-100 text-rose-700 flex flex-col items-center justify-center font-extrabold flex-shrink-0">
+                        <span class="text-lg">200m</span>
+                        <span class="text-[9px] uppercase tracking-wider">Yarıçap</span>
+                    </div>
+                    <div class="text-slate-600 leading-relaxed text-[11px]">
+                        Şüpheli pakete dokunulmaz, telsiz/cep telefonu yakınında kullanılmaz. Bina kademeli tahliye edilerek bomba imha uzmanı gelene kadar en az 200 metre emniyet şeridi çekilir.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Belge İndirme ve Eylemler Kartı -->
+    <div class="p-6 rounded-2xl bg-gradient-to-r from-blue-900 to-indigo-900 text-white flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div>
+            <h4 class="text-base font-bold flex items-center gap-2">
+                <i class="fa-solid fa-file-arrow-down text-emerald-400"></i>
+                <span>Hazırlanan Resmî Nüshayı Tek Tıkla İndirin</span>
+            </h4>
+            <p class="text-xs text-blue-200 mt-1">
+                İçerik {{ selected_school.kurum_adi }} kurum verileri, çalışan kotaları ve Ramazan ERYILDIZ imza bloğu ile anlık üretilir.
+            </p>
+        </div>
+        <div class="flex gap-2">
+            <a href="/api/adep-belge-indir/{{ selected_school.id }}" class="px-5 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-white font-extrabold text-xs shadow-lg shadow-emerald-500/30 transition hover:-translate-y-0.5 inline-flex items-center gap-2">
+                <i class="fa-solid fa-download"></i>
+                <span>Word (.docx) İndir</span>
+            </a>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+

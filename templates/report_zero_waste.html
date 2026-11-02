@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}Sıfır Atık & Çevre Yönetimi Raporu — Muratpaşa İSG{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <!-- Üst Başlık & Eylemler -->
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <div class="text-xs uppercase font-bold tracking-wider text-teal-600 flex items-center gap-1.5">
+                <i class="fa-solid fa-recycle"></i> Çevre Şehircilik ve İklim Değişikliği Bakanlığı Standartları
+            </div>
+            <h1 class="text-2xl font-bold text-slate-800 mt-1 flex items-center">
+                Okul Sıfır Atık Belgelendirme ve Eğitim Durumu İcmali
+            </h1>
+            <p class="text-xs text-slate-500 mt-1">
+                İlçe genelindeki okulların Sıfır Atık Belge Numaraları, veriliş ve son geçerlilik tarihleri, düzenlenen eğitim ve katılımcı sayıları.
+            </p>
+        </div>
+        <div class="flex items-center gap-2">
+            <button onclick="window.print()" class="bg-slate-700 hover:bg-slate-800 text-white text-xs font-semibold px-4 py-2.5 rounded-lg shadow-sm transition flex items-center">
+                <i class="fa-solid fa-print mr-2"></i> Raporu Yazdır
+            </button>
+            <a href="/mufettis-raporu" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2.5 rounded-lg shadow-sm transition flex items-center">
+                <i class="fa-solid fa-arrow-left mr-2"></i> Müfettiş İcmaline Dön
+            </a>
+        </div>
+    </div>
+
+    <!-- Özet İstatistik Kartları -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="bg-white p-5 rounded-xl border border-emerald-200 shadow-sm text-center bg-emerald-50/20">
+            <div class="text-xs font-bold text-emerald-600 uppercase">Sıfır Atık Belgeli Okul</div>
+            <div class="text-3xl font-black text-emerald-600 mt-1">{{ stats.certified_schools }}</div>
+            <div class="text-xs text-emerald-700 mt-1">%{{ stats.certified_ratio }} Belgelendirme Oranı</div>
+        </div>
+        <div class="bg-white p-5 rounded-xl border border-amber-200 shadow-sm text-center bg-amber-50/20">
+            <div class="text-xs font-bold text-amber-600 uppercase">Belgesi Eksik / Süresi Dolan</div>
+            <div class="text-3xl font-black text-amber-600 mt-1">{{ stats.uncertified_schools }}</div>
+            <div class="text-xs text-amber-700 mt-1">İlçe MEM Takip Havuzu</div>
+        </div>
+        <div class="bg-white p-5 rounded-xl border border-indigo-200 shadow-sm text-center bg-indigo-50/20">
+            <div class="text-xs font-bold text-indigo-600 uppercase">Düzenlenen Eğitim Sayısı</div>
+            <div class="text-3xl font-black text-indigo-600 mt-1">{{ stats.total_trainings }}</div>
+            <div class="text-xs text-indigo-700 mt-1">Seminer & Farkındalık Eğitimi</div>
+        </div>
+        <div class="bg-white p-5 rounded-xl border border-blue-200 shadow-sm text-center bg-blue-50/20">
+            <div class="text-xs font-bold text-blue-600 uppercase">Eğitilen Toplam Kişi</div>
+            <div class="text-3xl font-black text-blue-600 mt-1">{{ stats.total_participants }}</div>
+            <div class="text-xs text-blue-700 mt-1">Öğrenci, Öğretmen ve Personel</div>
+        </div>
+    </div>
+
+    <!-- Detaylı Sıfır Atık Tablosu -->
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+        <h2 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-4 flex items-center">
+            <span class="w-2.5 h-2.5 bg-teal-600 rounded-full mr-2"></span> Okul Bazlı Sıfır Atık Belge ve Geçerlilik Listesi
+        </h2>
+        <div class="overflow-x-auto">
+            <table id="zeroWasteTable" class="w-full text-xs text-left border border-slate-200">
+                <thead class="bg-slate-50 text-slate-700 font-bold border-b">
+                    <tr>
+                        <th class="p-2.5">Kod</th>
+                        <th class="p-2.5">Kurum Adı</th>
+                        <th class="p-2.5">Kurum Türü</th>
+                        <th class="p-2.5 text-center">Belge No</th>
+                        <th class="p-2.5 text-center">Belge Tarihi</th>
+                        <th class="p-2.5 text-center">Son Geçerlilik</th>
+                        <th class="p-2.5 text-center bg-indigo-50/50">Eğitim Sayısı</th>
+                        <th class="p-2.5 text-center bg-blue-50/50">Katılımcı Sayısı</th>
+                        <th class="p-2.5 text-center">Durum</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 font-medium">
+                    {% for r in schools %}
+                    <tr class="hover:bg-slate-50">
+                        <td class="p-2.5 font-mono text-slate-500">{{ r.kurum_kodu }}</td>
+                        <td class="p-2.5 font-bold text-slate-800">
+                            <a href="/okul/{{ r.id }}" class="hover:text-blue-600 hover:underline">{{ r.kurum_adi }}</a>
+                        </td>
+                        <td class="p-2.5 text-slate-600 text-[11px]">{{ r.kurum_turu or 'Okul' }}</td>
+                        <td class="p-2.5 text-center font-mono text-xs font-bold text-slate-700">
+                            {{ r.sifir_atik_belge_no or '-' }}
+                        </td>
+                        <td class="p-2.5 text-center text-slate-600">{{ r.sifir_atik_belge_tarihi or '-' }}</td>
+                        <td class="p-2.5 text-center font-semibold text-slate-700">{{ r.sifir_atik_gecerlilik_tarihi or '-' }}</td>
+                        <td class="p-2.5 text-center font-bold text-indigo-700">{{ r.sifir_atik_egitim_sayisi or 0 }}</td>
+                        <td class="p-2.5 text-center font-bold text-blue-700">{{ r.sifir_atik_katilimci_sayisi or 0 }}</td>
+                        <td class="p-2.5 text-center">
+                            {% if r.sifir_atik_belge_no %}
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                                <i class="fa-solid fa-circle-check mr-1"></i> Belgeli
+                            </span>
+                            {% else %}
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800">
+                                Belge Yok
+                            </span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<script>
+$(document).ready(function() {
+    $('#zeroWasteTable').DataTable({
+        pageLength: 25,
+        language: {
+            url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/tr.json'
+        }
+    });
+});
+</script>
+{% endblock %}

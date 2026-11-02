@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% block title %}Açık DÖF ve Periyodik Kontrol Alarmları — Muratpaşa İSG{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <!-- Üst Başlık -->
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex items-center justify-between">
+        <div>
+            <div class="text-xs uppercase font-bold tracking-wider text-red-600 flex items-center">
+                <span class="w-2.5 h-2.5 bg-red-500 rounded-full animate-ping mr-2"></span> Yasal Termin ve Güvenlik Alarmları
+            </div>
+            <h1 class="text-2xl font-bold text-slate-800 mt-1 flex items-center">
+                <i class="fa-solid fa-triangle-exclamation text-amber-500 mr-2.5"></i> Açık DÖF ve Geciken Periyodik Muayeneler
+            </h1>
+            <p class="text-xs text-slate-500 mt-1">
+                Termin süresi geçmiş riskler ile muayene geçerlilik süresi dolan veya yaklaşan okul tesisatları.
+            </p>
+        </div>
+    </div>
+
+    <!-- 1. Bölüm: Açık DÖF Listesi (Kırmızı Alarmlar) -->
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 space-y-4">
+        <div class="flex justify-between items-center">
+            <h2 class="text-base font-bold text-slate-800 flex items-center">
+                <span class="p-1.5 bg-red-100 text-red-600 rounded-lg mr-2 text-sm"><i class="fa-solid fa-fire"></i></span>
+                Süresi Geçmiş / Açık DÖF Kayıtları
+            </h2>
+            <span class="bg-red-500 text-white font-bold text-xs px-2.5 py-1 rounded-full">
+                {{ open_dofs|length }} Açık Kayıt
+            </span>
+        </div>
+
+        {% if open_dofs %}
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs border border-slate-200 rounded-lg">
+                <thead class="bg-slate-50 text-slate-700 font-bold border-b">
+                    <tr>
+                        <th class="p-2.5">Kurum Adı</th>
+                        <th class="p-2.5">Birim</th>
+                        <th class="p-2.5">Tehlike ve Risk</th>
+                        <th class="p-2.5">Puan</th>
+                        <th class="p-2.5">Alınacak Önlem (DÖF)</th>
+                        <th class="p-2.5">Sorumlu</th>
+                        <th class="p-2.5">Termin</th>
+                        <th class="p-2.5">Durum</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for d in open_dofs %}
+                    <tr class="hover:bg-red-50/30 transition">
+                        <td class="p-2.5 font-bold text-slate-800">
+                            <a href="/okul/{{ d.school_id }}" class="hover:text-blue-600 transition">{{ d.kurum_adi }}</a>
+                        </td>
+                        <td class="p-2.5 text-slate-600">{{ d.kontrol_edilen_birim }}</td>
+                        <td class="p-2.5 font-medium text-slate-800">
+                            <div>{{ d.tehlike }}</div>
+                            <div class="text-[11px] text-slate-500">{{ d.tehlike_unsurlari }}</div>
+                        </td>
+                        <td class="p-2.5">
+                            <span class="font-extrabold text-red-600 px-2 py-0.5 bg-red-100 rounded text-xs">{{ d.risk_puani }}</span>
+                        </td>
+                        <td class="p-2.5 text-slate-700">{{ d.alinan_onlemler }}</td>
+                        <td class="p-2.5 font-semibold text-slate-600">{{ d.sorumlular }}</td>
+                        <td class="p-2.5 font-mono font-bold text-red-600">{{ d.termin_tarihi }}</td>
+                        <td class="p-2.5">
+                            <span class="bg-red-600 text-white font-bold px-2 py-0.5 rounded text-[10px] animate-pulse">SÜRESİ GEÇTİ</span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="p-6 text-center bg-emerald-50 text-emerald-700 rounded-lg text-xs font-semibold">
+            Tebrikler! Şu anda termini geçmiş açık bir DÖF kaydı bulunmuyor.
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- 2. Bölüm: Periyodik Muayene Alarmları -->
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 space-y-4">
+        <div class="flex justify-between items-center">
+            <h2 class="text-base font-bold text-slate-800 flex items-center">
+                <span class="p-1.5 bg-amber-100 text-amber-600 rounded-lg mr-2 text-sm"><i class="fa-solid fa-clock"></i></span>
+                Periyodik Muayene Alarmları (Geciken veya Yaklaşan)
+            </h2>
+            <span class="bg-amber-500 text-white font-bold text-xs px-2.5 py-1 rounded-full">
+                {{ periodic_alarms|length }} Tesisat / Ekipman
+            </span>
+        </div>
+
+        {% if periodic_alarms %}
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs border border-slate-200 rounded-lg">
+                <thead class="bg-slate-50 text-slate-700 font-bold border-b">
+                    <tr>
+                        <th class="p-2.5">Kurum Adı</th>
+                        <th class="p-2.5">Ekipman / Tesisat</th>
+                        <th class="p-2.5">Son Muayene</th>
+                        <th class="p-2.5">Sonraki Muayene</th>
+                        <th class="p-2.5">Muayene Kuruluşu</th>
+                        <th class="p-2.5">Durum / Alarm</th>
+                        <th class="p-2.5">Notlar</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for p in periodic_alarms %}
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="p-2.5 font-bold text-slate-800">
+                            <a href="/okul/{{ p.school_id }}" class="hover:text-blue-600 transition">{{ p.kurum_adi }}</a>
+                        </td>
+                        <td class="p-2.5 font-semibold text-slate-700">{{ p.ekipman_turu }}</td>
+                        <td class="p-2.5 font-mono text-slate-600">{{ p.son_kontrol_tarihi }}</td>
+                        <td class="p-2.5 font-mono font-bold text-slate-800">{{ p.sonraki_kontrol_tarihi }}</td>
+                        <td class="p-2.5 text-slate-600">{{ p.kontrol_yapan_kurum }}</td>
+                        <td class="p-2.5">
+                            {% if p.alarm_seviyesi == 'Suresi Gecmis' %}
+                            <span class="bg-red-500 text-white font-bold px-2 py-0.5 rounded text-[10px] animate-pulse">SÜRESİ GEÇTİ</span>
+                            {% else %}
+                            <span class="bg-amber-500 text-white font-bold px-2 py-0.5 rounded text-[10px]">YAKLAŞIYOR (30 GÜN)</span>
+                            {% endif %}
+                        </td>
+                        <td class="p-2.5 text-[11px] text-slate-500">{{ p.notlar or '-' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="p-6 text-center bg-emerald-50 text-emerald-700 rounded-lg text-xs font-semibold">
+            Tüm kurumların periyodik teknik kontrolleri güncel durumdadır.
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

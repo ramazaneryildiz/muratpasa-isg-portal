@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ school.kurum_adi }} — İSG Bilgi Giriş & Güncelleme</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .tab-btn.active {
+            border-bottom-color: #dc2626;
+            color: #dc2626;
+            font-weight: 700;
+        }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans min-h-screen flex flex-col">
+
+    <!-- Üst Bar -->
+    <header class="bg-gradient-to-r from-red-800 via-red-700 to-blue-900 text-white shadow-md sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 h-16 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="bg-white p-2 rounded-full text-red-700 w-10 h-10 flex items-center justify-center shadow">
+                    <i class="fa-solid fa-school text-lg"></i>
+                </div>
+                <div>
+                    <div class="text-[11px] text-red-200 font-semibold uppercase">Muratpaşa İlçe MEM • Okul İSG Portalı</div>
+                    <div class="text-sm font-bold truncate max-w-md sm:max-w-xl">{{ school.kurum_adi }}</div>
+                </div>
+            </div>
+            <div class="flex items-center space-x-3">
+                <span class="hidden sm:inline-block px-2.5 py-1 bg-white/10 rounded text-xs font-mono">Kod: {{ school.kurum_kodu }}</span>
+                <a href="/okul-portal/yazdir" target="_blank" title="Resmî İSG Beyan Formunu A4 Formatında Yazdır / PDF Kaydet" class="px-3 py-1.5 bg-white/20 hover:bg-white/30 text-white rounded-lg text-xs font-semibold transition flex items-center shadow-xs">
+                    <i class="fa-solid fa-print mr-1.5"></i> Yazdır / PDF
+                </a>
+                <a href="/okul-portal/cikis" class="px-3 py-1.5 bg-red-900/60 hover:bg-red-900 text-red-100 hover:text-white rounded-lg text-xs font-semibold transition flex items-center">
+                    <i class="fa-solid fa-right-from-bracket mr-1.5"></i> Çıkış
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Ana İçerik -->
+    <main class="max-w-6xl w-full mx-auto p-4 sm:p-6 flex-1">
+
+        <!-- Bilgi / Bildirim Kartı -->
+        {% if msg %}
+        <div class="mb-5 p-4 bg-emerald-50 border-l-4 border-emerald-500 rounded-r-xl shadow-sm flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <i class="fa-solid fa-circle-check text-emerald-500 text-xl"></i>
+                <div>
+                    <div class="text-sm font-bold text-emerald-800">Verileriniz Başarıyla Kaydedildi!</div>
+                    <div class="text-xs text-emerald-600">Okulunuza ait tüm göstergeler ve iletişim bilgileri İlçe MEM İSG Birimi sistemine anında aktarıldı.</div>
+                </div>
+            </div>
+            <span class="text-xs font-mono text-emerald-700 bg-emerald-100 px-2 py-1 rounded">Canlı Eşitlendi</span>
+        </div>
+        {% endif %}
+
+        <!-- Başlık & Son Güncelleme -->
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+                <div class="flex items-center space-x-2">
+                    <span class="px-2 py-0.5 rounded text-xs font-bold {% if school.kurum_statusu == 'Resmî' %}bg-blue-100 text-blue-800{% else %}bg-purple-100 text-purple-800{% endif %}">
+                        {{ school.kurum_statusu }}
+                    </span>
+                    <span class="px-2 py-0.5 bg-slate-100 text-slate-700 rounded text-xs font-semibold">{{ school.kurum_turu }}</span>
+                    <span class="px-2 py-0.5 bg-amber-100 text-amber-800 rounded text-xs font-semibold">{{ school.oncelik_derecesi }}. Derece Öncelikli</span>
+                </div>
+                <h1 class="text-xl font-extrabold text-slate-800 mt-2">{{ school.kurum_adi }}</h1>
+                <p class="text-xs text-slate-500 mt-1">
+                    <i class="fa-solid fa-circle-info mr-1 text-blue-500"></i>
+                    Okulunuzdaki verileri güncellediğinizde İlçe İSG Birimi Koordinatörü ve Sorumlu İSG Uzmanı anında bilgilendirilir.
+                </p>
+            </div>
+            <div class="text-right text-xs bg-slate-50 p-3 rounded-xl border border-slate-200">
+                <div class="text-slate-400 font-semibold">Son Veri Girişi / Güncelleme:</div>
+                <div class="font-bold text-slate-700 mt-0.5">{{ school.son_veri_giris_tarihi or 'Henüz Girilmedi' }}</div>
+                {% if school.son_veri_giren_kisi %}
+                <div class="text-slate-500 mt-0.5">Giren: {{ school.son_veri_giren_kisi }}</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- CANLI VERİ TAMAMLANMA ORANI & EKSİK VERİ UYARISI -->
+        {% if completion %}
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 mb-6">
+            <div class="flex flex-col sm:flex-row justify-between sm:items-center pb-3 border-b border-slate-100 gap-3">
+                <div>
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Kurumunuzun İSG Veri Durumu</span>
+                    <div class="flex items-center space-x-2 mt-1">
+                        <span class="text-xl font-extrabold text-slate-800">Veri Tamamlanma Oranı:</span>
+                        <span class="px-2.5 py-0.5 rounded-full text-sm font-black {{ completion.color_class }}">%{{ completion.percentage }}</span>
+                    </div>
+                </div>
+                <div class="text-right text-xs font-semibold text-slate-500">
+                    {{ completion.completed_count }} / {{ completion.total_count }} Zorunlu Gösterge Tamamlandı
+                </div>
+            </div>
+
+            <div class="w-full bg-slate-100 rounded-full h-3 my-3 overflow-hidden">
+                <div class="{{ completion.bar_class }} h-3 rounded-full transition-all duration-500" style="width: {{ completion.percentage }}%"></div>
+            </div>
+
+            {% if completion.missing_count > 0 %}
+            <div class="bg-amber-50 border border-amber-200 rounded-xl p-3.5">
+                <div class="text-xs font-bold text-amber-900 mb-1.5 flex items-center">
+                    <i class="fa-solid fa-triangle-exclamation mr-1.5 text-amber-600"></i> Lütfen Aşağıdaki Eksik Verilerinizi İlgili Sekmelerden Doldurarak "Kaydet" Butonuna Basınız:
+                </div>
+                <div class="flex flex-wrap gap-1.5 mt-2">
+                    {% for m in completion.missing_items %}
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-white text-amber-900 border border-amber-300 shadow-2xs">
+                        <i class="fa-solid {{ m.icon }} mr-1.5 text-amber-600 text-[10px]"></i> {{ m.label }} <span class="text-[10px] text-slate-400 ml-1">({{ m.category }})</span>
+                    </span>
+                    {% endfor %}
+                </div>
+            </div>
+            {% else %}
+            <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3 flex items-center text-xs font-bold text-emerald-800">
+                <i class="fa-solid fa-circle-check mr-2 text-emerald-600 text-lg"></i> Tebrikler! Okulunuza ait 20 temel İSG verisi eksiksiz olarak sistemde yer almaktadır.
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- FORM BAŞLANGICI -->
+        <form action="/okul-portal/kaydet" method="POST" id="schoolForm" class="space-y-6">
+            <input type="hidden" name="school_id" value="{{ school.id }}">
+
+            <!-- Sekme Butonları -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="flex border-b border-slate-200 bg-slate-50 overflow-x-auto">
+                    <button type="button" onclick="switchTab('tab1')" id="btn_tab1" class="tab-btn active py-3.5 px-5 font-semibold text-xs sm:text-sm border-b-2 border-transparent text-slate-600 flex items-center whitespace-nowrap">
+                        <i class="fa-solid fa-address-book mr-2 text-blue-600"></i> 1. Kurum & İletişim
+                    </button>
+                    <button type="button" onclick="switchTab('tab2')" id="btn_tab2" class="tab-btn py-3.5 px-5 font-semibold text-xs sm:text-sm border-b-2 border-transparent text-slate-600 flex items-center whitespace-nowrap">
+                        <i class="fa-solid fa-shield-halved mr-2 text-indigo-600"></i> 2. Güvenlik & Kameralar (16 Tablo)
+                    </button>
+                    <button type="button" onclick="switchTab('tab3')" id="btn_tab3" class="tab-btn py-3.5 px-5 font-semibold text-xs sm:text-sm border-b-2 border-transparent text-slate-600 flex items-center whitespace-nowrap">
+                        <i class="fa-solid fa-fire-extinguisher mr-2 text-red-600"></i> 3. ADEP & Tatbikatlar
+                    </button>
+                    <button type="button" onclick="switchTab('tab4')" id="btn_tab4" class="tab-btn py-3.5 px-5 font-semibold text-xs sm:text-sm border-b-2 border-transparent text-slate-600 flex items-center whitespace-nowrap">
+                        <i class="fa-solid fa-wrench mr-2 text-emerald-600"></i> 4. Periyodik Kontroller & Tesisat
+                    </button>
+                    <button type="button" onclick="switchTab('tab5')" id="btn_tab5" class="tab-btn py-3.5 px-5 font-semibold text-xs sm:text-sm border-b-2 border-transparent text-slate-600 flex items-center whitespace-nowrap">
+                        <i class="fa-solid fa-users mr-2 text-purple-600"></i> 5. İSG Kurulu & Eğitimler
+                    </button>
+                </div>
+
+                <div class="p-6">
+                    
+                    <!-- ================= SEKME 1: KURUM & İLETİŞİM ================= -->
+                    <div id="tab1" class="tab-content active space-y-6">
+                        <div class="border-b border-slate-100 pb-3">
+                            <h3 class="font-bold text-slate-800 text-base">İşveren (Müdür) ve İşveren Vekili İletişim Bilgileri</h3>
+                            <p class="text-xs text-slate-500 mt-0.5">Acil durumlarda ve resmi İSG bildirimlerinde bu telefonlar aranır.</p>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- Müdür Bilgileri -->
+                            <div class="bg-blue-50/50 p-4 rounded-xl border border-blue-100 space-y-3">
+                                <div class="text-xs font-bold text-blue-900 uppercase flex items-center">
+                                    <i class="fa-solid fa-user-tie mr-1.5 text-blue-600"></i> İşveren (Okul Müdürü)
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">Müdür Adı Soyadı</label>
+                                    <input type="text" name="mudur_ad_soyad" value="{{ school.mudur_ad_soyad or '' }}" required
+                                           class="w-full bg-white border border-slate-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">Müdür Cep Telefonu</label>
+                                    <input type="text" name="mudur_tel" value="{{ school.mudur_tel or '' }}" placeholder="05xx xxx xx xx" required
+                                           class="w-full bg-white border border-slate-300 rounded-lg p-2.5 text-sm font-mono outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+                            </div>
+
+                            <!-- Md. Yrd. Bilgileri -->
+                            <div class="bg-indigo-50/50 p-4 rounded-xl border border-indigo-100 space-y-3">
+                                <div class="text-xs font-bold text-indigo-900 uppercase flex items-center">
+                                    <i class="fa-solid fa-user-gear mr-1.5 text-indigo-600"></i> İşveren Vekili (İSG'den Sorumlu Md. Yrd.)
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">İSG Md. Yrd. Adı Soyadı</label>
+                                    <input type="text" name="isveren_vekili_ad_soyad" value="{{ school.isveren_vekili_ad_soyad or '' }}"
+                                           class="w-full bg-white border border-slate-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-indigo-500">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">İSG Md. Yrd. Cep Telefonu</label>
+                                    <input type="text" name="isveren_vekili_tel" value="{{ school.isveren_vekili_tel or '' }}" placeholder="05xx xxx xx xx"
+                                           class="w-full bg-white border border-slate-300 rounded-lg p-2.5 text-sm font-mono outline-none focus:ring-2 focus:ring-indigo-500">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Kurum Genel Bilgileri -->
+                        <div class="border-t border-slate-100 pt-4">
+                            <h4 class="text-xs font-bold text-slate-700 uppercase mb-3">Kurum Kapasite ve Tesis Göstergeleri</h4>
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Öğrenci Sayısı</label>
+                                    <input type="number" name="ogrenci_sayisi" value="{{ school.ogrenci_sayisi or 0 }}" min="0"
+                                           class="w-full border border-slate-300 rounded-lg p-2 text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Öğretmen / Personel</label>
+                                    <input type="number" name="ogretmen_sayisi" value="{{ school.ogretmen_sayisi or 0 }}" min="0"
+                                           class="w-full border border-slate-300 rounded-lg p-2 text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Derslik Sayısı</label>
+                                    <input type="number" name="derslik_sayisi" value="{{ school.derslik_sayisi or 0 }}" min="0"
+                                           class="w-full border border-slate-300 rounded-lg p-2 text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Bina / Blok Sayısı</label>
+                                    <input type="number" name="bina_sayisi" value="{{ school.bina_sayisi or 1 }}" min="1"
+                                           class="w-full border border-slate-300 rounded-lg p-2 text-sm">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-3">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Okul Resmî E-posta Adresi</label>
+                                    <input type="email" name="eposta" value="{{ school.eposta or (school.kurum_kodu + '@meb.k12.tr') }}"
+                                           class="w-full border border-slate-300 rounded-lg p-2 text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Okul Sabit Telefonu</label>
+                                    <input type="text" name="telefon" value="{{ school.telefon or '' }}" placeholder="0242 xxx xx xx"
+                                           class="w-full border border-slate-300 rounded-lg p-2 text-sm">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ================= SEKME 2: GÜVENLİK & KAMERALAR ================= -->
+                    <div id="tab2" class="tab-content space-y-6">
+                        <div class="border-b border-slate-100 pb-3">
+                            <h3 class="font-bold text-slate-800 text-base">Okul Güvenlik Göstergeleri (Müfettiş 16 Tablo)</h3>
+                            <p class="text-xs text-slate-500 mt-0.5">Mülkiye Teftiş Kurulu ve MEB genelgesine dayalı okul güvenlik verileri.</p>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- Kamera ve KGYS -->
+                            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
+                                <div class="text-xs font-bold text-slate-800 uppercase flex items-center">
+                                    <i class="fa-solid fa-video mr-1.5 text-blue-600"></i> Kamera & KGYS Durumu
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">Güvenlik Kamera Sistemi</label>
+                                    <select name="kamera_sistemi_var_mi" class="w-full border border-slate-300 rounded-lg p-2 text-sm bg-white">
+                                        <option value="Var" {% if metrics.kamera_sistemi_var_mi == 'Var' %}selected{% endif %}>Var (Çalışır Durumda)</option>
+                                        <option value="Kısmen Var" {% if metrics.kamera_sistemi_var_mi == 'Kısmen Var' %}selected{% endif %}>Kısmen Var (Arızalı Noktalar Var)</option>
+                                        <option value="Yok" {% if metrics.kamera_sistemi_var_mi == 'Yok' %}selected{% endif %}>Yok</option>
+                                    </select>
+                                </div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-700 mb-1">Toplam Kamera Sayısı</label>
+                                        <input type="number" name="toplam_kamera_sayisi" value="{{ metrics.toplam_kamera_sayisi or 16 }}" min="0"
+                                               class="w-full border border-slate-300 rounded-lg p-2 text-sm bg-white">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-700 mb-1">Kör Nokta Kamera İhtiyacı</label>
+                                        <input type="number" name="kor_nokta_kamera_eksigi" value="{{ metrics.kor_nokta_kamera_eksigi or 0 }}" min="0"
+                                               class="w-full border border-slate-300 rounded-lg p-2 text-sm bg-white">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">KGYS (Emniyet Kent Güvenliği) Entegrasyonu</label>
+                                    <select name="kgys_entegre_mi" class="w-full border border-slate-300 rounded-lg p-2 text-sm bg-white">
+                                        <option value="Evet" {% if metrics.kgys_entegre_mi == 'Evet' %}selected{% endif %}>Evet (Emniyete Entegre)</option>
+                                        <option value="Hayır" {% if metrics.kgys_entegre_mi == 'Hayır' %}selected{% endif %}>Hayır (Entegre Değil)</option>
+                                        <option value="Kapsam Dışı" {% if metrics.kgys_entegre_mi == 'Kapsam Dışı' %}selected{% endif %}>Kapsam Dışı</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">30 Gün Kesintisiz Kayıt ve Açı Uygunluğu</label>
+                                    <select name="kamera_30gun_kayit_ve_aci_tam_mi" class="w-full border border-slate-300 rounded-lg p-2 text-sm bg-white">
+                                        <option value="Evet" {% if metrics.kamera_30gun_kayit_ve_aci_tam_mi == 'Evet' %}selected{% endif %}>Evet (Kayıt ve Açılar Tam)</option>
+                                        <option value="Hayır" {% if metrics.kamera_30gun_kayit_ve_aci_tam_mi == 'Hayır' %}selected{% endif %}>Hayır (Eksiklik Var)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Güvenlik Personeli & Giriş Kontrolü -->
+                            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
+                                <div class="text-xs font-bold text-slate-800 uppercase flex items-center">
+                                    <i class="fa-solid fa-user-shield mr-1.5 text-indigo-600"></i> Güvenlik Personeli & Giriş Kontrolü
+                                </div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-700 mb-1">Özel Güvenlik (ÖGG)</label>
+                                        <input type="number" name="ozel_guvenlik_sayisi" value="{{ metrics.ozel_guvenlik_sayisi or 0 }}" min="0"
+                                               class="w-full border border-slate-300 rounded-lg p-2 text-sm bg-white">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-700 mb-1">Bahçe Görevlisi (TYP)</label>
+                                        <input type="number" name="bahce_gorevlisi_sayisi" value="{{ metrics.bahce_gorevlisi_sayisi or 0 }}" min="0"
+                                               class="w-full border border-slate-300 rounded-lg p-2 text-sm bg-white">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">Giriş-Çıkış Kapı Durumu</label>
+                                    <select name="giris_cikis_kapi_durumu" class="w-full border border-slate-300 rounded-lg p-2 text-sm bg-white">
+                                        <option value="Tek Kapıdan Girişi Olan Okul" {% if metrics.giris_cikis_kapi_durumu == 'Tek Kapıdan Girişi Olan Okul' %}selected{% endif %}>Tek Kapıdan Girişi Olan Okul</option>
+                                        <option value="Birden Fazla Kapısı Olan Okul" {% if metrics.giris_cikis_kapi_durumu == 'Birden Fazla Kapısı Olan Okul' %}selected{% endif %}>Birden Fazla Kapısı Olan Okul</option>
+                                    </select>
+                                </div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-700 mb-1">Turnike Sistemi</label>
+                                        <select name="turnike_var_mi" class="w-full border border-slate-300 rounded-lg p-2 text-sm bg-white">
+                                            <option value="Var" {% if metrics.turnike_var_mi == 'Var' %}selected{% endif %}>Var</option>
+                                            <option value="Yok" {% if metrics.turnike_var_mi == 'Yok' %}selected{% endif %}>Yok</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-700 mb-1">Ziyaretçi Kayıt Sistemi</label>
+                                        <select name="ziyaretci_kayit_sistemi" class="w-full border border-slate-300 rounded-lg p-2 text-sm bg-white">
+                                            <option value="Evet" {% if metrics.ziyaretci_kayit_sistemi == 'Evet' %}selected{% endif %}>Evet (Defter/Dijital)</option>
+                                            <option value="Hayır" {% if metrics.ziyaretci_kayit_sistemi == 'Hayır' %}selected{% endif %}>Hayır</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">Özel Araçların Okul Bahçesine Giriş Engeli</label>
+                                    <select name="ozel_arac_bahce_engeli" class="w-full border border-slate-300 rounded-lg p-2 text-sm bg-white">
+                                        <option value="Evet" {% if metrics.ozel_arac_bahce_engeli == 'Evet' %}selected{% endif %}>Evet (Bahçeye Araç Alınmıyor/Bariyer Var)</option>
+                                        <option value="Hayır" {% if metrics.ozel_arac_bahce_engeli == 'Hayır' %}selected{% endif %}>Hayır (Araç Park Ediliyor)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ================= SEKME 3: ADEP & TATBİKATLAR ================= -->
+                    <div id="tab3" class="tab-content space-y-6">
+                        <div class="border-b border-slate-100 pb-3">
+                            <h3 class="font-bold text-slate-800 text-base">Acil Durum Planı, EK-7 Ölçeği ve Tatbikatlar</h3>
+                            <p class="text-xs text-slate-500 mt-0.5">Yasal zorunluluk kapsamındaki acil durum ve tatbikat kayıtları.</p>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- ADEP & EK-7 -->
+                            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
+                                <div class="text-xs font-bold text-slate-800 uppercase flex items-center">
+                                    <i class="fa-solid fa-file-shield mr-1.5 text-red-600"></i> ADEP & Durum Değerlendirmesi
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">Acil Durum Eylem Planı (ADEP) Durumu</label>
+                                    <select name="adep_var_mi" class="w-full border border-slate-300 rounded-lg p-2 text-sm bg-white">
+                                        <option value="Var" {% if metrics.adep_var_mi == 'Var' %}selected{% endif %}>Var (Onaylı & Güncel)</option>
+                                        <option value="Güncelleniyor" {% if metrics.adep_var_mi == 'Güncelleniyor' %}selected{% endif %}>Güncelleniyor / Revizyonda</option>
+                                        <option value="Yok" {% if metrics.adep_var_mi == 'Yok' %}selected{% endif %}>Yok</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">ADEP Son Onay / Revizyon Tarihi</label>
+                                    <input type="date" name="adep_tarihi" value="{{ metrics.adep_tarihi or '' }}"
+                                           class="w-full border border-slate-300 rounded-lg p-2 text-sm bg-white">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">EK-7 Durum Değerlendirme Ölçeği</label>
+                                    <select name="ek7_olcek_var_mi" class="w-full border border-slate-300 rounded-lg p-2 text-sm bg-white">
+                                        <option value="Var" {% if metrics.ek7_olcek_var_mi == 'Var' %}selected{% endif %}>Var (Dolduruldu)</option>
+                                        <option value="Yok" {% if metrics.ek7_olcek_var_mi == 'Yok' %}selected{% endif %}>Yok</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">EK-7 Doldurulma Tarihi</label>
+                                    <input type="date" name="ek7_tarihi" value="{{ metrics.ek7_tarihi or '' }}"
+                                           class="w-full border border-slate-300 rounded-lg p-2 text-sm bg-white">
+                                </div>
+                            </div>
+
+                            <!-- Tatbikatlar -->
+                            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
+                                <div class="text-xs font-bold text-slate-800 uppercase flex items-center">
+                                    <i class="fa-solid fa-person-running mr-1.5 text-amber-600"></i> Yangın & Tahliye Tatbikatları
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">Son Yapılan Tatbikat Türü</label>
+                                    <select name="tatbikat_turu" class="w-full border border-slate-300 rounded-lg p-2 text-sm bg-white">
+                                        <option value="Yangın ve Tahliye" {% if metrics.tatbikat_turu == 'Yangın ve Tahliye' %}selected{% endif %}>Yangın ve Tahliye Tatbikatı</option>
+                                        <option value="Deprem ve Tahliye" {% if metrics.tatbikat_turu == 'Deprem ve Tahliye' %}selected{% endif %}>Deprem ve Tahliye Tatbikatı</option>
+                                        <option value="İkisi Birlikte" {% if metrics.tatbikat_turu == 'İkisi Birlikte' %}selected{% endif %}>Deprem + Yangın + Tahliye Ortak</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">Tatbikat Yapılma Tarihi</label>
+                                    <input type="date" name="tatbikat_tarihi" value="{{ metrics.tatbikat_tarihi or '' }}"
+                                           class="w-full border border-slate-300 rounded-lg p-2 text-sm bg-white">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">Tatbikata Katılan Kişi Sayısı (Öğrenci + Personel)</label>
+                                    <input type="number" name="tatbikat_katilimci_sayisi" value="{{ metrics.tatbikat_katilimci_sayisi or 0 }}" min="0"
+                                           class="w-full border border-slate-300 rounded-lg p-2 text-sm bg-white">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 mb-1">Okul Güvenlik Ekibi Toplantı Sayısı (Bu Dönem)</label>
+                                    <input type="number" name="guvenlik_ekibi_toplanti_sayisi" value="{{ metrics.guvenlik_ekibi_toplanti_sayisi or 1 }}" min="0"
+                                           class="w-full border border-slate-300 rounded-lg p-2 text-sm bg-white">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ================= SEKME 4: PERİYODİK KONTROLLER ================= -->
+                    <div id="tab4" class="tab-content space-y-6">
+                        <div class="border-b border-slate-100 pb-3">
+                            <h3 class="font-bold text-slate-800 text-base">Teknik Periyodik Muayeneler & Bina Tesisat Güvenliği</h3>
+                            <p class="text-xs text-slate-500 mt-0.5">Yılda 1 kez akredite mühendislerce yapılması zorunlu teknik kontrollerin son tarihleri.</p>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <!-- Kalorifer Kazanı -->
+                            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
+                                <div class="text-xs font-bold text-slate-700 uppercase flex items-center justify-between">
+                                    <span class="flex items-center"><i class="fa-solid fa-temperature-arrow-up mr-1.5 text-red-500"></i> Kalorifer Kazanı</span>
+                                </div>
+                                <p class="text-[11px] text-slate-400">Yılda 1 kez hidrostatik test zorunludur.</p>
+                                <div>
+                                    <label class="block text-[11px] font-semibold text-slate-700 mb-1">Kazan Durumu</label>
+                                    <select name="kazan_durumu" id="kazan_durumu" onchange="toggleEquipmentField('kazan_durumu', 'kazan_tarih_container', 'kazan_muaf_msg')" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white font-medium">
+                                        <option value="Var" {% if metrics.kazan_durumu == 'Var' or not metrics.kazan_durumu %}selected{% endif %}>Var (Muayene Yapılmalı)</option>
+                                        <option value="Yok" {% if metrics.kazan_durumu == 'Yok' %}selected{% endif %}>Yok (Klima / Bireysel Isınma - Muaf)</option>
+                                    </select>
+                                </div>
+                                <div id="kazan_tarih_container">
+                                    <label class="block text-[11px] font-semibold text-slate-600 mb-1">Son Muayene Tarihi</label>
+                                    <input type="date" name="kazan_kontrol_tarihi" id="kazan_kontrol_tarihi" value="{{ metrics.kazan_kontrol_tarihi or '' }}"
+                                           class="w-full border border-slate-300 rounded-lg p-2 text-sm bg-white">
+                                </div>
+                                <div id="kazan_muaf_msg" class="hidden p-2 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center">
+                                    <i class="fa-solid fa-check-circle mr-1.5 text-emerald-600"></i> Merkezi kazan bulunmadığından muaftır.
+                                </div>
+                            </div>
+
+                            <!-- Elektrik & Topraklama -->
+                            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
+                                <div class="text-xs font-bold text-slate-700 uppercase flex items-center">
+                                    <i class="fa-solid fa-bolt mr-1.5 text-amber-500"></i> Elektrik İç Tesisat & Topraklama
+                                </div>
+                                <p class="text-[11px] text-slate-400">Topraklama ölçümü ve kaçak akım rölesi testi.</p>
+                                <div class="pt-2">
+                                    <label class="block text-[11px] font-semibold text-slate-600 mb-1">Son Ölçüm Tarihi</label>
+                                    <input type="date" name="elektrik_topraklama_tarihi" value="{{ metrics.elektrik_topraklama_tarihi or '' }}"
+                                           class="w-full border border-slate-300 rounded-lg p-2 text-sm bg-white">
+                                </div>
+                            </div>
+
+                            <!-- Paratoner -->
+                            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
+                                <div class="text-xs font-bold text-slate-700 uppercase flex items-center justify-between">
+                                    <span class="flex items-center"><i class="fa-solid fa-cloud-bolt mr-1.5 text-blue-500"></i> Paratoner (Yıldırımlık)</span>
+                                </div>
+                                <p class="text-[11px] text-slate-400">Yıldırımdan korunma tesisatı ölçüm tarihi.</p>
+                                <div>
+                                    <label class="block text-[11px] font-semibold text-slate-700 mb-1">Paratoner Durumu</label>
+                                    <select name="paratoner_durumu" id="paratoner_durumu" onchange="toggleEquipmentField('paratoner_durumu', 'paratoner_tarih_container', 'paratoner_muaf_msg')" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white font-medium">
+                                        <option value="Var" {% if metrics.paratoner_durumu == 'Var' or not metrics.paratoner_durumu %}selected{% endif %}>Var (Mevcut)</option>
+                                        <option value="Yok" {% if metrics.paratoner_durumu == 'Yok' %}selected{% endif %}>Yok (Binada Paratoner Yok)</option>
+                                    </select>
+                                </div>
+                                <div id="paratoner_tarih_container">
+                                    <label class="block text-[11px] font-semibold text-slate-600 mb-1">Son Ölçüm Tarihi</label>
+                                    <input type="date" name="paratoner_kontrol_tarihi" id="paratoner_kontrol_tarihi" value="{{ metrics.paratoner_kontrol_tarihi or '' }}"
+                                           class="w-full border border-slate-300 rounded-lg p-2 text-sm bg-white">
+                                </div>
+                                <div id="paratoner_muaf_msg" class="hidden p-2 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 text-xs flex items-center">
+                                    <i class="fa-solid fa-circle-info mr-1.5 text-slate-500"></i> Paratoner bulunmadığı beyan edilmiştir.
+                                </div>
+                            </div>
+
+                            <!-- Yangın Tüpleri -->
+                            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
+                                <div class="text-xs font-bold text-slate-700 uppercase flex items-center">
+                                    <i class="fa-solid fa-fire-extinguisher mr-1.5 text-rose-500"></i> Yangın Söndürme Cihazları (YSC)
+                                </div>
+                                <p class="text-[11px] text-slate-400">Yıllık dolum ve 6 aylık basınç kontrol tarihi.</p>
+                                <div class="pt-2">
+                                    <label class="block text-[11px] font-semibold text-slate-600 mb-1">Son Kontrol Tarihi</label>
+                                    <input type="date" name="yangin_tupleri_kontrol_tarihi" value="{{ metrics.yangin_tupleri_kontrol_tarihi or '' }}"
+                                           class="w-full border border-slate-300 rounded-lg p-2 text-sm bg-white">
+                                </div>
+                            </div>
+
+                            <!-- Asansör -->
+                            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
+                                <div class="text-xs font-bold text-slate-700 uppercase flex items-center justify-between">
+                                    <span class="flex items-center"><i class="fa-solid fa-elevator mr-1.5 text-indigo-500"></i> Asansör Muayenesi</span>
+                                </div>
+                                <p class="text-[11px] text-slate-400">A tipi muayene kuruluşu yeşil etiket tarihi.</p>
+                                <div>
+                                    <label class="block text-[11px] font-semibold text-slate-700 mb-1">Asansör Durumu</label>
+                                    <select name="asansor_durumu" id="asansor_durumu" onchange="toggleEquipmentField('asansor_durumu', 'asansor_tarih_container', 'asansor_muaf_msg')" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white font-medium">
+                                        <option value="Yok" {% if metrics.asansor_durumu == 'Yok' or not metrics.asansor_durumu %}selected{% endif %}>Yok (Binada Asansör Yok / Muaf)</option>
+                                        <option value="Var" {% if metrics.asansor_durumu == 'Var' %}selected{% endif %}>Var (Asansör Mevcut)</option>
+                                    </select>
+                                </div>
+                                <div id="asansor_tarih_container">
+                                    <label class="block text-[11px] font-semibold text-slate-600 mb-1">Son A Tipi Yeşil Etiket Tarihi</label>
+                                    <input type="date" name="asansor_muayene_tarihi" id="asansor_muayene_tarihi" value="{{ metrics.asansor_muayene_tarihi or '' }}"
+                                           class="w-full border border-slate-300 rounded-lg p-2 text-sm bg-white">
+                                </div>
+                                <div id="asansor_muaf_msg" class="hidden p-2 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center">
+                                    <i class="fa-solid fa-check-circle mr-1.5 text-emerald-600"></i> Binada asansör bulunmamaktadır (Muaf).
+                                </div>
+                            </div>
+
+                            <!-- Su Deposu -->
+                            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
+                                <div class="text-xs font-bold text-slate-700 uppercase flex items-center justify-between">
+                                    <span class="flex items-center"><i class="fa-solid fa-faucet-drip mr-1.5 text-cyan-500"></i> Su Deposu Temizlik & Klor</span>
+                                </div>
+                                <p class="text-[11px] text-slate-400">6 ayda bir temizlik & dezenfeksiyon.</p>
+                                <div>
+                                    <label class="block text-[11px] font-semibold text-slate-700 mb-1">Su Deposu Durumu</label>
+                                    <select name="su_deposu_durumu" id="su_deposu_durumu" onchange="toggleEquipmentField('su_deposu_durumu', 'su_deposu_tarih_container', 'su_deposu_muaf_msg')" class="w-full border border-slate-300 rounded-lg p-2 text-xs bg-white font-medium">
+                                        <option value="Var" {% if metrics.su_deposu_durumu == 'Var' or not metrics.su_deposu_durumu %}selected{% endif %}>Var (Mevcut)</option>
+                                        <option value="Yok" {% if metrics.su_deposu_durumu == 'Yok' %}selected{% endif %}>Yok (Su Deposu Yok)</option>
+                                    </select>
+                                </div>
+                                <div id="su_deposu_tarih_container">
+                                    <label class="block text-[11px] font-semibold text-slate-600 mb-1">Son Dezenfeksiyon Tarihi</label>
+                                    <input type="date" name="su_deposu_temizlik_tarihi" id="su_deposu_temizlik_tarihi" value="{{ metrics.su_deposu_temizlik_tarihi or '' }}"
+                                           class="w-full border border-slate-300 rounded-lg p-2 text-sm bg-white">
+                                </div>
+                                <div id="su_deposu_muaf_msg" class="hidden p-2 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 text-xs flex items-center">
+                                    <i class="fa-solid fa-circle-info mr-1.5 text-slate-500"></i> Su deposu bulunmadığı beyan edilmiştir.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ================= SEKME 5: İSG KURULU & EĞİTİMLER ================= -->
+                    <div id="tab5" class="tab-content space-y-6">
+                        <div class="border-b border-slate-100 pb-3">
+                            <h3 class="font-bold text-slate-800 text-base">İSG Kurulu, Ekipler ve Eğitim Sayıları</h3>
+                            <p class="text-xs text-slate-500 mt-0.5">6331 sayılı Kanun kapsamındaki organizasyonel göstergeler.</p>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">İSG Kurulu Oluşturuldu mu?</label>
+                                <select name="isg_kurulu_var_mi" class="w-full border border-slate-300 rounded-lg p-2 text-sm bg-white">
+                                    <option value="Evet" {% if metrics.isg_kurulu_var_mi == 'Evet' %}selected{% endif %}>Evet (Aktif Çalışıyor)</option>
+                                    <option value="Hayır" {% if metrics.isg_kurulu_var_mi == 'Hayır' %}selected{% endif %}>Hayır (Gerekli Değil / Yok)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">Çalışan Temsilcisi Seçildi mi?</label>
+                                <select name="calisan_temsilcisi_var_mi" class="w-full border border-slate-300 rounded-lg p-2 text-sm bg-white">
+                                    <option value="Evet" {% if metrics.calisan_temsilcisi_var_mi == 'Evet' %}selected{% endif %}>Evet (Ataması Yapıldı)</option>
+                                    <option value="Hayır" {% if metrics.calisan_temsilcisi_var_mi == 'Hayır' %}selected{% endif %}>Hayır</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">Sertifikalı İlkyardımcı Sayısı</label>
+                                <input type="number" name="ilkyardimci_personel_sayisi" value="{{ metrics.ilkyardimci_personel_sayisi or 2 }}" min="0"
+                                       class="w-full border border-slate-300 rounded-lg p-2 text-sm bg-white">
+                            </div>
+                        </div>
+
+                        <div class="border-t border-slate-100 pt-4">
+                            <h4 class="text-xs font-bold text-slate-700 uppercase mb-3">İSG Eğitimi Alan Kişi Sayıları</h4>
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Eğitim Alan Yönetici</label>
+                                    <input type="number" name="egitim_yonetici_alan" value="{{ metrics.egitim_yonetici_alan or 0 }}" min="0"
+                                           class="w-full border border-slate-300 rounded-lg p-2 text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Eğitim Alan Öğretmen</label>
+                                    <input type="number" name="egitim_ogretmen_alan" value="{{ metrics.egitim_ogretmen_alan or 0 }}" min="0"
+                                           class="w-full border border-slate-300 rounded-lg p-2 text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Eğitim Alan Öğrenci</label>
+                                    <input type="number" name="egitim_ogrenci_alan" value="{{ metrics.egitim_ogrenci_alan or 0 }}" min="0"
+                                           class="w-full border border-slate-300 rounded-lg p-2 text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Eğitim Alan Diğer Personel</label>
+                                    <input type="number" name="egitim_diger_alan" value="{{ metrics.egitim_diger_alan or 0 }}" min="0"
+                                           class="w-full border border-slate-300 rounded-lg p-2 text-sm">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="border-t border-slate-100 pt-4">
+                            <h4 class="text-xs font-bold text-slate-700 uppercase mb-3">Güvenlik ve Olay İstatistikleri</h4>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">İş Kazası / Yaralanma Sayısı</label>
+                                    <input type="number" name="guvenlik_olay_sayisi" value="{{ metrics.guvenlik_olay_sayisi or 0 }}" min="0"
+                                           class="w-full border border-slate-300 rounded-lg p-2 text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">İhmal / İstismar Olay Sayısı</label>
+                                    <input type="number" name="ihmal_istismar_sayisi" value="{{ metrics.ihmal_istismar_sayisi or 0 }}" min="0"
+                                           class="w-full border border-slate-300 rounded-lg p-2 text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Bildirilen Olay Sayısı</label>
+                                    <input type="number" name="bildirilen_ihmal_istismar_sayisi" value="{{ metrics.bildirilen_ihmal_istismar_sayisi or 0 }}" min="0"
+                                           class="w-full border border-slate-300 rounded-lg p-2 text-sm">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Form Alt Çubuğu & Kaydet Butonu -->
+                <div class="p-5 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-4">
+                    <div class="text-xs text-slate-500">
+                        <i class="fa-solid fa-lock text-emerald-600 mr-1"></i>
+                        Verileriniz doğrudan yerel veritabanına ve ilçe sistemine anında kaydedilir.
+                    </div>
+                    <div class="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+                        <a href="/okul-portal/yazdir" target="_blank" class="w-full sm:w-auto px-5 py-3 bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 font-bold rounded-xl shadow-xs transition flex items-center justify-center text-sm">
+                            <i class="fa-solid fa-print mr-2 text-slate-500"></i> İSG Beyan Formu Çıktısı Al
+                        </a>
+                        <button type="submit" class="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition flex items-center justify-center text-sm">
+                            <i class="fa-solid fa-cloud-arrow-up mr-2 text-base"></i> Bilgileri Kaydet ve İlçe MEM'e İlet
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+    </main>
+
+    <footer class="bg-slate-800 text-slate-400 text-xs py-4 text-center border-t border-slate-700 mt-auto">
+        T.C. Antalya Muratpaşa İlçe Millî Eğitim Müdürlüğü • İş Sağlığı ve Güvenliği Birimi © 2026
+    </footer>
+
+    <script>
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            document.getElementById('btn_' + tabId).classList.add('active');
+        }
+
+        function toggleEquipmentField(selectId, containerId, msgId) {
+            const sel = document.getElementById(selectId);
+            const container = document.getElementById(containerId);
+            const msg = document.getElementById(msgId);
+            if (!sel || !container) return;
+            const isAbsent = (sel.value === 'Yok');
+            if (isAbsent) {
+                container.classList.add('hidden');
+                if (msg) msg.classList.remove('hidden');
+            } else {
+                container.classList.remove('hidden');
+                if (msg) msg.classList.add('hidden');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            toggleEquipmentField('kazan_durumu', 'kazan_tarih_container', 'kazan_muaf_msg');
+            toggleEquipmentField('paratoner_durumu', 'paratoner_tarih_container', 'paratoner_muaf_msg');
+            toggleEquipmentField('asansor_durumu', 'asansor_tarih_container', 'asansor_muaf_msg');
+            toggleEquipmentField('su_deposu_durumu', 'su_deposu_tarih_container', 'su_deposu_muaf_msg');
+        });
+    </script>
+</body>
+</html>

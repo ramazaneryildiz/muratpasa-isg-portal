@@ -1,0 +1,302 @@
+{% extends "base.html" %}
+
+{% block title %}İGU Görevlendirme & Çalışma Dağılım Çizelgesi — Muratpaşa İSG{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <!-- Üst Başlık & Eylemler -->
+    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <div class="flex items-center space-x-2 text-xs font-semibold text-sky-600 mb-1">
+                <i class="fa-solid fa-clipboard-user"></i>
+                <span>RESMÎ GÖREVLENDİRME & PERSONEL DAĞILIMI (20.08.2026 KARARI)</span>
+            </div>
+            <h1 class="text-2xl font-extrabold text-slate-800">İş Güvenliği Uzmanları (İGU) Okul ve Personel Dağılım Çizelgesi</h1>
+            <p class="text-xs text-slate-500 mt-1">
+                Antalya İl Millî Eğitim Müdürlüğü ve Muratpaşa İlçe MEM kararına dayalı İGU görevlendirmeleri, personel sayıları ve yasal hizmet süreleri.
+            </p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+            <a href="/export/igu-gorevlendirme" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition shadow flex items-center">
+                <i class="fa-solid fa-file-excel mr-2"></i> Çizelgeyi Excel Olarak İndir
+            </a>
+        </div>
+    </div>
+
+    <!-- İstatistik Kartları -->
+    <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+            <div>
+                <div class="text-xs text-slate-400 font-semibold uppercase">Görevli İGU Uzmanı</div>
+                <div class="text-2xl font-black text-slate-800 mt-0.5">{{ total_experts }} Uzman</div>
+                <div class="text-[11px] text-slate-500 mt-0.5">3 A Sınıfı • 1 B Sınıfı • 4 C Sınıfı</div>
+            </div>
+            <div class="w-10 h-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center text-lg">
+                <i class="fa-solid fa-user-shield"></i>
+            </div>
+        </div>
+
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+            <div>
+                <div class="text-xs text-slate-400 font-semibold uppercase">Atanan Resmî Kurum</div>
+                <div class="text-2xl font-black text-indigo-600 mt-0.5">{{ total_assigned_schools }} Okul</div>
+                <div class="text-[11px] text-indigo-600 mt-0.5">Tehlikeli & Az Tehlikeli</div>
+            </div>
+            <div class="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-lg flex items-center justify-center text-lg">
+                <i class="fa-solid fa-school"></i>
+            </div>
+        </div>
+
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+            <div>
+                <div class="text-xs text-slate-400 font-semibold uppercase">Kapsanan Personel</div>
+                <div class="text-2xl font-black text-emerald-600 mt-0.5">{{ total_personnel }} Kişi</div>
+                <div class="text-[11px] text-emerald-600 mt-0.5">Öğretmen ve Kamu Çalışanı</div>
+            </div>
+            <div class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center text-lg">
+                <i class="fa-solid fa-users"></i>
+            </div>
+        </div>
+
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+            <div>
+                <div class="text-xs text-slate-400 font-semibold uppercase">Aylık Yasal Hizmet Süresi</div>
+                <div class="text-2xl font-black text-amber-600 mt-0.5">{{ total_minutes // 60 }} Saat</div>
+                <div class="text-[11px] text-amber-600 mt-0.5">{{ total_minutes }} Dakika / Ay</div>
+            </div>
+            <div class="w-10 h-10 bg-amber-50 text-amber-600 rounded-lg flex items-center justify-center text-lg">
+                <i class="fa-solid fa-stopwatch"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Görevlendirme Kapsamı Durum Bilgisi (Resmî vs Özel Dağılımı) -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div class="bg-indigo-50/70 border border-indigo-200 rounded-xl p-3.5 flex items-center justify-between">
+            <div>
+                <span class="text-[11px] font-bold text-indigo-900 uppercase">Resmî Görevlendirilen Okul</span>
+                <div class="text-xl font-extrabold text-indigo-700 mt-0.5">{{ total_assigned_schools }} Kurum</div>
+                <div class="text-[11px] text-indigo-600">8 İGU Uzmanına Dağıtılan</div>
+            </div>
+            <i class="fa-solid fa-user-check text-2xl text-indigo-400"></i>
+        </div>
+
+        <div class="bg-amber-50/70 border border-amber-200 rounded-xl p-3.5 flex items-center justify-between">
+            <div>
+                <span class="text-[11px] font-bold text-amber-900 uppercase">Havuzdaki Resmî Kurumlar</span>
+                <div class="text-xl font-extrabold text-amber-700 mt-0.5">{{ unassigned_official|length }} Kurum</div>
+                <div class="text-[11px] text-amber-600">İl MEM Kararnamesi Dışı / İlçe Havuzu</div>
+            </div>
+            <i class="fa-solid fa-school-circle-exclamation text-2xl text-amber-400"></i>
+        </div>
+
+        <div class="bg-slate-100 border border-slate-300 rounded-xl p-3.5 flex items-center justify-between">
+            <div>
+                <span class="text-[11px] font-bold text-slate-800 uppercase">Özel Okul ve Kurumlar</span>
+                <div class="text-xl font-extrabold text-slate-700 mt-0.5">{{ unassigned_private|length }} Kurum</div>
+                <div class="text-[11px] text-slate-500">6331 Kapsamı Kendi Uzmanı / OSGB</div>
+            </div>
+            <i class="fa-solid fa-building-shield text-2xl text-slate-400"></i>
+        </div>
+    </div>
+
+    <!-- 8 Uzman Kartları ve Okul Listeleri -->
+    <div class="space-y-6">
+        {% for expert in experts_data %}
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <!-- Uzman Başlık Şeridi -->
+            <div class="bg-gradient-to-r from-slate-50 to-slate-100 p-4 sm:p-5 border-b border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div class="flex items-center space-x-3.5">
+                    <div class="w-12 h-12 rounded-xl flex items-center justify-center text-xl font-bold shadow-sm
+                        {% if 'A Sınıfı' in expert.igu_sinifi %}bg-red-100 text-red-700 border border-red-200
+                        {% elif 'B Sınıfı' in expert.igu_sinifi %}bg-amber-100 text-amber-700 border border-amber-200
+                        {% else %}bg-blue-100 text-blue-700 border border-blue-200{% endif %}">
+                        <i class="fa-solid fa-user-tie"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <h2 class="text-base font-extrabold text-slate-800">{{ expert.full_name }}</h2>
+                            <span class="px-2 py-0.5 rounded text-[11px] font-bold
+                                {% if 'A Sınıfı' in expert.igu_sinifi %}bg-red-100 text-red-800
+                                {% elif 'B Sınıfı' in expert.igu_sinifi %}bg-amber-100 text-amber-800
+                                {% else %}bg-blue-100 text-blue-800{% endif %}">
+                                {{ expert.igu_sinifi }}
+                            </span>
+                            <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-slate-200 text-slate-700">
+                                {{ expert.gorev_turu }}
+                            </span>
+                            {% if expert.role == 'koordinator' %}
+                            <span class="px-2 py-0.5 rounded text-[11px] font-black bg-amber-400 text-slate-900 uppercase">
+                                İlçe İSG Büro Koordinatörü
+                            </span>
+                            {% endif %}
+                        </div>
+                        <div class="text-xs text-slate-500 mt-1 flex flex-wrap items-center gap-x-4 gap-y-1">
+                            <span><i class="fa-solid fa-id-card mr-1 text-slate-400"></i> TC: {{ expert.tc_kimlik or '-' }}</span>
+                            <span><i class="fa-solid fa-building mr-1 text-slate-400"></i> Kadro: {{ expert.kadro_yeri or '-' }}</span>
+                            <span><i class="fa-solid fa-envelope mr-1 text-slate-400"></i> {{ expert.email }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-4 bg-white p-2.5 rounded-xl border border-slate-200 shadow-xs">
+                    <div class="text-center px-2">
+                        <div class="text-xs text-slate-400 font-semibold uppercase">Sorumlu Okul</div>
+                        <div class="text-base font-black text-slate-800">{{ expert.schools|length }}</div>
+                    </div>
+                    <div class="h-8 w-px bg-slate-200"></div>
+                    <div class="text-center px-2">
+                        <div class="text-xs text-slate-400 font-semibold uppercase">Personel</div>
+                        <div class="text-base font-black text-emerald-600">{{ expert.total_personnel }}</div>
+                    </div>
+                    <div class="h-8 w-px bg-slate-200"></div>
+                    <div class="text-center px-2">
+                        <div class="text-xs text-slate-400 font-semibold uppercase">Yasal Süre</div>
+                        <div class="text-base font-black text-amber-600">{{ expert.total_minutes // 60 }} sa {{ expert.total_minutes % 60 }} dk</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Okul Listesi Tablosu -->
+            <div class="overflow-x-auto p-4">
+                <table class="w-full text-left text-xs border-collapse">
+                    <thead>
+                        <tr class="bg-slate-50 text-slate-600 border-b border-slate-200">
+                            <th class="py-2.5 px-3">Kod</th>
+                            <th class="py-2.5 px-3">Kurum Adı</th>
+                            <th class="py-2.5 px-3">Tür</th>
+                            <th class="py-2.5 px-3">Tehlike Sınıfı</th>
+                            <th class="py-2.5 px-3 text-center">Personel Sayısı</th>
+                            <th class="py-2.5 px-3 text-center">Aylık Hizmet Süresi</th>
+                            <th class="py-2.5 px-3">Okul Müdürü & Telefon</th>
+                            <th class="py-2.5 px-3 text-center">İşlem</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        {% for s in expert.schools %}
+                        <tr class="hover:bg-slate-50 transition">
+                            <td class="py-2.5 px-3 font-mono font-semibold text-slate-600">{{ s.kurum_kodu }}</td>
+                            <td class="py-2.5 px-3 font-medium text-slate-800">
+                                <a href="/okul/{{ s.id }}" class="hover:text-blue-600 transition font-bold">{{ s.kurum_adi }}</a>
+                            </td>
+                            <td class="py-2.5 px-3 text-slate-500">{{ s.kurum_turu }}</td>
+                            <td class="py-2.5 px-3">
+                                <span class="px-2 py-0.5 rounded text-[10px] font-bold {% if s.tehlike_sinifi == 'Tehlikeli' %}bg-amber-100 text-amber-800{% else %}bg-slate-100 text-slate-600{% endif %}">
+                                    {{ s.tehlike_sinifi }}
+                                </span>
+                            </td>
+                            <td class="py-2.5 px-3 text-center font-bold text-slate-700">{{ s.personel_sayisi or '-' }}</td>
+                            <td class="py-2.5 px-3 text-center font-mono font-bold text-indigo-700">
+                                {% if s.aylik_hizmet_suresi_dk %}
+                                {{ s.aylik_hizmet_suresi_dk }} dk ({{ s.aylik_hizmet_suresi_dk // 60 }} sa)
+                                {% else %}-{% endif %}
+                            </td>
+                            <td class="py-2.5 px-3">
+                                <div class="font-semibold text-slate-700">{{ s.mudur_ad_soyad or 'Tanımlanmadı' }}</div>
+                                {% if s.mudur_tel %}
+                                <a href="tel:{{ s.mudur_tel }}" class="text-blue-600 font-mono hover:underline text-[11px] flex items-center gap-1">
+                                    <i class="fa-solid fa-phone text-[9px]"></i> {{ s.mudur_tel }}
+                                </a>
+                                {% endif %}
+                            </td>
+                            <td class="py-2.5 px-3 text-center">
+                                <a href="/okul/{{ s.id }}" class="px-2 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded text-xs font-semibold transition">
+                                    Detay <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- DOĞRUDAN UZMAN GÖREVLENDİRİLMEMİŞ / İLÇE HAVUZUNDAKİ KURUMLAR (223 KURUM) -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden p-6 mt-8">
+        <div class="flex flex-col sm:flex-row justify-between sm:items-center pb-4 border-b border-slate-200 gap-3">
+            <div>
+                <div class="flex items-center space-x-2">
+                    <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-200">
+                        <i class="fa-solid fa-circle-exclamation mr-1"></i> Görevlendirme Dışı Kurumlar
+                    </span>
+                    <span class="text-xs text-slate-400">Toplam {{ total_unassigned }} Kurum</span>
+                </div>
+                <h2 class="text-lg font-bold text-slate-800 mt-1">İlçe İSG Büro Havuzundaki (Atanmamış) Okul ve Kurumlar</h2>
+                <p class="text-xs text-slate-500 mt-0.5">
+                    Antalya İl Millî Eğitim Müdürlüğü'nün 20.08.2026 tarihli resmî kararnamesinde 8 uzmana dağıtılmayan <strong>{{ unassigned_official|length }} Resmî Okul</strong> ile yasal olarak kendi İGU/OSGB hizmetini alan <strong>{{ unassigned_private|length }} Özel Kurum</strong>.
+                </p>
+            </div>
+            <div class="flex items-center space-x-2">
+                <a href="/dinamik-rapor?sorumlu_uzman_id=atanmadi" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition flex items-center">
+                    <i class="fa-solid fa-filter mr-1.5"></i> Filtrele ve Raporla
+                </a>
+            </div>
+        </div>
+
+        <!-- 63 Resmî Okul Listesi -->
+        <div class="mt-5">
+            <div class="flex items-center justify-between mb-2">
+                <h3 class="text-xs font-bold text-amber-900 uppercase tracking-wider flex items-center">
+                    <i class="fa-solid fa-school-circle-exclamation mr-2 text-amber-600"></i> 1. Doğrudan Uzman Görevlendirilmemiş Resmî Okullar ({{ unassigned_official|length }} Okul)
+                </h3>
+                <span class="text-[11px] text-amber-700 font-semibold bg-amber-50 px-2.5 py-0.5 rounded-lg border border-amber-200">İlçe Koordinatörlük Havuzu</span>
+            </div>
+            <div class="overflow-x-auto border border-amber-200 rounded-xl max-h-96 overflow-y-auto">
+                <table class="w-full text-left text-xs border-collapse">
+                    <thead class="bg-amber-50 text-amber-900 border-b border-amber-200 sticky top-0 z-10 shadow-xs">
+                        <tr>
+                            <th class="py-2.5 px-3">Kod</th>
+                            <th class="py-2.5 px-3">Kurum Adı</th>
+                            <th class="py-2.5 px-3">Kurum Türü</th>
+                            <th class="py-2.5 px-3">Öncelik</th>
+                            <th class="py-2.5 px-3">Okul Müdürü & İletişim</th>
+                            <th class="py-2.5 px-3 text-center">İşlem</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-amber-100 bg-white">
+                        {% for s in unassigned_official %}
+                        <tr class="hover:bg-amber-50/50 transition">
+                            <td class="py-2 px-3 font-mono font-bold text-slate-600">{{ s.kurum_kodu }}</td>
+                            <td class="py-2 px-3 font-semibold text-slate-800">
+                                <a href="/okul/{{ s.id }}" class="hover:text-blue-600">{{ s.kurum_adi }}</a>
+                            </td>
+                            <td class="py-2 px-3 text-slate-500">{{ s.kurum_turu }}</td>
+                            <td class="py-2 px-3">
+                                {% if s.oncelik_derecesi == 1 %}
+                                <span class="bg-red-100 text-red-800 font-bold px-1.5 py-0.2 rounded text-[10px]">1. Derece</span>
+                                {% elif s.oncelik_derecesi == 2 %}
+                                <span class="bg-amber-100 text-amber-800 font-medium px-1.5 py-0.2 rounded text-[10px]">2. Derece</span>
+                                {% else %}
+                                <span class="bg-slate-100 text-slate-600 px-1.5 py-0.2 rounded text-[10px]">3. Derece</span>
+                                {% endif %}
+                            </td>
+                            <td class="py-2 px-3 text-[11px]">
+                                {{ s.mudur_ad_soyad or 'Tanımlanmadı' }} 
+                                {% if s.mudur_tel %}<span class="text-blue-600 font-mono">({{ s.mudur_tel }})</span>{% endif %}
+                            </td>
+                            <td class="py-2 px-3 text-center">
+                                <a href="/okul/{{ s.id }}" class="px-2 py-1 bg-slate-100 hover:bg-blue-100 text-blue-700 rounded text-[11px] font-semibold">İncele</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 160 Özel Kurum Açıklaması -->
+        <div class="mt-5 p-4 bg-slate-50 border border-slate-200 rounded-xl">
+            <div class="flex items-start space-x-3">
+                <i class="fa-solid fa-circle-info text-blue-500 text-base mt-0.5"></i>
+                <div class="text-xs text-slate-600">
+                    <strong class="text-slate-800">Özel Okul ve Kurumlar ({{ unassigned_private|length }} Kurum):</strong> 6331 sayılı İSG Kanunu uyarınca özel okullar ve kurslar kendi bünyelerindeki İGU uzmanı veya anlaşmalı OSGB üzerinden İSG hizmeti almakla yükümlüdür. Bu kurumlara ilçe kamu İGU uzmanı atanmaz; İlçe İSG Büro Koordinatörlüğümüz yalnızca teftiş, denetim, 16 Tablo güvenlik göstergeleri ve tatbikat süreçlerini koordine eder.
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

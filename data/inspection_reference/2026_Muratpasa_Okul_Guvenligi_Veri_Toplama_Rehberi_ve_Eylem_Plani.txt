@@ -1,0 +1,126 @@
+﻿T.C. ANTALYA MURATPAŞA İLÇE MİLLÎ EĞİTİM MÜDÜRLÜĞÜ
+Bakanlık Müfettişleri (Mülkiye + MEB + Kolluk) Okul Güvenliği Denetimi — Durum Özeti, Veri Kaynakları Matrisi ve İşlem Basamakları Rehberi
+Hazırlayan: Ramazan ERYILDIZ — İş Güvenliği Uzmanı | Tarih: 15 Ekim 2026
+________________
+1. MEVCUT DURUM ÖZETİ: BU DENETİM NEDİR VE NEDEN ÇOK KRİTİKTİR?
+* Denetimin Kimliği ve Kapsamı: İçişleri Bakanlığı Mülkiye Teftiş Kurulu Başkanlığı (13.10.2026 / 35296 sayılı görev emri), MEB Müfettişleri ve Kolluk (Emniyet/Jandarma) Müfettişleri tarafından ortaklaşa yürütülen; 24.04.2026 tarihli ve 130906 sayılı "Okul ve Çevresi Güvenlik Tedbirleri" Genelgesi ile Çocukların Eğitim Süreçlerinin Güvenliğine İlişkin İş Birliği Protokolü uygulamalarının denetimidir.
+* İncelenen Dönem: Tabloların ve maddelerin büyük çoğunluğu 24 Nisan 2026 tarihinden denetim tarihine (Ekim 2026) kadar yapılan iş ve işlemleri, bir kısmı ise son 2 eğitim-öğretim yılını ve özellikle 19.10.2026 – 20.10.2026 tarihlerindeki kamera/KGYS kayıtlarını kapsamaktadır.
+* Format Kuralı (Kırmızı Çizgi): Rapor şablonundaki 109 madde ve 16 tablonun (Tablo-1'den Tablo-16'ya kadar) sırası, numarası ve formatı kesinlikle değiştirilmeden, sarı boyalı alanlar ve (XX) boşlukları resmi yazı tarih/sayıları (somut kanıt/örnek evraklar) ile doldurulacaktır.
+* Muratpaşa İlçesi Kurum Evreni (okul listesi.xlsx):
+   * Resmî Okul ve Kurumlar: 123 Kurum (İlçe MEM, RAM, BİLSEM, HEM, MESEM ve Оlgunlaşma Enstitüsü dahil; 117'si doğrudan örgün/özel eğitim okulu)
+   * Özel Okullar: 146 Okul
+   * Özel Öğrenci Yurtları: 14 Yurt
+   * Genel Toplam: 283 Kurum
+________________
+2. BİZE HANGİ VERİLER LAZIM VE NEREDEN TOPLAYACAĞIZ? (3 KAYNAK GRUBU MATRİSİ)
+Rapordaki 16 tablo ve 109 maddenin hiçbir verisi tek bir birimde değildir. Verileri 3 ana kaynaktan toplayacak şekilde gruplandırdık:
+GRUP A — DOĞRUDAN OKUL MÜDÜRLÜKLERİNDEN (GOOGLE FORM İLE) TOPLANACAK VERİLER
+(İlçedeki tüm okul müdürlüklerine göndereceğimiz tek bir "Muratpaşa Okul Güvenliği Denetim Veri Giriş Formu" ile 24–48 saat içinde toplanacak veriler):
+İlgili Tablo / Madde
+	Okuldan İstenecek Veri Başlığı
+	Formdaki Soru Türü ve Kanıt
+ 
+	Tablo-1 (Md. 4, 5, 6)
+	• Okulun Öncelik/Risk Derecesi (1., 2., 3. veya 4. Derece)
+• Güncel Acil Durum Planı (Var/Yok, Hazırlanma/Güncellenme Tarihi)
+• Okul Durum Değerlendirme Ölçeği (EK-7) (Var/Yok, Düzenlenme Tarihi)
+	Çoktan seçmeli + Tarih alanı
+	Tablo-2 & Tablo-4 (Md. 10, 21, 22)
+	• Okuldaki Özel Güvenlik Görevlisi sayısı
+• Okul Bahçe Görevlisi (TYP/İŞKUR) sayısı ve Özel Güvenlik Sertifikası olup olmadığı
+• Bahçe görevlisine görev/yetki tebliğ tarihi (EGM 24.08.2026 yazısı gereği)
+	Sayısal giriş + Evet/Hayır + Tebliğ tarihi
+	Tablo-3 & Tablo-11 (Md. 15, 43, 65, 73, 78)
+	• El Tipi Metal Dedektör eğitimi alan personel sayısı
+• Okulda 24.04.2026'dan beri güvenlik/siber güvenlik/mahremiyet eğitimi alan Okul Yöneticisi, Öğretmen, Rehber Öğretmen, Öğrenci, Veli ve Diğer Çalışan sayıları
+• Okul Acil İhbar Uygulaması tanıtım tarihi
+• SİBERAY Kulübü varlığı ve etkinlik tarihi
+	Kişi sayıları + Tarih ve DYS yazı/tutanak sayısı
+	Tablo-5 (Md. 23, 24, 25)
+	• 24.04.2026'dan itibaren düzenlenen Okul Gözlem Formu / Raporu sayısı ve tespit edilen risklere karşı alınan tedbir örneği
+	Sayısal giriş + Örnek form tarihi
+	Tablo-6 & Tablo-7 (Md. 27–30, 36, 38, 39)
+	• Güvenlik Kamerası (Var / Yok / KGYS'ye Entegre mi / Kayıt saklama süresi yeterli mi?)
+• Giriş-Çıkış: Tek kapı mı / Birden fazla kapı mı? El dedektörü, Kapı dedektörü, Turnike sistemi (Var/Yok)
+• Fiziki Engel: Duvar / Tel Çit / Diğer / Fiziki Engel Yok
+• Araç/Servis Park Yeri ve Servis Bekleme Alanı: Var / Yok, Özel araç girişi engellendi mi?
+• Ziyaretçi Kayıt Sistemine geçiş durumu ve 24.04.2026 sonrası giderilen çevre güvenliği eksikliği
+	Çoktan seçmeli (Evet/Hayır) + 19-20 Ekim 2026 kamera kontrol teyidi
+	Tablo-9, 12, 13 (Md. 53, 57, 81, 82, 83, 86)
+	• 24.04.2026'dan beri Güvenlik Olayları Kayıt ve Bildirim Formu ile bildirilen olay sayısı
+• Okulda meydana gelen İhmal, İstismar, Şiddet vaka sayısı ve üst makama/kolluğa bildirim sayısı
+• Erken Uyarı ve Yönlendirme Sistemi kapsamında takip edilen Seviye 1, Seviye 2 ve Seviye 3 (ÇDE - Çok Disiplinli Değerlendirme Ekibi) vaka sayıları
+• Devamsız öğrenciler için yapılan aile ziyareti sayısı
+	Sayısal giriş + Örnek tutanak tarihleri
+	Tablo-14 & Tablo-16 (Md. 91, 96, 97)
+	• Okul Güvenliği Yönetim Ekibi (Okul Md. + Md. Yrd. + Rehber Öğrt.) aylık toplantı sayısı (24.04.2026'dan beri) ve görüşülen toplam konu sayısı
+• 1. Derece Öncelikli Okullar İçin: Tablo-16'daki 17 denetim kriterinin (Var/Yok) tek tek karşılığı
+	Sayısal giriş + 17 maddelik kontrol listesi
+	GRUP B — MURATPAŞA İLÇE MEM İÇİ ŞUBELERDEN ALINACAK VERİLER
+(İlçe MEM bünyesindeki şube müdürlüklerinden DYS/EBYS kayıtları ve şube istatistikleriyle toplanacak veriler):
+İlçe MEM Birimi / Şubesi
+	Alınacak Veri ve Evraklar
+	İlgili Rapor Maddeleri ve Tablolar
+ 
+	İSG Bürosu & Sivil Savunma / Özel Büro
+	• Okulların Acil Durum Planları ve Risk Değerlendirme (EK-7) icmali
+• Şiddet/silahlı tehdit olağanüstü durum standart müdahale prosedürü yazısı
+• 24.04.2026'dan beri bina/çevre güvenliği danışmanlığı verilen okul sayısı
+• Mevcut ve yeni açılacak okulların/yöneticilerin eğitim yılından 1 ay önce kolluğa bildirildiği resmi yazı tarih/sayısı
+	Tablo-1, Tablo-7, Md. 4, 5, 6, 7, 13, 20, 30, 35
+	Özel Eğitim ve Rehberlik Şubesi & Muratpaşa RAM
+	• İlçe düzeyinde risk faktörleri (devamsızlık, bağımlılık, siber zorbalık, suça sürüklenme) analiz raporları
+• Erken uyarı sistemi (Seviye 1, Seviye 2, Seviye 3 ve ÇDE) vaka icmali
+• İhmal, istismar, şiddet vaka ve bildirim sayıları
+• Rehber öğretmen, öğrenci ve veli eğitim sayıları; pedagojik iletişim eğitimi planı
+	Tablo-3, Tablo-11, Tablo-12, Tablo-13, Md. 8, 9, 16, 19, 65, 67, 69, 70, 73, 79, 81–88
+	Destek Hizmetleri / İdari ve Mali İşler (TYP & Taşımalı/Servis)
+	• TYP kapsamında istihdam edilen toplam bahçe görevlisi sayısı ve sertifika durumu
+• Servis şoförü ve rehber personele verilen "Güvenli Eğitim İletişimi / Çocuk Hakları" eğitim tarih ve katılımcı sayıları
+• Okul önü trafik eksikleri (yaya geçidi, korkuluk, levha) için Belediye/UKOME/İlçe Trafik Komisyonuna yazılan yazılar
+	Tablo-2, Tablo-4, Md. 21, 38, 40, 41, 43
+	Temel Eğitim & Ortaöğretim Şubeleri (Devamsızlık / Erişim)
+	• Kolluktan veya Nüfus Müdürlüğünden gelen verilerle okula kazandırılan / yönlendirilen zorunlu eğitim çağındaki çocuk sayısı
+• Hakkında adli işlem yapılıp İlçe MEM'e bildirilen öğrenci sayısı
+• Muhtarlar ve kolluk desteğiyle yapılan devamsızlık saha taraması ve aile ziyareti yazıları
+• Çocuk işçiliği önleme eğitim/farkındalık yazıları
+	Tablo-8, Md. 55, 56, 57, 58, 59
+	GRUP C — MURATPAŞA KAYMAKAMLIĞI, İLÇE EMNİYET MÜDÜRLÜĞÜ VE BELEDİYEDEN ALINACAK VERİLER
+(Kaymakamlık Yazı İşleri, İlçe Emniyet Müdürlüğü Çocuk Büro / Toplum Destekli Polislik / Trafik / Narkotik / Siber Suçlar ve Muratpaşa Belediyesi Zabıta/Fen İşleri'nden istenecek veriler):
+Dış Kurum / Birim
+	Alınacak Veri ve Evraklar (24.04.2026'dan İtibaren)
+	İlgili Rapor Maddeleri ve Tablolar
+ 
+	Muratpaşa Kaymakamlığı
+(Yazı İşleri / Özel Kalem)
+	• Kaymakam başkanlığında toplanan İlçe Eğitim Güvenliği Yürütme Kurulu toplantı sayısı, tarihleri, görüşülen konuların dağılımı (Tablo-15) ve alınan karar örnekleri
+• Muhtarlar toplantısında okul güvenliği bilgilendirme tutanakları
+	Tablo-14, Tablo-15, Md. 8, 13, 52, 91, 93, 94, 95
+	Muratpaşa İlçe Emniyet Müdürlüğü
+(Çocuk Büro / Asayiş / Narkotik / Siber / Trafik)
+	• Görevlendirmeler (Tablo-2): Okul Kolluk Görevlisi sayısı, Güvenli Eğitim Koordinasyon Görevlisi sayısı, Giriş-Çıkış saatlerinde görevlendirilen Devriye/Ekip sayısı ve görevlendirme/eğitim tarihleri
+• Çevre Denetimleri (Tablo-7): Tehlike teşkil eden kişi/gruplara yapılan işlem sayısı, denetlenip işlem yapılan seyyar satıcı sayısı, bağımlılık yapıcı madde satışı tespit edilen işletme sayısı, okula 100m'den yakın (bar, kahvehane, elektronik oyun vb.) işlem yapılan işletme sayısı
+• Narkotik ve Silah Bilinçlendirme (Tablo-8): Narko-Rehber eğitim sayısı, ruhsatlı ateşli silah sahibi ailelere yapılan bilinçlendirme/SMS sayısı ve 6136 sayılı Kanun m.13/A tebliğleri
+• Güvenlik Olayları İcmali (Tablo-9): Narkotik, Hırsızlık, Gasp, Yaralama, Saldırı/Silahlı Tehdit, Sabotaj, Kavga, İntihar, Diğer olay sayıları ve son 2 yılda olayların en çok yoğunlaştığı ilk 5 okul
+• Siber Suçlar (Tablo-10): Sanal ortamda tespit edilen Siber Zorbalık, Tehdit, Şiddet içeriği sayıları ve yapılan adli/idari işlem sayısı
+• KGYS ve Trafik: KGYS'ye entegre okul sayısı, 19–20 Ekim 2026 KGYS izleme sonuçları (Md. 37) ve servis denetim sayıları (Md. 42)
+	Tablo-2, Tablo-3, Tablo-7, Tablo-8, Tablo-9, Tablo-10, Md. 10–19, 22, 31, 32, 34, 37, 42, 44–51, 53–56, 61–68, 85, 89, 90
+	Muratpaşa Belediyesi & Büyükşehir Belediyesi / Sosyal Hizmetler
+	• Okul çevresinde tespit edilen toplam metruk bina sayısı, yıktırılan metruk bina sayısı ve kalan metruk bina sayısı (Tablo-7, Md. 33)
+• Son 6 ayda okul çevresindeki park/rekreasyon alanlarına kurulan kamera ve aydınlatma sayısı (Md. 47)
+• Barınma ihtiyacı olan çocuklar için konukevi/barınma desteği verilen çocuk sayısı (Md. 60)
+	Tablo-7, Md. 33, 47, 60
+	________________
+3. BAŞLAMAK İÇİN ADIM ADIM İŞLEM BASAMAKLARI (EYLEM PLANIMIZ)
+1. 1. Adım — Kapsam ve Kurum Sayısının Netleştirilmesi (İlçe MEM İçi Teyit):
+   * okul listesi.xlsx içinde 123 Resmî Kurum (117'si okul), 146 Özel Okul ve 14 Özel Yurt bulunuyor. Tablo-1, 5, 6'daki "Toplam Okul Sayısı" hanesine sadece Resmî Okulların (117 veya 122) mı yoksa Resmî + Özel tüm okulların (263 okul) mı dahil edileceğini Şube Müdürümüz Özgür ÖZDEMİR ile netleştireceğiz.
+2. 2. Adım — Okullar İçin "Google Form / Veri Toplama Tablosu" Hazırlanması ve Gönderimi:
+   * Grup A'da belirlediğimiz tüm soruları (Tablo 1, 2, 3, 4, 5, 6, 7, 9, 11, 12, 13, 14 ve 16'yı tek seferde doldurtacak şekilde) içeren birebir soru-cevap yapısını hazırlayacağım.
+   * Okullardan gelen yanıtlar otomatik olarak Google E-Tablo'da toplanacak ve formüllerle doğrudan Tablo-1, 4, 5, 6, 11, 12, 13, 14 ve 16'nın ilçe toplamlarını hatasız üretecek.
+3. 3. Adım — İlçe MEM Şubeleri ve Dış Kurumlar (Emniyet / Kaymakamlık / Belediye) İçin Resmî Veri Talep Yazılarının Hazırlanması:
+   * Grup B (İlçe MEM Şubeleri: Özel Eğitim/RAM, Destek, Temel Eğitim, Ortaöğretim) için kurum içi veri talep föyü hazırlayacağız.
+   * Grup C (İlçe Emniyet Müdürlüğü ve Muratpaşa Belediyesi) için Kaymakamlık makamı üzerinden gönderilecek resmî üst yazı taslağını ve ekindeki boş Tablo-2, 7, 8, 9, 10 şablonlarını hazırlayacağız.
+4. 4. Adım — Kritik Tarih: 19–20 Ekim 2026 Kamera ve KGYS Kayıt İncelemesi (Md. 36 ve Md. 37):
+   * Raporun 36 ve 37. maddeleri özellikle 19.10.2026 (Pazartesi) ve 20.10.2026 (Salı) günlerinde 1. ve 2. öncelik dereceli 10 örnek okulun giriş-çıkış saatlerindeki kamera ve KGYS kayıtlarının incelenmesini şart koşuyor! Önümüzdeki Pazartesi ve Salı günü bu 10 okulun kamera kayıtlarının incelenip tutanak altına alınmasını sağlayacağız.
+5. 5. Adım — Verilerin Birleştirilmesi, Kanıt (Tarih/Sayı) Eşleştirmesi ve Raporun Doldurulması:
+   * Google Form'dan, İlçe MEM şubelerinden ve Emniyet'ten gelen tüm sayıları İlçe İcmal Çizelgelerine ve Denetim Raporu Taslağına formatını hiç bozmadan işleyip müfettiş denetimine eksiksiz hazır hale getireceğiz.

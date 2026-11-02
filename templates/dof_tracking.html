@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+
+{% block title %}DÖF ve Periyodik Kontrol Takip Motoru — Muratpaşa İlçe MEM{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <!-- Header Hero -->
+    <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-amber-950 via-slate-900 to-slate-950 p-6 sm:p-8 text-white shadow-xl border border-amber-800/50">
+        <div class="absolute -right-16 -top-16 w-80 h-80 rounded-full bg-amber-600/20 blur-3xl pointer-events-none"></div>
+        <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+            <div class="space-y-2">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 border border-amber-400/30 text-amber-300 text-xs font-semibold backdrop-blur-sm">
+                    <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+                    <span>Modül 5: DÖF Terminleri ve Yasal Muayene Alarmları</span>
+                </div>
+                <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white flex items-center gap-3">
+                    <i class="fa-solid fa-clock-rotate-left text-amber-400"></i>
+                    <span>DÖF ve Periyodik Kontrol Takip Motoru</span>
+                </h1>
+                <p class="text-sm text-slate-300 max-w-3xl leading-relaxed">
+                    Şehit Serkan Çölkesen MTAL (160 DÖF) ve Muratpaşa MTAL (27 DÖF) gibi kritik okulların düzeltici faaliyetlerini, 31.12.2026 Yangın Tüpü dolumunu, elektrik topraklama ve kazan muayenelerini anlık izleyen ve uyarı üreten sistem.
+                </p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2.5">
+                <button onclick="triggerNotificationSimulation()" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold shadow-lg shadow-amber-600/30 transition hover:-translate-y-0.5">
+                    <i class="fa-solid fa-bell text-sm"></i>
+                    <span>Toplu Termin Uyarısı Gönder</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4 İstatistik Kartı -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+            <div class="flex items-center justify-between">
+                <div>
+                    <span class="text-xs font-bold uppercase tracking-wider text-rose-600">Açık DÖF Sayısı</span>
+                    <div class="text-3xl font-extrabold text-rose-600 mt-1">{{ total_open_dof }}</div>
+                </div>
+                <div class="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center text-xl">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+            </div>
+            <div class="mt-3 text-xs text-slate-500">Kapatılmamış Düzeltici Faaliyetler</div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+            <div class="flex items-center justify-between">
+                <div>
+                    <span class="text-xs font-bold uppercase tracking-wider text-amber-600">Süresi Geçen DÖF</span>
+                    <div class="text-3xl font-extrabold text-amber-600 mt-1">{{ expired_dof_count }}</div>
+                </div>
+                <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl">
+                    <i class="fa-solid fa-hourglass-end"></i>
+                </div>
+            </div>
+            <div class="mt-3 text-xs text-amber-700 font-semibold">Şehit Serkan Çölkesen / Muratpaşa MTAL</div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+            <div class="flex items-center justify-between">
+                <div>
+                    <span class="text-xs font-bold uppercase tracking-wider text-blue-600">Yangın Tüpü Termini</span>
+                    <div class="text-xl font-extrabold text-blue-600 mt-1">31.12.2026</div>
+                </div>
+                <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl">
+                    <i class="fa-solid fa-fire-extinguisher"></i>
+                </div>
+            </div>
+            <div class="mt-3 text-xs text-blue-700 font-semibold">Tüm Okullar Yıllık Dolum</div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+            <div class="flex items-center justify-between">
+                <div>
+                    <span class="text-xs font-bold uppercase tracking-wider text-emerald-600">Yaklaşan Muayeneler</span>
+                    <div class="text-3xl font-extrabold text-emerald-600 mt-1">{{ upcoming_controls }}</div>
+                </div>
+                <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl">
+                    <i class="fa-solid fa-bolt"></i>
+                </div>
+            </div>
+            <div class="mt-3 text-xs text-slate-500">30 Gün İçinde Yapılacak</div>
+        </div>
+    </div>
+
+    <!-- Kritik Okullar ve Açık DÖF Dağılımı -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        <!-- Kritik Okullar DÖF Listesi -->
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 space-y-4">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <h3 class="text-sm font-extrabold text-slate-900 flex items-center gap-2">
+                    <i class="fa-solid fa-fire text-rose-500"></i> En Çok DÖF Açığı Bulunan Okullar
+                </h3>
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-700">Öncelikli Takip</span>
+            </div>
+
+            <div class="space-y-3 text-xs">
+                {% for sc in top_dof_schools %}
+                <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-3">
+                    <div>
+                        <div class="font-bold text-slate-900 text-sm">{{ sc.kurum_adi }}</div>
+                        <div class="text-slate-500 text-[11px] mt-0.5">
+                            Kod: <span class="font-mono font-semibold">{{ sc.kurum_kodu }}</span> | 
+                            Müdür: {{ sc.mudur_ad_soyad or 'Okul Müdürü' }} ({{ sc.mudur_tel or 'Tel Yok' }})
+                        </div>
+                    </div>
+                    <div class="text-right flex-shrink-0">
+                        <span class="px-3 py-1 rounded-full text-xs font-extrabold bg-rose-100 text-rose-700 border border-rose-300">
+                            {{ sc.open_dof }} Açık DÖF
+                        </span>
+                        <div class="text-[10px] text-rose-600 font-bold mt-1">Süresi Geçti!</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Yasal Muayene ve Periyodik Kontrol Takvimi -->
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 space-y-4">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <h3 class="text-sm font-extrabold text-slate-900 flex items-center gap-2">
+                    <i class="fa-solid fa-wrench text-indigo-600"></i> Yasal Periyodik Muayene Standartları
+                </h3>
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-100 text-indigo-700">6331 s. Kanun</span>
+            </div>
+
+            <div class="space-y-3 text-xs">
+                <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                    <div class="space-y-0.5">
+                        <div class="font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-fire-extinguisher text-rose-500"></i> Yangın Söndürme Tüpleri (YSC)
+                        </div>
+                        <div class="text-[11px] text-slate-500">Binaların Yangından Korunması Hakkında Yönetmelik m.99</div>
+                    </div>
+                    <div class="text-right">
+                        <span class="font-bold text-rose-600 font-mono">31.12.2026</span>
+                        <div class="text-[10px] text-slate-400">Yıllık Dolum/Kontrol</div>
+                    </div>
+                </div>
+
+                <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                    <div class="space-y-0.5">
+                        <div class="font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-bolt text-amber-500"></i> Elektrik İç Tesisat & Topraklama Ölçümü
+                        </div>
+                        <div class="text-[11px] text-slate-500">Elektrik Tesislerinde Topraklamalar Yönetmeliği</div>
+                    </div>
+                    <div class="text-right">
+                        <span class="font-bold text-slate-700">Yılda 1 Kez</span>
+                        <div class="text-[10px] text-slate-400">EMO Onaylı Rapor</div>
+                    </div>
+                </div>
+
+                <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                    <div class="space-y-0.5">
+                        <div class="font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-temperature-high text-indigo-500"></i> Kalorifer Kazanı & Basınçlı Kaplar
+                        </div>
+                        <div class="text-[11px] text-slate-500">İş Ekipmanlarının Kullanımında Sağlık ve Güvenlik Şartları</div>
+                    </div>
+                    <div class="text-right">
+                        <span class="font-bold text-slate-700">Yılda 1 Kez</span>
+                        <div class="text-[10px] text-slate-400">Akredite Muayene</div>
+                    </div>
+                </div>
+
+                <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+                    <div class="space-y-0.5">
+                        <div class="font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-cloud-bolt text-purple-500"></i> Paratoner (Yıldırımlık) Ölçümü
+                        </div>
+                        <div class="text-[11px] text-slate-500">TSE EN 62305 Standardı uyarınca direnç ölçümü</div>
+                    </div>
+                    <div class="text-right">
+                        <span class="font-bold text-slate-700">Yılda 1 Kez</span>
+                        <div class="text-[10px] text-slate-400">Max. 10 Ohm</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    function triggerNotificationSimulation() {
+        alert("BİLDİRİM MOTORU ÇALIŞTIRILDI!\n\n1. Şehit Serkan Çölkesen MTAL Okul İdaresine süresi geçmiş 160 DÖF için SMS ve DYS uyarısı iletildi.\n2. Muratpaşa MTAL Okul İdaresine süresi geçmiş 27 DÖF için uyarı iletildi.\n3. 31.12.2026 Yangın Tüpü kontrolü için 268 kuruma hatırlatma e-postası planlandı.");
+    }
+</script>
+{% endblock %}
+
