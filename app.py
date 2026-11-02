@@ -51,10 +51,12 @@ def login_page(request: Request):
 
 @app.post("/login")
 def login_post(request: Request, response: Response, username: str = Form(...), password: str = Form(...)):
+    clean_username = username.strip().lower()
+    clean_password = password.strip()
     conn = get_db()
     cursor = conn.cursor()
-    p_hash = hash_pw(password)
-    cursor.execute("SELECT id, username, full_name, role FROM users WHERE username = ? AND password_hash = ?", (username, p_hash))
+    p_hash = hash_pw(clean_password)
+    cursor.execute("SELECT id, username, full_name, role FROM users WHERE LOWER(TRIM(username)) = ? AND password_hash = ?", (clean_username, p_hash))
     user = cursor.fetchone()
     conn.close()
 
@@ -65,7 +67,13 @@ def login_post(request: Request, response: Response, username: str = Form(...), 
         }, status_code=400)
 
     res = RedirectResponse("/", status_code=303)
-    res.set_cookie(key="session_user_id", value=str(user["id"]), max_age=86400, httponly=True)
+    res.set_cookie(
+        key="session_user_id",
+        value=str(user["id"]),
+        max_age=86400,
+        httponly=True,
+        samesite="lax"
+    )
     return res
 
 @app.get("/logout")
