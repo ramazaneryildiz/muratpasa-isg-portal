@@ -6,11 +6,12 @@ import csv
 from datetime import datetime, timedelta
 import json
 from typing import Optional
+import requests
 from adep_generator import generate_adep_docx, calculate_quotas, get_architectural_units
 from okulum_temiz_criteria import OKULUM_TEMIZ_SECTIONS, get_all_questions_flat
 
-from fastapi import FastAPI, Request, Form, Response, Depends, HTTPException
-from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse
+from fastapi import FastAPI, Request, Form, Response, Depends, HTTPException, UploadFile, File
+from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
@@ -2430,6 +2431,10 @@ def users_management_page(request: Request, msg: Optional[str] = None, error: Op
 
     conn.close()
 
+    db_size = 0.0
+    if os.path.exists(DB_PATH):
+        db_size = round(os.path.getsize(DB_PATH) / (1024 * 1024), 2)
+
     return templates.TemplateResponse(request=request, name="users_management.html", context={
         "user": user,
         "all_users": all_users,
@@ -2439,6 +2444,9 @@ def users_management_page(request: Request, msg: Optional[str] = None, error: Op
             "uzman_count": uzman_count,
             "a_igu_count": a_igu_count
         },
+        "db_size_mb": db_size,
+        "gdrive_webhook_url": os.environ.get("GDRIVE_BACKUP_WEBHOOK_URL", ""),
+        "backup_secret_token": os.environ.get("BACKUP_SECRET_TOKEN", "muratpasa-isg-yedek-2026"),
         "msg": msg,
         "error": error,
         "active_page": "users"
@@ -2535,6 +2543,78 @@ def delete_user(request: Request, target_id: int):
     conn.close()
 
     return RedirectResponse("/kullanicilar?msg=deleted", status_code=303)
+
+# ==================== VERİTABANI YEDEKLEME & AFET KURTARMA ====================
+
+@app.get("/admin/veritabani-indir")
+def download_database_backup(request: Request, token: Optional[str] = None):
+    user = get_current_user(request)
+    secret_token = os.environ.get("BACKUP_SECRET_TOKEN", "muratpasa-isg-yedek-2026")
+    is_authorized = (user and user["role"] == "koordinator") or (token and token.strip() == secret_token)
+    if not is_authorized:
+        raise HTTPException(status_code=403, detail="Yalnızca İlçe İSG Büro Koordinatörü canlı veritabanı yedeği indirebilir.")
+
+    if not os.path.exists(DB_PATH):
+        raise HTTPException(status_code=404, detail="Veritabanı dosyası bulunamadı.")
+
+    filename = f"isg_muratpasa_canli_yedek_{datetime.now().strftime('%Y%m%d_%H%M%S')}.db"
+    return FileResponse(
+        path=DB_PATH,
+        filename=filename,
+        media_type="application/x-sqlite3"
+    )
+
+@app.post("/admin/veritabani-yukle")
+async def restore_database_backup(request: Request, backup_file: UploadFile = File(...)):
+    user = get_current_user(request)
+    if not user or user["role"] != "koordinator":
+        raise HTTPException(status_code=403, detail="Yetkisiz işlem.")
+
+    content = await backup_file.read()
+    # SQLite başlık doğrulaması (İlk 16 bayt: 'SQLite format 3\x00')
+    if not content.startswith(b"SQLite format 3\x00"):
+        return RedirectResponse("/kullanicilar?error=invalid_db_file", status_code=303)
+
+    # Mevcut veritabanını güvenle üzerine yaz
+    with open(DB_PATH, "wb") as f:
+        f.write(content)
+
+    return RedirectResponse("/kullanicilar?msg=db_restored", status_code=303)
+
+@app.post("/admin/drive-yedekle")
+def trigger_drive_backup(request: Request, webhook_url: Optional[str] = Form(None)):
+    user = get_current_user(request)
+    if not user or user["role"] != "koordinator":
+        raise HTTPException(status_code=403, detail="Yetkisiz işlem.")
+
+    target_url = (webhook_url or os.environ.get("GDRIVE_BACKUP_WEBHOOK_URL") or "").strip()
+    if not target_url:
+        return RedirectResponse("/kullanicilar?error=no_webhook_url", status_code=303)
+
+    try:
+        import base64
+        with open(DB_PATH, "rb") as f:
+            db_bytes = f.read()
+
+        b64_data = base64.b64encode(db_bytes).decode("utf-8")
+        resp = requests.post(
+            target_url,
+            json={
+                "filename": f"isg_muratpasa_otomatik_yedek_{datetime.now().strftime('%Y%m%d_%H%M')}.db",
+                "file_data": b64_data
+            },
+            headers={"Content-Type": "application/json"},
+            allow_redirects=True,
+            timeout=60
+        )
+        if resp.status_code in [200, 201, 302]:
+            return RedirectResponse("/kullanicilar?msg=drive_backup_success", status_code=303)
+        else:
+            print(f"Drive backup returned status: {resp.status_code}, response: {resp.text[:200]}")
+            return RedirectResponse("/kullanicilar?error=drive_backup_failed", status_code=303)
+    except Exception as e:
+        print(f"Drive backup exception: {e}")
+        return RedirectResponse("/kullanicilar?error=drive_backup_failed", status_code=303)
 
 if __name__ == "__main__":
     import uvicorn

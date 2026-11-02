@@ -80,6 +80,46 @@
         </div>
         <button onclick="this.parentElement.remove()" class="text-rose-500 hover:text-rose-700"><i class="fa-solid fa-xmark"></i></button>
     </div>
+    {% elif msg == 'db_restored' %}
+    <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center justify-between shadow-xs">
+        <div class="flex items-center gap-2">
+            <i class="fa-solid fa-cloud-arrow-down text-emerald-600 text-base"></i>
+            <span>Veritabanı yedeği başarıyla geri yüklendi! Sistem güncel verilerle hazır.</span>
+        </div>
+        <button onclick="this.parentElement.remove()" class="text-emerald-500 hover:text-emerald-700"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    {% elif msg == 'drive_backup_success' %}
+    <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center justify-between shadow-xs">
+        <div class="flex items-center gap-2">
+            <i class="fa-brands fa-google-drive text-emerald-600 text-base"></i>
+            <span>Tebrikler! Canlı veritabanı yedeği başarıyla Google Drive hesabınıza aktarıldı.</span>
+        </div>
+        <button onclick="this.parentElement.remove()" class="text-emerald-500 hover:text-emerald-700"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    {% elif error == 'invalid_db_file' %}
+    <div class="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold flex items-center justify-between shadow-xs">
+        <div class="flex items-center gap-2">
+            <i class="fa-solid fa-triangle-exclamation text-rose-600 text-base"></i>
+            <span>Hata: Yüklenen dosya geçerli bir SQLite veritabanı dosyası değil! Güvenlik nedeniyle işlem iptal edildi.</span>
+        </div>
+        <button onclick="this.parentElement.remove()" class="text-rose-500 hover:text-rose-700"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    {% elif error == 'drive_backup_failed' %}
+    <div class="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold flex items-center justify-between shadow-xs">
+        <div class="flex items-center gap-2">
+            <i class="fa-solid fa-circle-exclamation text-rose-600 text-base"></i>
+            <span>Hata: Google Drive'a yedekleme gönderilemedi. Webhook URL'sini ve erişim izinlerinizi kontrol edin.</span>
+        </div>
+        <button onclick="this.parentElement.remove()" class="text-rose-500 hover:text-rose-700"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    {% elif error == 'no_webhook_url' %}
+    <div class="p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs font-bold flex items-center justify-between shadow-xs">
+        <div class="flex items-center gap-2">
+            <i class="fa-solid fa-circle-info text-amber-600 text-base"></i>
+            <span>Uyarı: Google Drive Webhook URL girilmedi. Lütfen Apps Script URL adresinizi girin.</span>
+        </div>
+        <button onclick="this.parentElement.remove()" class="text-amber-500 hover:text-amber-700"><i class="fa-solid fa-xmark"></i></button>
+    </div>
     {% endif %}
 
     <!-- ==================== İSTATİSTİK & KPI KARTLARI ==================== -->
@@ -291,6 +331,142 @@
 
     </div>
 
+    <!-- ==================== VERİTABANI YEDEKLEME & AFET KURTARMA MERKEZİ ==================== -->
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        
+        <!-- Üst Başlık & Durum Çubuğu -->
+        <div class="p-6 bg-gradient-to-r from-slate-900 via-slate-800 to-indigo-950 text-white flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div class="space-y-1">
+                <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 text-[11px] font-bold">
+                    <i class="fa-solid fa-shield-halved text-emerald-400"></i>
+                    <span>Sıfır Veri Kaybı Güvencesi</span>
+                </div>
+                <h2 class="text-xl font-extrabold flex items-center gap-2.5">
+                    <i class="fa-solid fa-database text-indigo-400"></i>
+                    <span>Veritabanı Yedekleme & Google Drive Afet Kurtarma Merkezi</span>
+                </h2>
+                <p class="text-xs text-slate-300 max-w-2xl">
+                    268 okulun kayıtlarını, İGU okul zimmetlerini ve form yanıtlarını tek tıkla güvence altına alın veya olası bir sunucu arızasında veritabanınızı anında geri yükleyin.
+                </p>
+            </div>
+
+            <!-- Canlı İstatistik Rozetleri -->
+            <div class="flex items-center gap-3">
+                <div class="px-4 py-2 rounded-xl bg-slate-800/80 border border-slate-700/80 text-right">
+                    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Canlı DB Boyutu</div>
+                    <div class="text-sm font-extrabold text-emerald-400 font-mono">{{ db_size_mb }} MB</div>
+                </div>
+                <div class="px-4 py-2 rounded-xl bg-slate-800/80 border border-slate-700/80 text-right">
+                    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Veritabanı Motoru</div>
+                    <div class="text-sm font-extrabold text-indigo-300 font-mono">SQLite 3</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3 Sütunlu Eylem Kartları -->
+        <div class="p-6 grid grid-cols-1 md:grid-cols-3 gap-6 bg-slate-50/50">
+
+            <!-- KART 1: ANLIK DB İNDİR -->
+            <div class="bg-white rounded-xl p-5 border border-slate-200 shadow-xs flex flex-col justify-between space-y-4 hover:border-blue-300 transition">
+                <div class="space-y-3">
+                    <div class="w-11 h-11 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-lg">
+                        <i class="fa-solid fa-cloud-arrow-down"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+                            <span>1. Bilgisayara Canlı Yedek İndir</span>
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-1 leading-relaxed">
+                            Sunucudaki güncel <code class="bg-slate-100 text-slate-700 px-1 py-0.5 rounded text-[11px]">isg_muratpasa.db</code> dosyasını tarih ve saat damgasıyla bilgisayarınıza anında indirir.
+                        </p>
+                    </div>
+                    <div class="text-[11px] text-slate-400 flex items-center gap-1">
+                        <i class="fa-solid fa-check text-blue-500"></i>
+                        <span>Hiçbir kurulum gerektirmez, hemen çalışır.</span>
+                    </div>
+                </div>
+
+                <div class="pt-2">
+                    <a href="/admin/veritabani-indir" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-md shadow-blue-600/20 transition">
+                        <i class="fa-solid fa-download"></i>
+                        <span>Canlı Veritabanını İndir (.db)</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- KART 2: GOOGLE DRIVE YEDEKLEME -->
+            <div class="bg-white rounded-xl p-5 border border-slate-200 shadow-xs flex flex-col justify-between space-y-4 hover:border-emerald-300 transition">
+                <div class="space-y-3">
+                    <div class="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg">
+                        <i class="fa-brands fa-google-drive"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+                            <span>2. Google Drive'a Otomatik Yedekle</span>
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-1 leading-relaxed">
+                            Veritabanını Google Drive'ınızdaki <code class="bg-emerald-50 text-emerald-700 px-1 py-0.5 rounded text-[11px]">Muratpasa_ISG_Yedekleri</code> klasörünüze anında aktarır.
+                        </p>
+                    </div>
+
+                    <form id="driveBackupForm" method="POST" action="/admin/drive-yedekle" class="space-y-2">
+                        <label class="block text-[11px] font-bold text-slate-700">Google Apps Script Webhook URL:</label>
+                        <input type="url" id="driveWebhookInput" name="webhook_url" value="{{ gdrive_webhook_url }}" placeholder="https://script.google.com/macros/s/.../exec" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-mono focus:ring-2 focus:ring-emerald-500 focus:outline-none" required>
+                        <div class="flex items-center justify-between pt-1">
+                            <button type="button" onclick="openDriveSetupModal()" class="text-[11px] text-emerald-700 font-bold hover:underline inline-flex items-center gap-1">
+                                <i class="fa-solid fa-circle-question"></i> Nasıl Kurulur? (2 Dk)
+                            </button>
+                        </div>
+                        <button type="submit" onclick="saveWebhookUrlToStorage()" class="w-full mt-2 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-md shadow-emerald-600/20 transition">
+                            <i class="fa-brands fa-google-drive"></i>
+                            <span>Şimdi Google Drive'a Yedekle</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- KART 3: AFET GERİ YÜKLEME (RESTORE) -->
+            <div class="bg-white rounded-xl p-5 border border-slate-200 shadow-xs flex flex-col justify-between space-y-4 hover:border-rose-300 transition">
+                <div class="space-y-3">
+                    <div class="w-11 h-11 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-lg">
+                        <i class="fa-solid fa-rotate-left"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+                            <span>3. Afet Durumunda Geri Yükle</span>
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-1 leading-relaxed">
+                            Sunucu arızası durumunda elinizdeki veya Google Drive'daki en son <code class="bg-slate-100 text-slate-700 px-1 py-0.5 rounded text-[11px]">.db</code> yedeğini yükleyerek tüm sistemi saniyeler içinde ayağa kaldırın.
+                        </p>
+                    </div>
+
+                    <form method="POST" action="/admin/veritabani-yukle" enctype="multipart/form-data" onsubmit="return confirm('DİKKAT: Yüklediğiniz veritabanı sunucudaki mevcut verilerin üzerine yazılacaktır. Geri yüklemek istediğinize emin misiniz?');" class="space-y-2">
+                        <label class="block text-[11px] font-bold text-slate-700">Yedek Dosyası Seç (.db):</label>
+                        <input type="file" name="backup_file" accept=".db,.sqlite,.sqlite3" required class="w-full text-xs text-slate-500 file:mr-2 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-rose-50 file:text-rose-700 hover:file:bg-rose-100 cursor-pointer">
+                        <p class="text-[10px] text-slate-400">Yalnızca geçerli SQLite 3 formatındaki dosyalar kabul edilir.</p>
+                        <button type="submit" class="w-full mt-2 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-md shadow-rose-600/20 transition">
+                            <i class="fa-solid fa-upload"></i>
+                            <span>Veritabanını Geri Yükle (Restore)</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Alt Bilgilendirme Notu: Render & Veri Güvenliği -->
+        <div class="px-6 py-4 bg-slate-100/70 border-t border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-slate-600">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-circle-info text-indigo-600 text-sm"></i>
+                <span><strong>Önemli Bilgi:</strong> Periyodik kontroller, okul formları veya İGU atamaları yapıldıkça düzenli yedek almanız veya Google Drive otomatik gece yedeğini aktifleştirmeniz önerilir.</span>
+            </div>
+            <div class="text-[11px] text-slate-500 font-mono flex-shrink-0">
+                Otomatik Çekim Anahtarı: <code class="text-slate-700 bg-white px-1.5 py-0.5 rounded border border-slate-200">{{ backup_secret_token }}</code>
+            </div>
+        </div>
+
+    </div>
+
 </div>
 
 <!-- ==================== MODAL: YENİ KULLANICI EKLE ==================== -->
@@ -454,6 +630,130 @@
     </div>
 </div>
 
+<!-- ==================== MODAL: GOOGLE DRIVE OTOMATİK YEDEKLEME REHBERİ ==================== -->
+<div id="driveSetupModal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl border border-slate-200 space-y-4 max-h-[90vh] overflow-y-auto">
+        
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+            <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg">
+                    <i class="fa-brands fa-google-drive"></i>
+                </div>
+                <div>
+                    <h3 class="text-base font-extrabold text-slate-900">Google Drive Otomatik Yedekleme Kurulumu</h3>
+                    <p class="text-xs text-slate-500">2 dakikada kendi Google Drive hesabınıza ücretsiz ve sınırsız yedekleme kurun.</p>
+                </div>
+            </div>
+            <button onclick="closeDriveSetupModal()" class="text-slate-400 hover:text-slate-700 text-lg">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <div class="space-y-4 text-xs text-slate-700">
+            
+            <!-- Adım 1 -->
+            <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
+                <div class="font-bold text-slate-900 flex items-center gap-2">
+                    <span class="w-5 h-5 rounded-full bg-emerald-600 text-white text-[11px] flex items-center justify-center font-bold">1</span>
+                    <span>Google Apps Script Sayfasını Açın</span>
+                </div>
+                <p class="text-slate-600 text-[11px] pl-7">
+                    Tarayıcınızda <a href="https://script.google.com" target="_blank" class="text-blue-600 font-bold hover:underline inline-flex items-center gap-1">script.google.com <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i></a> adresini açın ve <strong>"Yeni Proje"</strong> (New Project) butonuna tıklayın.
+                </p>
+            </div>
+
+            <!-- Adım 2 -->
+            <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+                <div class="font-bold text-slate-900 flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <span class="w-5 h-5 rounded-full bg-emerald-600 text-white text-[11px] flex items-center justify-center font-bold">2</span>
+                        <span>Aşağıdaki Hazır Kodu Projeye Yapıştırın</span>
+                    </div>
+                    <button type="button" onclick="copyDriveScriptCode()" id="copyCodeBtn" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-100 text-emerald-800 text-[11px] font-bold hover:bg-emerald-200 transition">
+                        <i class="fa-solid fa-copy"></i>
+                        <span>Kodu Kopyala</span>
+                    </button>
+                </div>
+                <pre class="bg-slate-900 text-emerald-400 p-3.5 rounded-xl font-mono text-[10px] overflow-x-auto max-h-48 leading-relaxed border border-slate-800" id="driveScriptCodeBlock">function doPost(e) {
+  try {
+    var data = JSON.parse(e.postData.contents);
+    var filename = data.filename || ("isg_muratpasa_yedek_" + Utilities.formatDate(new Date(), "GMT+3", "yyyyMMdd_HHmm") + ".db");
+    var decoded = Utilities.base64Decode(data.file_data);
+    var blob = Utilities.newBlob(decoded, "application/x-sqlite3", filename);
+    
+    var folder = getBackupFolder();
+    var file = folder.createFile(blob);
+    
+    return ContentService.createTextOutput(JSON.stringify({
+      status: "success",
+      fileId: file.getId(),
+      fileName: file.getName()
+    })).setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({
+      status: "error",
+      message: err.toString()
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+// 7/24 OTOMATİK GECE YEDEĞİ (Tetikleyici ile her gece 23:00'te otomatik çeker)
+function otomatikGeceYedegiAl() {
+  var PORTAL_URL = "https://muratpasa-isg-portal.onrender.com/admin/veritabani-indir?token={{ backup_secret_token }}";
+  try {
+    var response = UrlFetchApp.fetch(PORTAL_URL, { muteHttpExceptions: true });
+    if (response.getResponseCode() === 200) {
+      var blob = response.getBlob();
+      var filename = "isg_gece_otomatik_yedek_" + Utilities.formatDate(new Date(), "GMT+3", "yyyyMMdd_HHmm") + ".db";
+      blob.setName(filename);
+      var folder = getBackupFolder();
+      folder.createFile(blob);
+      Logger.log("Yedek alındı: " + filename);
+    }
+  } catch (e) {
+    Logger.log("Hata: " + e.toString());
+  }
+}
+
+function getBackupFolder() {
+  var folderName = "Muratpasa_ISG_Yedekleri";
+  var folders = DriveApp.getFoldersByName(folderName);
+  return folders.hasNext() ? folders.next() : DriveApp.createFolder(folderName);
+}</pre>
+            </div>
+
+            <!-- Adım 3 -->
+            <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
+                <div class="font-bold text-slate-900 flex items-center gap-2">
+                    <span class="w-5 h-5 rounded-full bg-emerald-600 text-white text-[11px] flex items-center justify-center font-bold">3</span>
+                    <span>Dağıtın (Deploy) ve Web URL'sini Alın</span>
+                </div>
+                <p class="text-slate-600 text-[11px] pl-7 leading-relaxed">
+                    Sayfanın sağ üstündeki mavi <strong>Dağıt (Deploy)</strong> butonuna basın &rarr; <strong>Yeni Dağıtım (New deployment)</strong> seçin &rarr; Sol çark simgesinden <strong>Web Uygulaması (Web app)</strong> seçin &rarr; <em>"Erişebilecek Kişiler"</em> alanını <strong>"Herkes (Anyone)"</strong> yapın ve Dağıt'a tıklayın. Çıkan Web App URL'sini kopyalayıp portaldaki URL alanına yapıştırın.
+                </p>
+            </div>
+
+            <!-- Adım 4 -->
+            <div class="p-3.5 rounded-xl bg-amber-50 border border-amber-200 space-y-1">
+                <div class="font-bold text-amber-900 flex items-center gap-2">
+                    <span class="w-5 h-5 rounded-full bg-amber-600 text-white text-[11px] flex items-center justify-center font-bold">4</span>
+                    <span>(Önerilen) 7/24 Sıfır Müdahale Otomatik Gece Yedeği</span>
+                </div>
+                <p class="text-amber-800 text-[11px] pl-7 leading-relaxed">
+                    Google Apps Script sol menüsündeki saat simgesine (<strong>Tetikleyiciler / Triggers</strong>) tıklayın &rarr; <strong>Tetikleyici Ekle</strong> deyin &rarr; Çalıştırılacak fonksiyon olarak <code class="font-mono bg-white px-1 rounded">otomatikGeceYedegiAl</code> seçin &rarr; Etkinlik kaynağını <strong>Zamana dayalı (Time-driven) -> Günlük zamanlayıcı -> Gece 23:00 - 00:00</strong> yapın. Artık siz bilgisayarınızı açmasanız bile her gece Google Drive'ınıza en güncel veritabanı dosyası otomatik olarak kaydedilecektir!
+                </p>
+            </div>
+
+        </div>
+
+        <div class="flex items-center justify-end pt-3 border-t border-slate-100">
+            <button type="button" onclick="closeDriveSetupModal()" class="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs">
+                Anladım, Kapat
+            </button>
+        </div>
+    </div>
+</div>
+
 {% endblock %}
 
 {% block scripts %}
@@ -479,5 +779,39 @@
     function closeEditUserModal() {
         document.getElementById('editUserModal').classList.add('hidden');
     }
+
+    function openDriveSetupModal() {
+        document.getElementById('driveSetupModal').classList.remove('hidden');
+    }
+    function closeDriveSetupModal() {
+        document.getElementById('driveSetupModal').classList.add('hidden');
+    }
+
+    function copyDriveScriptCode() {
+        const code = document.getElementById('driveScriptCodeBlock').innerText;
+        navigator.clipboard.writeText(code).then(() => {
+            const btn = document.getElementById('copyCodeBtn');
+            btn.innerHTML = '<i class="fa-solid fa-check"></i> <span>Kopyalandı!</span>';
+            setTimeout(() => {
+                btn.innerHTML = '<i class="fa-solid fa-copy"></i> <span>Kodu Kopyala</span>';
+            }, 2500);
+        });
+    }
+
+    function saveWebhookUrlToStorage() {
+        const url = document.getElementById('driveWebhookInput').value;
+        if (url) {
+            localStorage.setItem('gdrive_backup_webhook_url', url.trim());
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const input = document.getElementById('driveWebhookInput');
+        if (input && !input.value) {
+            const saved = localStorage.getItem('gdrive_backup_webhook_url');
+            if (saved) input.value = saved;
+        }
+    });
 </script>
 {% endblock %}
+
