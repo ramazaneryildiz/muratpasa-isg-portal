@@ -306,6 +306,13 @@
                         Koordinasyon & Okul Portalı
                     </div>
                     <div class="space-y-1">
+                        {% if user.role == 'koordinator' %}
+                        <a href="/kullanicilar" class="sidebar-item {% if active_page == 'users' %}active{% endif %}">
+                            <i class="fa-solid fa-users-gear w-4 text-center text-rose-400"></i>
+                            <span class="text-white font-semibold">Kullanıcı Yönetimi</span>
+                            <span class="ml-auto text-[9px] bg-rose-500/20 text-rose-300 px-1.5 py-0.2 rounded font-bold border border-rose-500/30">Koordinatör</span>
+                        </a>
+                        {% endif %}
                         <a href="/igu-gorevlendirme" class="sidebar-item {% if active_page == 'igu' %}active{% endif %}">
                             <i class="fa-solid fa-user-shield w-4 text-center text-sky-400"></i>
                             <span>İGU Dağılım Çizelgesi</span>

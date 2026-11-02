@@ -2391,6 +2391,151 @@ def document_library_page(request: Request):
         "active_page": "library"
     })
 
+# ==================== KULLANICI YÖNETİMİ (YALNIZCA KOORDİNATÖR) ====================
+
+@app.get("/kullanicilar", response_class=HTMLResponse)
+def users_management_page(request: Request, msg: Optional[str] = None, error: Optional[str] = None):
+    user = get_current_user(request)
+    if not user:
+        return RedirectResponse("/login", status_code=303)
+    if user["role"] != "koordinator":
+        raise HTTPException(status_code=403, detail="Bu sayfaya sadece İlçe İSG Büro Koordinatörü erişebilir.")
+
+    conn = get_db()
+    c = conn.cursor()
+    
+    # Kullanıcıları okul zimmet sayılarıyla birlikte getir
+    c.execute("""
+        SELECT u.*,
+               COUNT(s.id) as zimmetli_okul_sayisi
+        FROM users u
+        LEFT JOIN schools s ON u.id = s.sorumlu_uzman_id AND s.is_active_school = 1
+        GROUP BY u.id
+        ORDER BY CASE WHEN u.role = 'koordinator' THEN 1 ELSE 2 END, u.id ASC
+    """)
+    all_users = [dict(r) for r in c.fetchall()]
+
+    # İstatistikler
+    c.execute("SELECT COUNT(*) FROM users")
+    total_users = c.fetchone()[0]
+    
+    c.execute("SELECT COUNT(*) FROM users WHERE role = 'koordinator'")
+    coord_count = c.fetchone()[0]
+
+    c.execute("SELECT COUNT(*) FROM users WHERE role = 'uzman'")
+    uzman_count = c.fetchone()[0]
+
+    c.execute("SELECT COUNT(*) FROM users WHERE igu_sinifi LIKE '%A%'")
+    a_igu_count = c.fetchone()[0]
+
+    conn.close()
+
+    return templates.TemplateResponse(request=request, name="users_management.html", context={
+        "user": user,
+        "all_users": all_users,
+        "stats": {
+            "total_users": total_users,
+            "coord_count": coord_count,
+            "uzman_count": uzman_count,
+            "a_igu_count": a_igu_count
+        },
+        "msg": msg,
+        "error": error,
+        "active_page": "users"
+    })
+
+@app.post("/kullanicilar/ekle")
+def add_user(
+    request: Request,
+    username: str = Form(...),
+    password: str = Form(...),
+    full_name: str = Form(...),
+    title: str = Form("İş Güvenliği Uzmanı"),
+    role: str = Form("uzman"),
+    email: str = Form(""),
+    phone: str = Form(""),
+    igu_sinifi: str = Form("C Sınıfı İGU")
+):
+    user = get_current_user(request)
+    if not user or user["role"] != "koordinator":
+        raise HTTPException(status_code=403, detail="Yetkisiz işlem.")
+
+    clean_username = username.strip().lower()
+    conn = get_db()
+    c = conn.cursor()
+    c.execute("SELECT id FROM users WHERE username = ?", (clean_username,))
+    existing = c.fetchone()
+    if existing:
+        conn.close()
+        return RedirectResponse("/kullanicilar?error=username_exists", status_code=303)
+
+    p_hash = hash_pw(password.strip())
+    c.execute("""
+        INSERT INTO users (username, password_hash, full_name, title, role, email, phone, igu_sinifi)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    """, (clean_username, p_hash, full_name.strip(), title.strip(), role, email.strip(), phone.strip(), igu_sinifi.strip()))
+    conn.commit()
+    conn.close()
+
+    return RedirectResponse("/kullanicilar?msg=added", status_code=303)
+
+@app.post("/kullanicilar/guncelle/{target_id}")
+def update_user(
+    request: Request,
+    target_id: int,
+    full_name: str = Form(...),
+    title: str = Form(...),
+    role: str = Form(...),
+    email: str = Form(""),
+    phone: str = Form(""),
+    igu_sinifi: str = Form(""),
+    new_password: Optional[str] = Form(None)
+):
+    user = get_current_user(request)
+    if not user or user["role"] != "koordinator":
+        raise HTTPException(status_code=403, detail="Yetkisiz işlem.")
+
+    conn = get_db()
+    c = conn.cursor()
+
+    if new_password and new_password.strip():
+        p_hash = hash_pw(new_password.strip())
+        c.execute("""
+            UPDATE users SET
+                full_name = ?, title = ?, role = ?, email = ?, phone = ?, igu_sinifi = ?, password_hash = ?
+            WHERE id = ?
+        """, (full_name.strip(), title.strip(), role, email.strip(), phone.strip(), igu_sinifi.strip(), p_hash, target_id))
+    else:
+        c.execute("""
+            UPDATE users SET
+                full_name = ?, title = ?, role = ?, email = ?, phone = ?, igu_sinifi = ?
+            WHERE id = ?
+        """, (full_name.strip(), title.strip(), role, email.strip(), phone.strip(), igu_sinifi.strip(), target_id))
+
+    conn.commit()
+    conn.close()
+
+    return RedirectResponse("/kullanicilar?msg=updated", status_code=303)
+
+@app.post("/kullanicilar/sil/{target_id}")
+def delete_user(request: Request, target_id: int):
+    user = get_current_user(request)
+    if not user or user["role"] != "koordinator":
+        raise HTTPException(status_code=403, detail="Yetkisiz işlem.")
+
+    if user["id"] == target_id:
+        return RedirectResponse("/kullanicilar?error=cannot_delete_self", status_code=303)
+
+    conn = get_db()
+    c = conn.cursor()
+    # Okulları boşa düşür (yetkisiz kalmaması için)
+    c.execute("UPDATE schools SET sorumlu_uzman_id = NULL WHERE sorumlu_uzman_id = ?", (target_id,))
+    c.execute("DELETE FROM users WHERE id = ?", (target_id,))
+    conn.commit()
+    conn.close()
+
+    return RedirectResponse("/kullanicilar?msg=deleted", status_code=303)
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("app:app", host="127.0.0.1", port=8000, reload=True)
