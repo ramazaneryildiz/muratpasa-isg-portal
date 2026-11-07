@@ -1,0 +1,240 @@
+{% extends "base.html" %}
+
+{% block title %}İSG Yapay Zeka Asistanı & Mevzuat Danışmanı — Muratpaşa İlçe MEM{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto space-y-6">
+
+    <!-- ==================== EXECUTIVE AI HEADER ==================== -->
+    <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-950 via-purple-950 to-slate-900 p-6 sm:p-8 text-white shadow-2xl border border-purple-900/50">
+        <div class="absolute -right-16 -top-16 w-80 h-80 rounded-full bg-purple-600/20 blur-3xl pointer-events-none"></div>
+        <div class="absolute right-1/3 -bottom-16 w-64 h-64 rounded-full bg-indigo-500/15 blur-2xl pointer-events-none"></div>
+
+        <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div class="space-y-2">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/20 border border-purple-400/30 text-purple-300 text-xs font-semibold backdrop-blur-sm">
+                    <span class="w-2 h-2 rounded-full bg-purple-400 animate-pulse"></span>
+                    <span>Google AI Studio • Gemini 3.5 Flash Motoru</span>
+                </div>
+                <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white flex items-center gap-3">
+                    <i class="fa-solid fa-brain text-purple-400"></i>
+                    <span>İSG Yapay Zeka Danışmanı</span>
+                </h1>
+                <p class="text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed">
+                    6331 sayılı İSG Kanunu, Binaların Yangından Korunması Yönetmeliği, Okulum Temiz Kılavuzu ve ADEP mevzuatında uzman yapay zeka asistanınız. Aklınıza takılan her türlü yasal soruyu ve saha uygulamasını anında sorun.
+                </p>
+            </div>
+
+            <div class="flex items-center gap-3 flex-shrink-0">
+                <div class="px-4 py-2.5 rounded-2xl bg-slate-900/80 border border-purple-500/30 text-right">
+                    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Durum</div>
+                    <div class="text-xs font-extrabold text-emerald-400 flex items-center gap-1.5 justify-end">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span> Canlı Bağlı
+                    </div>
+                </div>
+                <button onclick="clearChatHistory()" class="px-3.5 py-2.5 rounded-2xl bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs font-bold transition" title="Sohbeti Temizle">
+                    <i class="fa-solid fa-rotate-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== HIZLI ÖNERİ SORULARI (PROMPT CHIPS) ==================== -->
+    <div class="space-y-2">
+        <div class="text-xs font-extrabold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+            <i class="fa-solid fa-lightbulb text-amber-500"></i> Sıkça Sorulan Mevzuat Başlıkları (Tek Tıkla Sorun):
+        </div>
+        <div class="flex flex-wrap gap-2">
+            <button onclick="askQuickPrompt('Okulumuzdaki yangın söndürme tüplerinin ve yangın dolaplarının periyodik kontrol süresi ve yapılması gerekenler nelerdir?')" class="px-3 py-1.5 rounded-xl bg-white hover:bg-purple-50 border border-slate-200 hover:border-purple-300 text-slate-700 hover:text-purple-700 text-xs font-semibold shadow-xs transition flex items-center gap-1.5">
+                <span>🧯 Yangın Tüpü & Dolap Periyotları</span>
+            </button>
+            <button onclick="askQuickPrompt('MEB Okulum Temiz belgelendirme denetiminde tetkikçilerin en çok dikkat ettiği kritik kriterler hangileridir?')" class="px-3 py-1.5 rounded-xl bg-white hover:bg-purple-50 border border-slate-200 hover:border-purple-300 text-slate-700 hover:text-purple-700 text-xs font-semibold shadow-xs transition flex items-center gap-1.5">
+                <span>🏫 Okulum Temiz Tetkik Kriterleri</span>
+            </button>
+            <button onclick="askQuickPrompt('Okulda acil durum tatbikatları yılda kaç kez yapılmalıdır? ADEP dosyasına hangi evraklar eklenmelidir?')" class="px-3 py-1.5 rounded-xl bg-white hover:bg-purple-50 border border-slate-200 hover:border-purple-300 text-slate-700 hover:text-purple-700 text-xs font-semibold shadow-xs transition flex items-center gap-1.5">
+                <span>🚨 Tatbikat & ADEP Gereklilikleri</span>
+            </button>
+            <button onclick="askQuickPrompt('Kazan dairesi, hidrofor ve elektrik iç tesisat topraklama ölçümleri kaç yılda bir zorunludur?')" class="px-3 py-1.5 rounded-xl bg-white hover:bg-purple-50 border border-slate-200 hover:border-purple-300 text-slate-700 hover:text-purple-700 text-xs font-semibold shadow-xs transition flex items-center gap-1.5">
+                <span>⚡ Elektrik & Kazan Muayenesi</span>
+            </button>
+            <button onclick="askQuickPrompt('Okulumuzdaki öğrenci ve öğretmen mevcuduna göre zorunlu ilk yardımcı personel sayısı nasıl hesaplanır?')" class="px-3 py-1.5 rounded-xl bg-white hover:bg-purple-50 border border-slate-200 hover:border-purple-300 text-slate-700 hover:text-purple-700 text-xs font-semibold shadow-xs transition flex items-center gap-1.5">
+                <span>🩺 İlk Yardımcı Sayısı Hesabı</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- ==================== SOHBET ALANI ==================== -->
+    <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden flex flex-col h-[580px]">
+        
+        <!-- Sohbet Mesajları Konteyneri -->
+        <div id="chatMessages" class="flex-1 p-5 overflow-y-auto space-y-4 bg-slate-50/50">
+            
+            <!-- Karşılama Mesajı (AI) -->
+            <div class="flex items-start gap-3 max-w-3xl">
+                <div class="w-9 h-9 rounded-2xl bg-gradient-to-tr from-purple-600 to-indigo-600 text-white flex items-center justify-center font-bold text-sm shadow-md shadow-purple-500/20 flex-shrink-0">
+                    <i class="fa-solid fa-brain"></i>
+                </div>
+                <div class="space-y-1">
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-extrabold text-slate-900">Muratpaşa İSG Asistanı</span>
+                        <span class="text-[10px] text-slate-400 font-mono">Gemini 3.5</span>
+                    </div>
+                    <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs text-xs text-slate-700 leading-relaxed space-y-2">
+                        <p>
+                            Merhaba! Ben Muratpaşa İlçe Milli Eğitim Müdürlüğü'nün İş Sağlığı ve Güvenliği yapay zeka danışmanıyım.
+                        </p>
+                        <p>
+                            6331 sayılı İSG Kanunu, okul bina denetimleri, acil durumlar, Okulum Temiz belgeleri veya risk değerlendirmesi konularında bana istediğiniz soruyu sorabilirsiniz. Yukarıdaki hazır başlıklardan birine tıklayabilir ya da aşağıdaki alana sorunuzu doğrudan yazabilirsiniz.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Yazıyor... Animasyonu (Gizli) -->
+        <div id="typingIndicator" class="hidden px-6 py-2 bg-slate-50/80 border-t border-slate-100 flex items-center gap-2 text-xs text-purple-600 font-bold">
+            <i class="fa-solid fa-wand-magic-sparkles animate-spin text-sm"></i>
+            <span>Gemini İSG Asistanı mevzuatı inceliyor ve cevabı hazırlıyor...</span>
+        </div>
+
+        <!-- Soru Giriş Kutusu -->
+        <div class="p-4 bg-white border-t border-slate-200">
+            <form id="advisorChatForm" onsubmit="handleChatSubmit(event)" class="flex items-center gap-2">
+                <div class="relative flex-1">
+                    <input type="text" id="chatInput" placeholder="Mevzuat, okul güvenliği veya periyodik kontroller hakkında bir soru sorun..." class="w-full bg-slate-50 border border-slate-300 rounded-2xl pl-4 pr-10 py-3 text-xs focus:ring-2 focus:ring-purple-500 focus:bg-white focus:outline-none transition">
+                </div>
+                <button type="submit" id="sendBtn" class="px-5 py-3 rounded-2xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs shadow-md shadow-purple-600/30 transition flex items-center gap-1.5 flex-shrink-0">
+                    <span>Sor</span>
+                    <i class="fa-solid fa-paper-plane text-xs"></i>
+                </button>
+            </form>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function escapeHtml(text) {
+        const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+        return text.replace(/[&<>"']/g, m => map[m]);
+    }
+
+    function formatMarkdown(text) {
+        let html = escapeHtml(text);
+        // Bold
+        html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        // Italic
+        html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+        // Headings ###
+        html = html.replace(/^### (.*$)/gim, '<h4 class="font-bold text-slate-900 mt-2 mb-1 text-xs">$1</h4>');
+        html = html.replace(/^## (.*$)/gim, '<h3 class="font-extrabold text-slate-900 mt-3 mb-1 text-sm">$1</h3>');
+        // Linebreaks
+        html = html.replace(/\n/g, '<br>');
+        return html;
+    }
+
+    function appendUserMessage(text) {
+        const container = document.getElementById('chatMessages');
+        const div = document.createElement('div');
+        div.className = 'flex items-start justify-end gap-3 max-w-2xl ml-auto';
+        div.innerHTML = `
+            <div class="space-y-1 text-right">
+                <div class="text-[10px] text-slate-400 font-bold">Siz</div>
+                <div class="p-3.5 rounded-2xl rounded-tr-xs bg-indigo-600 text-white shadow-xs text-xs leading-relaxed text-left">
+                    ${escapeHtml(text)}
+                </div>
+            </div>
+            <div class="w-9 h-9 rounded-2xl bg-slate-800 text-white flex items-center justify-center font-bold text-xs flex-shrink-0">
+                <i class="fa-solid fa-user"></i>
+            </div>
+        `;
+        container.appendChild(div);
+        container.scrollTop = container.scrollHeight;
+    }
+
+    function appendAIMessage(text) {
+        const container = document.getElementById('chatMessages');
+        const div = document.createElement('div');
+        div.className = 'flex items-start gap-3 max-w-3xl';
+        div.innerHTML = `
+            <div class="w-9 h-9 rounded-2xl bg-gradient-to-tr from-purple-600 to-indigo-600 text-white flex items-center justify-center font-bold text-sm shadow-md shadow-purple-500/20 flex-shrink-0">
+                <i class="fa-solid fa-brain"></i>
+            </div>
+            <div class="space-y-1 flex-1">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-extrabold text-slate-900">Muratpaşa İSG Asistanı</span>
+                    <button onclick="copyMessage(this)" class="text-[10px] text-slate-400 hover:text-purple-600 font-bold transition flex items-center gap-1">
+                        <i class="fa-solid fa-copy"></i> Kopyala
+                    </button>
+                </div>
+                <div class="ai-content p-4 rounded-2xl rounded-tl-xs bg-white border border-slate-200 shadow-xs text-xs text-slate-700 leading-relaxed space-y-2">
+                    ${formatMarkdown(text)}
+                </div>
+            </div>
+        `;
+        container.appendChild(div);
+        container.scrollTop = container.scrollHeight;
+    }
+
+    function copyMessage(btn) {
+        const content = btn.parentElement.nextElementSibling.innerText;
+        navigator.clipboard.writeText(content).then(() => {
+            btn.innerHTML = '<i class="fa-solid fa-check text-emerald-600"></i> Kopyalandı';
+            setTimeout(() => {
+                btn.innerHTML = '<i class="fa-solid fa-copy"></i> Kopyala';
+            }, 2000);
+        });
+    }
+
+    async function handleChatSubmit(e) {
+        if (e) e.preventDefault();
+        const input = document.getElementById('chatInput');
+        const question = input.value.trim();
+        if (!question) return;
+
+        input.value = '';
+        appendUserMessage(question);
+
+        const indicator = document.getElementById('typingIndicator');
+        const sendBtn = document.getElementById('sendBtn');
+        indicator.classList.remove('hidden');
+        sendBtn.disabled = true;
+
+        try {
+            const resp = await fetch('/api/ai/ask-advisor', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ question: question })
+            });
+            const data = await resp.json();
+            if (data.success) {
+                appendAIMessage(data.answer);
+            } else {
+                appendAIMessage('Üzgünüm, sorunuz analiz edilirken bir hata oluştu: ' + (data.error || 'Bilinmeyen hata'));
+            }
+        } catch (err) {
+            appendAIMessage('Bağlantı hatası oluştu: ' + err.message);
+        } finally {
+            indicator.classList.add('hidden');
+            sendBtn.disabled = false;
+            document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
+        }
+    }
+
+    function askQuickPrompt(text) {
+        document.getElementById('chatInput').value = text;
+        handleChatSubmit(null);
+    }
+
+    function clearChatHistory() {
+        if (confirm('Sohbet geçmişini sıfırlamak istiyor musunuz?')) {
+            location.reload();
+        }
+    }
+</script>
+{% endblock %}

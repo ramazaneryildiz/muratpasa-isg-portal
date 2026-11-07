@@ -188,10 +188,42 @@
                 <p class="text-xs text-slate-500 mt-0.5">20 Kritik Olay Kategorisi & ÇDE Seviyesi</p>
             </div>
 
+            <!-- GEMINI YAPAY ZEKA AKILLI AYRIŞTIRICI KUTUSU -->
+            <div class="p-3.5 rounded-2xl bg-gradient-to-r from-purple-50 via-indigo-50 to-slate-50 border border-purple-200/80 shadow-xs space-y-2.5">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-extrabold text-purple-900 flex items-center gap-1.5">
+                        <i class="fa-solid fa-wand-magic-sparkles text-purple-600"></i>
+                        <span>Gemini AI Akıllı Olay Ayrıştırıcı</span>
+                    </span>
+                    <span class="text-[9px] font-black px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 border border-purple-200">Google Gemini 3.5</span>
+                </div>
+                <p class="text-[11px] text-purple-800 leading-snug">
+                    Olayı serbestçe bir-iki cümleyle yazın; okul, olay türü, risk derecesi ve resmi mevzuat DÖF önerisi otomatik doldurulsun.
+                </p>
+                <div class="space-y-1.5">
+                    <div class="flex gap-1.5">
+                        <input type="text" id="aiIncidentText" placeholder="Örn: Cuma günü Atatürk İlkokulu bahçesinde pota panyası gevşemiş..." class="flex-1 bg-white border border-purple-200 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-purple-500 focus:outline-none">
+                        <button type="button" onclick="analyzeIncidentWithAI()" id="aiAnalyzeBtn" class="px-3.5 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold shadow-md shadow-purple-600/20 transition flex items-center gap-1 flex-shrink-0">
+                            <i class="fa-solid fa-bolt text-amber-300"></i>
+                            <span>Doldur</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Sonuç Bildirim Alanı (Gizli) -->
+                <div id="aiIncidentBadge" class="hidden p-2.5 bg-white rounded-xl border border-purple-200 text-[11px] space-y-1 text-slate-700">
+                    <div class="flex items-center justify-between font-bold text-slate-900">
+                        <span id="aiBadgeTitle" class="flex items-center gap-1 text-purple-700"></span>
+                        <span id="aiBadgeScore" class="px-1.5 py-0.5 rounded text-[10px] bg-amber-50 text-amber-800 border border-amber-200"></span>
+                    </div>
+                    <div id="aiBadgeDof" class="text-[10px] text-slate-600"></div>
+                </div>
+            </div>
+
             <form method="POST" action="/kriz-yonetimi/olay-ekle" class="space-y-3 text-xs">
                 <div>
                     <label class="block font-bold text-slate-700 mb-1">Okul / Kurum Seçimi:</label>
-                    <select name="school_id" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    <select id="incidentSchoolSelect" name="school_id" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold focus:ring-2 focus:ring-indigo-500 focus:outline-none">
                         {% for sc in all_schools %}
                         <option value="{{ sc.id }}">{{ sc.kurum_kodu }} — {{ sc.kurum_adi }}</option>
                         {% endfor %}
@@ -200,7 +232,7 @@
 
                 <div>
                     <label class="block font-bold text-slate-700 mb-1">Olay Türü (20 Kritik Kategori):</label>
-                    <select name="olay_turu" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    <select id="incidentTypeSelect" name="olay_turu" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold focus:ring-2 focus:ring-indigo-500 focus:outline-none">
                         <option value="BICAKLAMA_KESICI">Bıçaklama / Kesici Aletli Saldırı</option>
                         <option value="SILAHLI_SALDIRI_TEHDIT">Silahlı Saldırı / Tehdit</option>
                         <option value="AGIR_KAVGA">Toplu veya Ağır Yaralamalı Kavga</option>
@@ -227,7 +259,7 @@
                 <div class="grid grid-cols-2 gap-2">
                     <div>
                         <label class="block font-bold text-slate-700 mb-1">Erken Uyarı Seviyesi:</label>
-                        <select name="cde_seviye" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                        <select id="incidentCdeLevel" name="cde_seviye" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold focus:ring-2 focus:ring-indigo-500 focus:outline-none">
                             <option value="SEVIYE_3_CDE">Seviye 3 (ÇDE Zorunlu)</option>
                             <option value="SEVIYE_2">Seviye 2 (Rehberlik/PDR)</option>
                             <option value="SEVIYE_1">Seviye 1 (İdari Takip)</option>
@@ -235,7 +267,7 @@
                     </div>
                     <div>
                         <label class="block font-bold text-slate-700 mb-1">ÇDE Termin Süresi:</label>
-                        <select name="termin_saat" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                        <select id="incidentTerminSaat" name="termin_saat" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold focus:ring-2 focus:ring-indigo-500 focus:outline-none">
                             <option value="24">Azami 24 Saat (Yakın Tehlike)</option>
                             <option value="48">Azami 48 Saat (Diğer Seviye 3)</option>
                         </select>
@@ -249,7 +281,7 @@
 
                 <div>
                     <label class="block font-bold text-slate-700 mb-1">Olay Özeti (Özel Kişisel Veri Girmeden):</label>
-                    <textarea name="aciklama" rows="3" placeholder="Olay yeri, alınan ilk güvenlik önlemleri..." required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none"></textarea>
+                    <textarea id="incidentDescription" name="aciklama" rows="3" placeholder="Olay yeri, alınan ilk güvenlik önlemleri..." required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none"></textarea>
                 </div>
 
                 <div class="p-2 rounded-lg bg-emerald-50 border border-emerald-200 flex items-start gap-2">
@@ -544,5 +576,64 @@
 
     setInterval(updateCountdowns, 1000);
     updateCountdowns();
+
+    // ==================== GEMINI AI İLE OLAY AYRIŞTIRMA ====================
+    async function analyzeIncidentWithAI() {
+        const input = document.getElementById('aiIncidentText');
+        const text = input.value.trim();
+        if (!text) {
+            alert('Lütfen analiz edilecek olayı kısaca açıklayan bir cümle yazın.');
+            return;
+        }
+
+        const btn = document.getElementById('aiAnalyzeBtn');
+        const badge = document.getElementById('aiIncidentBadge');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> <span>Analiz...</span>';
+
+        try {
+            const resp = await fetch('/api/ai/analyze-incident', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: text })
+            });
+            const res = await resp.json();
+            if (res.success && res.data) {
+                const d = res.data;
+                // Form alanlarını otomatik seç / doldur
+                if (d.matched_school_id) {
+                    const scSelect = document.getElementById('incidentSchoolSelect');
+                    if (scSelect) scSelect.value = d.matched_school_id;
+                }
+                if (d.cde_seviye) {
+                    const cdeSelect = document.getElementById('incidentCdeLevel');
+                    if (cdeSelect) cdeSelect.value = d.cde_seviye;
+                }
+                if (d.termin_saat) {
+                    const terminSelect = document.getElementById('incidentTerminSaat');
+                    if (terminSelect) terminSelect.value = String(d.termin_saat);
+                }
+                
+                // Açıklama alanını doldur
+                const descArea = document.getElementById('incidentDescription');
+                if (descArea) {
+                    descArea.value = `${d.resmi_aciklama || text}\n\n[Mevzuat Dayanağı: ${d.mevzuat_maddesi || '6331 sayılı İSG Kanunu'}]\n[Tavsiye Edilen DÖF: ${d.onerilen_dof || ''}]`;
+                }
+
+                // AI Rozetini göster
+                badge.classList.remove('hidden');
+                document.getElementById('aiBadgeTitle').innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600"></i> ${d.tehlike_kaynagi || 'Olay Analiz Edildi'}`;
+                document.getElementById('aiBadgeScore').innerText = `Risk Skoru: ${d.risk_skoru || 10} (${d.risk_seviyesi || 'Orta'})`;
+                document.getElementById('aiBadgeDof').innerHTML = `<strong>Önerilen DÖF:</strong> ${d.onerilen_dof || 'Gerekli tedbirler alınmalıdır.'}`;
+            } else {
+                alert('Yapay zeka analizi yapılamadı: ' + (res.error || 'Bilinmeyen hata'));
+            }
+        } catch (err) {
+            alert('Bağlantı hatası: ' + err.message);
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-bolt text-amber-300"></i> <span>Doldur</span>';
+        }
+    }
 </script>
 {% endblock %}

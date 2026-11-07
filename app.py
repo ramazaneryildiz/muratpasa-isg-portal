@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 import json
 from typing import Optional
 import requests
+import isg_ai
 from adep_generator import generate_adep_docx, calculate_quotas, get_architectural_units
 from okulum_temiz_criteria import OKULUM_TEMIZ_SECTIONS, get_all_questions_flat
 
@@ -16,6 +17,14 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+env_path = os.path.join(BASE_DIR, ".env")
+if os.path.exists(env_path):
+    with open(env_path, "r", encoding="utf-8") as f:
+        for line in f:
+            if "=" in line and not line.strip().startswith("#"):
+                k, v = line.strip().split("=", 1)
+                os.environ.setdefault(k.strip(), v.strip())
+
 DB_PATH = os.environ.get("DB_PATH", os.path.join(BASE_DIR, "isg_muratpasa.db"))
 
 app = FastAPI(title="Muratpaşa İlçe MEM İSG Bilgi Yönetim Sistemi")
@@ -2222,6 +2231,59 @@ def update_incident_status(incident_id: int, yeni_durum: str = Form(...)):
     conn.commit()
     conn.close()
     return RedirectResponse("/kriz-yonetimi", status_code=303)
+
+# ==================== YAPAY ZEKA (GEMINI AI) MODÜLLERİ ====================
+
+@app.post("/api/ai/analyze-incident")
+async def api_analyze_incident(request: Request):
+    user = get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Oturum açmanız gerekiyor.")
+
+    body = await request.json()
+    raw_text = body.get("text", "").strip()
+    if not raw_text:
+        raise HTTPException(status_code=400, detail="Analiz için metin girilmedi.")
+
+    conn = get_db()
+    c = conn.cursor()
+    c.execute("SELECT id, kurum_adi, kurum_kodu FROM schools WHERE is_active_school = 1")
+    schools = [dict(r) for r in c.fetchall()]
+    conn.close()
+
+    try:
+        result = isg_ai.analyze_incident_ai(raw_text, schools)
+        return {"success": True, "data": result}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+@app.get("/isg-asistan", response_class=HTMLResponse)
+def ai_advisor_page(request: Request):
+    user = get_current_user(request)
+    if not user:
+        return RedirectResponse("/login", status_code=303)
+
+    return templates.TemplateResponse(request=request, name="ai_advisor.html", context={
+        "user": user,
+        "active_page": "ai_advisor"
+    })
+
+@app.post("/api/ai/ask-advisor")
+async def api_ask_advisor(request: Request):
+    user = get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Oturum açmanız gerekiyor.")
+
+    body = await request.json()
+    question = body.get("question", "").strip()
+    if not question:
+        raise HTTPException(status_code=400, detail="Soru metni girilmedi.")
+
+    try:
+        answer = isg_ai.ask_isg_advisor_ai(question)
+        return {"success": True, "answer": answer}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
 
 # MODÜL 4: OKULUM TEMİZ DIŞ TETKİK VE BELGELENDİRME PORTALI
 @app.get("/okulum-temiz", response_class=HTMLResponse)
