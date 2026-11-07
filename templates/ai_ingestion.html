@@ -1,0 +1,458 @@
+{% extends "base.html" %}
+
+{% block title %}MEBBİS & Saha Belgesi Yapay Zeka Aktarıcı — Muratpaşa İlçe MEM{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <!-- ==================== EXECUTIVE HEADER ==================== -->
+    <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-950 via-purple-950 to-slate-900 p-6 sm:p-8 text-white shadow-2xl border border-purple-900/50">
+        <div class="absolute -right-16 -top-16 w-80 h-80 rounded-full bg-purple-600/20 blur-3xl pointer-events-none"></div>
+        <div class="absolute right-1/3 -bottom-16 w-64 h-64 rounded-full bg-indigo-500/15 blur-2xl pointer-events-none"></div>
+
+        <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div class="space-y-2">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/20 border border-purple-400/30 text-purple-300 text-xs font-semibold backdrop-blur-sm">
+                    <span class="w-2 h-2 rounded-full bg-purple-400 animate-pulse"></span>
+                    <span>Multimodal Vision & MEBBİS Veri Aktarım Motoru</span>
+                </div>
+                <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white flex items-center gap-3">
+                    <i class="fa-solid fa-file-circle-check text-purple-400"></i>
+                    <span>MEBBİS & Belge Yapay Zeka Aktarıcı</span>
+                </h1>
+                <p class="text-xs sm:text-sm text-slate-300 max-w-3xl leading-relaxed">
+                    MEBBİS İSG Excel tablolarını, periyodik kontrol raporlarını veya sahadan çekilen muayene fotoğraflarını yükleyin. Gemini Vision içeriği okur, okulu tespit eder ve veritabanını tek tıkla otomatik günceller.
+                </p>
+            </div>
+
+            <div class="flex items-center gap-3 flex-shrink-0">
+                <a href="/isg-asistan" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-slate-800/80 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 transition">
+                    <i class="fa-solid fa-brain text-purple-400"></i>
+                    <span>İSG Asistanına Git</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== BİLDİRİM KARTI (DİNAMİK) ==================== -->
+    <div id="aiSuccessAlert" class="hidden p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center justify-between shadow-xs">
+        <div class="flex items-center gap-2.5">
+            <i class="fa-solid fa-circle-check text-emerald-600 text-base"></i>
+            <span id="aiSuccessMessage"></span>
+        </div>
+        <button onclick="this.parentElement.classList.add('hidden')" class="text-emerald-500 hover:text-emerald-700"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+
+    <!-- ==================== 2 SÜTUNLU AKILLI AKTARIM MERKEZİ ==================== -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- SOL KOLON (7 BİRİM): DOSYA YÜKLEME & TALİMAT -->
+        <div class="lg:col-span-7 bg-white rounded-3xl p-6 shadow-sm border border-slate-200 space-y-5">
+            <div class="pb-3 border-b border-slate-100 flex items-center justify-between">
+                <h3 class="text-base font-extrabold text-slate-900 flex items-center gap-2">
+                    <i class="fa-solid fa-cloud-arrow-up text-purple-600"></i> 1. Belge / Rapor / Fotoğraf Yükle
+                </h3>
+                <span class="text-[11px] font-bold text-slate-400">PDF, Excel, JPG, PNG, DOCX</span>
+            </div>
+
+            <form id="docUploadForm" onsubmit="handleDocAnalysis(event)" class="space-y-4">
+                
+                <!-- Sürükle Bırak / Dosya Seçme Alanı -->
+                <div id="dropZone" class="relative border-2 border-dashed border-purple-200 hover:border-purple-500 rounded-2xl p-6 sm:p-8 text-center bg-purple-50/30 hover:bg-purple-50/60 transition cursor-pointer group">
+                    <input type="file" id="fileInput" name="doc_file" accept=".xlsx,.xls,.pdf,.jpg,.jpeg,.png,.webp,.docx,.csv" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" required onchange="handleFileSelect(this)">
+                    
+                    <div id="dropZoneContent" class="space-y-2">
+                        <div class="w-14 h-14 mx-auto rounded-2xl bg-purple-100 text-purple-600 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-file-invoice"></i>
+                        </div>
+                        <div class="text-sm font-bold text-slate-900">
+                            Dosyayı buraya sürükleyin veya <span class="text-purple-600 underline">gözatın</span>
+                        </div>
+                        <p class="text-[11px] text-slate-500 max-w-sm mx-auto">
+                            MEBBİS İSG periyodik kontrol dökümleri, yangın tüpü dolum faturaları, kazan muayene tutanakları veya sahadan çekilen etiket fotoğrafları.
+                        </p>
+                    </div>
+
+                    <!-- Seçilen Dosya Rozeti (Gizli) -->
+                    <div id="selectedFileInfo" class="hidden p-3 rounded-xl bg-white border border-purple-200 flex items-center justify-between text-left shadow-xs">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-700 flex items-center justify-center text-lg">
+                                <i class="fa-solid fa-file-lines" id="fileIcon"></i>
+                            </div>
+                            <div>
+                                <div id="selectedFileName" class="text-xs font-extrabold text-slate-900 truncate max-w-xs"></div>
+                                <div id="selectedFileSize" class="text-[10px] text-slate-400 font-mono"></div>
+                            </div>
+                        </div>
+                        <button type="button" onclick="clearSelectedFile(event)" class="text-rose-500 hover:text-rose-700 p-2 text-sm font-bold" title="Dosyayı Kaldır">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- İsteğe Bağlı Ek Açıklama / Talimat -->
+                <div class="space-y-1.5">
+                    <label class="block text-xs font-bold text-slate-700 flex items-center justify-between">
+                        <span>Yapay Zekaya Özel Not / Talimat (İsteğe Bağlı):</span>
+                        <span class="text-[10px] text-slate-400 font-normal">Boş bırakırsanız AI kendisi tespit eder</span>
+                    </label>
+                    <textarea id="userInstruction" name="user_instruction" rows="2" placeholder="Örn: Bu Barbaros Ortaokulu'nun yangın tüpü kontrol faturasıdır, kontrol tarihini 05.11.2026 olarak güncelle..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-purple-500 focus:bg-white focus:outline-none transition"></textarea>
+                </div>
+
+                <!-- Buton -->
+                <button type="submit" id="analyzeBtn" class="w-full py-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-extrabold text-xs shadow-lg shadow-purple-600/30 transition hover:-translate-y-0.5 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-wand-magic-sparkles text-sm"></i>
+                    <span>Yapay Zeka ile Analiz Et & Oku</span>
+                </button>
+            </form>
+
+            <!-- Analiz İlerleme Çubuğu (Gizli) -->
+            <div id="aiAnalyzingIndicator" class="hidden p-4 rounded-2xl bg-purple-50 border border-purple-200 space-y-2">
+                <div class="flex items-center justify-between text-xs font-bold text-purple-900">
+                    <span class="flex items-center gap-2">
+                        <i class="fa-solid fa-spinner animate-spin text-purple-600"></i>
+                        <span>Gemini 3.5 Flash belgeyi inceliyor ve okul verilerini çıkarıyor...</span>
+                    </span>
+                </div>
+                <div class="w-full bg-purple-200 h-1.5 rounded-full overflow-hidden">
+                    <div class="bg-purple-600 h-full w-2/3 animate-pulse"></div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- SAĞ KOLON (5 BİRİM): ÇIKARILAN VERİLER & ONAY KARTI -->
+        <div class="lg:col-span-5 space-y-4">
+            
+            <!-- Boş Durum (Analiz Yapılmadan Önce) -->
+            <div id="emptyResultPlaceholder" class="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm text-center space-y-3 h-full flex flex-col items-center justify-center text-slate-400">
+                <div class="w-16 h-16 rounded-3xl bg-slate-100 flex items-center justify-center text-2xl text-slate-400">
+                    <i class="fa-solid fa-list-check"></i>
+                </div>
+                <h4 class="text-sm font-bold text-slate-700">Analiz Önizlemesi Bekleniyor</h4>
+                <p class="text-xs text-slate-500 max-w-xs leading-relaxed">
+                    Sol taraftan bir MEBBİS İSG raporu veya saha fotoğrafı yükleyip "Analiz Et"e bastığınızda tespit edilen tüm okul verileri burada görüntülenecektir.
+                </p>
+            </div>
+
+            <!-- Analiz Sonuç & Veritabanı Onay Kartı (Dinamik Açılır) -->
+            <div id="aiResultCard" class="hidden bg-white rounded-3xl p-6 border-2 border-purple-400 shadow-xl space-y-5">
+                
+                <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                    <div>
+                        <div class="text-[10px] font-extrabold uppercase tracking-wider text-purple-600">Yapay Zeka Tespiti</div>
+                        <h4 class="text-sm font-extrabold text-slate-900" id="detectedDocType">Periyodik Kontrol Belgesi</h4>
+                    </div>
+                    <span id="detectedConfidence" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                        Güven: Yüksek
+                    </span>
+                </div>
+
+                <!-- Okul Eşleşmesi -->
+                <div class="p-3.5 rounded-2xl bg-purple-50/70 border border-purple-200 space-y-1.5">
+                    <label class="block text-[11px] font-extrabold text-purple-900">
+                        Eşleşen Okul / Kurum: <span class="text-slate-400 font-normal">(Gerekirse Değiştirin)</span>
+                    </label>
+                    <select id="targetSchoolSelect" class="w-full bg-white border border-purple-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-purple-500 focus:outline-none">
+                        {% for sc in schools %}
+                        <option value="{{ sc.id }}">{{ sc.kurum_kodu }} — {{ sc.kurum_adi }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Tespit Edilen Veri Alanları -->
+                <div class="space-y-2">
+                    <div class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">
+                        Güncellenecek Bilgiler:
+                    </div>
+                    <div id="detectedFieldsList" class="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+                        <!-- JS ile dolar -->
+                    </div>
+                </div>
+
+                <!-- Eklenecek Periyodik Kontroller -->
+                <div id="detectedControlsSection" class="space-y-1.5 hidden">
+                    <div class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">
+                        Eklenecek Periyodik Muayeneler:
+                    </div>
+                    <div id="detectedControlsList" class="space-y-1">
+                        <!-- JS ile dolar -->
+                    </div>
+                </div>
+
+                <!-- AI Özeti -->
+                <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-600 leading-relaxed" id="aiSummaryText">
+                </div>
+
+                <!-- Onay ve Veritabanı Güncelleme Butonu -->
+                <button type="button" onclick="applyUpdatesToDatabase()" id="applyBtn" class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-lg shadow-emerald-600/30 transition hover:-translate-y-0.5 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-check-double text-sm"></i>
+                    <span>Onayla ve Veritabanını Güncelle</span>
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ==================== SON ARŞİVLENEN VE AKTARILAN BELGELER ==================== -->
+    <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200 space-y-4">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+            <div>
+                <h3 class="text-base font-extrabold text-slate-900 flex items-center gap-2">
+                    <i class="fa-solid fa-clock-rotate-left text-indigo-600"></i> Son Arşivlenen Belgeler & MEBBİS Aktarımları
+                </h3>
+                <p class="text-xs text-slate-500 mt-0.5">Sisteme yüklenen ve veritabanı güncellenen resmi evraklar</p>
+            </div>
+            <span class="text-xs font-mono font-bold text-slate-400">{{ recent_docs|length }} Kayıt</span>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs border-collapse">
+                <thead>
+                    <tr class="border-b border-slate-200 bg-slate-50/70 text-slate-600 font-bold uppercase text-[10px]">
+                        <th class="py-3 px-3">Tarih</th>
+                        <th class="py-3 px-3">Okul Adı</th>
+                        <th class="py-3 px-3">Belge Türü</th>
+                        <th class="py-3 px-3">Belge Adı</th>
+                        <th class="py-3 px-3 text-center">İşlem</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for doc in recent_docs %}
+                    <tr class="hover:bg-slate-50/50 transition">
+                        <td class="py-3 px-3 font-mono text-[11px] text-slate-500">{{ doc.yukleme_tarihi }}</td>
+                        <td class="py-3 px-3 font-extrabold text-slate-900">{{ doc.kurum_adi }}</td>
+                        <td class="py-3 px-3">
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                                {{ doc.belge_turu }}
+                            </span>
+                        </td>
+                        <td class="py-3 px-3 text-slate-600 truncate max-w-xs">{{ doc.belge_adi }}</td>
+                        <td class="py-3 px-3 text-center">
+                            <a href="{{ doc.dosya_yolu }}" target="_blank" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-purple-600 hover:text-white text-slate-600 text-xs font-bold transition">
+                                <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                                <span>Görüntüle</span>
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="py-6 text-center text-slate-400">
+                            Henüz arşivlenmiş bir yapay zeka belgesi bulunmuyor. Yukarıdan ilk raporunuzu yükleyebilirsiniz.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let currentAnalysisData = null;
+    let currentFileInfo = null;
+
+    function handleFileSelect(input) {
+        if (input.files && input.files[0]) {
+            const file = input.files[0];
+            document.getElementById('dropZoneContent').classList.add('hidden');
+            const fileInfo = document.getElementById('selectedFileInfo');
+            fileInfo.classList.remove('hidden');
+            document.getElementById('selectedFileName').innerText = file.name;
+            document.getElementById('selectedFileSize').innerText = (file.size / 1024).toFixed(1) + ' KB';
+        }
+    }
+
+    function clearSelectedFile(e) {
+        e.stopPropagation();
+        document.getElementById('fileInput').value = '';
+        document.getElementById('selectedFileInfo').classList.add('hidden');
+        document.getElementById('dropZoneContent').classList.remove('hidden');
+    }
+
+    async function handleDocAnalysis(e) {
+        e.preventDefault();
+        const fileInput = document.getElementById('fileInput');
+        if (!fileInput.files || !fileInput.files[0]) {
+            alert('Lütfen analiz edilecek bir dosya seçin.');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('doc_file', fileInput.files[0]);
+        formData.append('user_instruction', document.getElementById('userInstruction').value);
+
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const indicator = document.getElementById('aiAnalyzingIndicator');
+        analyzeBtn.disabled = true;
+        indicator.classList.remove('hidden');
+
+        try {
+            const resp = await fetch('/api/ai/parse-document', {
+                method: 'POST',
+                body: formData
+            });
+            const res = await resp.json();
+
+            if (res.success && res.data) {
+                currentAnalysisData = res.data;
+                currentFileInfo = res.saved_file;
+                displayAnalysisResult(res.data, res.saved_file);
+            } else {
+                alert('Yapay zeka analizi başarısız oldu: ' + (res.error || 'Bilinmeyen hata'));
+            }
+        } catch (err) {
+            alert('Sunucu bağlantı hatası: ' + err.message);
+        } finally {
+            analyzeBtn.disabled = false;
+            indicator.classList.add('hidden');
+        }
+    }
+
+    function displayAnalysisResult(data, fileInfo) {
+        document.getElementById('emptyResultPlaceholder').classList.add('hidden');
+        const resultCard = document.getElementById('aiResultCard');
+        resultCard.classList.remove('hidden');
+
+        document.getElementById('detectedDocType').innerText = data.belge_turu || 'İSG Belgesi';
+        document.getElementById('detectedConfidence').innerText = 'Güven: ' + (data.guven_derecesi || 'Yüksek');
+
+        // Okul Seçimi
+        const schoolSelect = document.getElementById('targetSchoolSelect');
+        if (data.matched_school_id) {
+            schoolSelect.value = String(data.matched_school_id);
+        }
+
+        // Tespit edilen alanlar
+        const fieldsList = document.getElementById('detectedFieldsList');
+        fieldsList.innerHTML = '';
+        const fields = data.tespit_edilen_alanlar || {};
+        let fieldCount = 0;
+
+        const fieldLabels = {
+            'kazan_kontrol_tarihi': 'Kalorifer Kazanı Muayenesi',
+            'kazan_durumu': 'Kazan Durumu',
+            'yangin_tupleri_kontrol_tarihi': 'Yangın Tüpleri Kontrolü',
+            'elektrik_topraklama_tarihi': 'Elektrik Topraklama Ölçümü',
+            'paratoner_kontrol_tarihi': 'Paratoner Muayenesi',
+            'paratoner_durumu': 'Paratoner Durumu',
+            'asansor_muayene_tarihi': 'Asansör Muayenesi',
+            'asansor_durumu': 'Asansör Durumu',
+            'su_deposu_temizlik_tarihi': 'Su Deposu Temizliği',
+            'adep_tarihi': 'ADEP Güncelleme Tarihi',
+            'tatbikat_tarihi': 'Tatbikat Tarihi',
+            'tatbikat_turu': 'Tatbikat Türü',
+            'ilkyardimci_personel_sayisi': 'İlk Yardımcı Sayısı',
+            'ozel_guvenlik_sayisi': 'Özel Güvenlik Görevlisi',
+            'ogrenci_sayisi': 'Öğrenci Sayısı',
+            'ogretmen_sayisi': 'Öğretmen Sayısı',
+            'mudur_ad_soyad': 'Okul Müdürü',
+            'mudur_tel': 'Müdür Telefon'
+        };
+
+        for (const [k, v] of Object.entries(fields)) {
+            if (v !== null && v !== undefined && String(v).trim() !== '') {
+                fieldCount++;
+                const label = fieldLabels[k] || k;
+                const div = document.createElement('div');
+                div.className = 'p-2 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between text-[11px]';
+                div.innerHTML = `
+                    <span class="font-bold text-slate-700">${label}:</span>
+                    <span class="font-extrabold text-purple-700 font-mono bg-purple-50 px-2 py-0.5 rounded border border-purple-200">${v}</span>
+                `;
+                fieldsList.appendChild(div);
+            }
+        }
+
+        if (fieldCount === 0) {
+            fieldsList.innerHTML = '<div class="text-[11px] text-slate-400 p-2">Belirli bir periyodik tarih tespit edilmedi (yalnızca arşivlenecek).</div>';
+        }
+
+        // Periyodik Kontroller Ekle
+        const controlsSection = document.getElementById('detectedControlsSection');
+        const controlsList = document.getElementById('detectedControlsList');
+        controlsList.innerHTML = '';
+        const controls = data.periodic_controls_ekle || [];
+
+        if (controls.length > 0) {
+            controlsSection.classList.remove('hidden');
+            controls.forEach(c => {
+                const div = document.createElement('div');
+                div.className = 'p-2 rounded-xl bg-emerald-50 border border-emerald-200 text-[11px] flex items-center justify-between';
+                div.innerHTML = `
+                    <div>
+                        <div class="font-extrabold text-emerald-950">${c.ekipman_turu}</div>
+                        <div class="text-[10px] text-emerald-700">${c.kontrol_yapan_kurum || ''}</div>
+                    </div>
+                    <span class="font-mono font-extrabold text-emerald-700">${c.son_kontrol_tarihi}</span>
+                `;
+                controlsList.appendChild(div);
+            });
+        } else {
+            controlsSection.classList.add('hidden');
+        }
+
+        document.getElementById('aiSummaryText').innerHTML = `<strong>AI Değerlendirmesi:</strong> ${data.ai_ozeti || 'Veriler başarıyla çıkarıldı.'}`;
+    }
+
+    async function applyUpdatesToDatabase() {
+        if (!currentAnalysisData) return;
+
+        const schoolId = parseInt(document.getElementById('targetSchoolSelect').value);
+        if (!schoolId) {
+            alert('Lütfen güncellenecek okulu seçiniz.');
+            return;
+        }
+
+        const applyBtn = document.getElementById('applyBtn');
+        applyBtn.disabled = true;
+        applyBtn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> <span>Veritabanına Yazılıyor...</span>';
+
+        try {
+            const resp = await fetch('/api/ai/apply-updates', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    school_id: schoolId,
+                    tespit_edilen_alanlar: currentAnalysisData.tespit_edilen_alanlar || {},
+                    periodic_controls_ekle: currentAnalysisData.periodic_controls_ekle || [],
+                    belge_turu: currentAnalysisData.belge_turu || 'MEBBİS İSG Belgesi',
+                    file_info: currentFileInfo
+                })
+            });
+            const res = await resp.json();
+
+            if (res.success) {
+                const alertBox = document.getElementById('aiSuccessAlert');
+                document.getElementById('aiSuccessMessage').innerText = res.message;
+                alertBox.classList.remove('hidden');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+
+                // Formu sıfırla
+                document.getElementById('fileInput').value = '';
+                document.getElementById('userInstruction').value = '';
+                document.getElementById('selectedFileInfo').classList.add('hidden');
+                document.getElementById('dropZoneContent').classList.remove('hidden');
+                document.getElementById('aiResultCard').classList.add('hidden');
+                document.getElementById('emptyResultPlaceholder').classList.remove('hidden');
+
+                // 2 saniye sonra sayfayı tazeleyip tabloyu güncelle
+                setTimeout(() => { location.reload(); }, 2500);
+            } else {
+                alert('Güncelleme hatası: ' + (res.error || 'Bilinmeyen hata'));
+            }
+        } catch (err) {
+            alert('Bağlantı hatası: ' + err.message);
+        } finally {
+            applyBtn.disabled = false;
+            applyBtn.innerHTML = '<i class="fa-solid fa-check-double text-sm"></i> <span>Onayla ve Veritabanını Güncelle</span>';
+        }
+    }
+</script>
+{% endblock %}

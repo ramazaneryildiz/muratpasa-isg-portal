@@ -2285,6 +2285,194 @@ async def api_ask_advisor(request: Request):
     except Exception as e:
         return {"success": False, "error": str(e)}
 
+@app.get("/ai-veri-aktarimi", response_class=HTMLResponse)
+def ai_ingestion_page(request: Request):
+    user = get_current_user(request)
+    if not user:
+        return RedirectResponse("/login", status_code=303)
+
+    conn = get_db()
+    c = conn.cursor()
+    c.execute("SELECT id, kurum_kodu, kurum_adi FROM schools WHERE is_active_school = 1 ORDER BY kurum_adi ASC")
+    schools = [dict(r) for r in c.fetchall()]
+
+    c.execute("""
+        SELECT d.*, s.kurum_adi, s.kurum_kodu
+        FROM documents_archive d
+        JOIN schools s ON d.school_id = s.id
+        ORDER BY d.id DESC LIMIT 20
+    """)
+    recent_docs = [dict(r) for r in c.fetchall()]
+    conn.close()
+
+    return templates.TemplateResponse(request=request, name="ai_ingestion.html", context={
+        "user": user,
+        "schools": schools,
+        "recent_docs": recent_docs,
+        "active_page": "ai_ingestion"
+    })
+
+@app.post("/api/ai/parse-document")
+async def api_parse_document(
+    request: Request,
+    doc_file: UploadFile = File(...),
+    user_instruction: Optional[str] = Form("")
+):
+    user = get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Oturum açmanız gerekiyor.")
+
+    file_bytes = await doc_file.read()
+    if not file_bytes:
+        raise HTTPException(status_code=400, detail="Boş dosya yüklendi.")
+
+    # Dosyayı kaydet
+    upload_dir = os.path.join(BASE_DIR, "static", "uploads", "isg_belgeler")
+    os.makedirs(upload_dir, exist_ok=True)
+    clean_name = os.path.basename(doc_file.filename).replace(" ", "_")
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    saved_filename = f"{timestamp}_{clean_name}"
+    file_path = os.path.join(upload_dir, saved_filename)
+    with open(file_path, "wb") as f:
+        f.write(file_bytes)
+
+    relative_file_path = f"/static/uploads/isg_belgeler/{saved_filename}"
+
+    # Dosya içeriğini çıkar
+    file_text, inline_img = isg_ai.extract_file_content(clean_name, file_bytes)
+
+    conn = get_db()
+    c = conn.cursor()
+    c.execute("SELECT id, kurum_kodu, kurum_adi FROM schools WHERE is_active_school = 1")
+    schools = [dict(r) for r in c.fetchall()]
+    conn.close()
+
+    try:
+        extracted = isg_ai.analyze_and_extract_mebbis_report(file_text, inline_img, user_instruction, schools)
+        return {
+            "success": True,
+            "data": extracted,
+            "saved_file": {
+                "filename": doc_file.filename,
+                "file_path": relative_file_path
+            }
+        }
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+@app.post("/api/ai/apply-updates")
+async def api_apply_updates(request: Request):
+    user = get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Oturum açmanız gerekiyor.")
+
+    body = await request.json()
+    school_id = body.get("school_id")
+    if not school_id:
+        raise HTTPException(status_code=400, detail="Okul seçilmedi.")
+
+    fields = body.get("tespit_edilen_alanlar", {})
+    controls = body.get("periodic_controls_ekle", [])
+    file_info = body.get("file_info", {})
+    belge_turu = body.get("belge_turu", "MEBBİS İSG Belgesi")
+
+    conn = get_db()
+    c = conn.cursor()
+
+    # 1. Okul kontrolü
+    c.execute("SELECT id, kurum_adi FROM schools WHERE id = ?", (school_id,))
+    school = c.fetchone()
+    if not school:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Okul bulunamadı.")
+
+    now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    # 2. schools tablosu güncellemeleri
+    school_updates = []
+    school_params = []
+    for k in ["ogrenci_sayisi", "ogretmen_sayisi", "mudur_ad_soyad", "mudur_tel"]:
+        val = fields.get(k)
+        if val is not None and str(val).strip():
+            school_updates.append(f"{k} = ?")
+            school_params.append(val)
+
+    user_name = user["full_name"] if (user and "full_name" in user.keys()) else "MEBBİS AI"
+
+    if school_updates:
+        school_updates.append("son_veri_giris_tarihi = ?")
+        school_updates.append("son_veri_giren_kisi = ?")
+        school_params.extend([now_str, f"Yapay Zeka ({user_name})", school_id])
+        c.execute(f"UPDATE schools SET {', '.join(school_updates)} WHERE id = ?", tuple(school_params))
+    else:
+        c.execute("UPDATE schools SET son_veri_giris_tarihi = ?, son_veri_giren_kisi = ? WHERE id = ?", (now_str, f"Yapay Zeka ({user_name})", school_id))
+
+    # 3. inspection_metrics tablosu güncellemeleri
+    metric_cols = [
+        "kazan_kontrol_tarihi", "kazan_durumu",
+        "elektrik_topraklama_tarihi",
+        "paratoner_kontrol_tarihi", "paratoner_durumu",
+        "yangin_tupleri_kontrol_tarihi",
+        "asansor_muayene_tarihi", "asansor_durumu",
+        "su_deposu_temizlik_tarihi", "su_deposu_durumu",
+        "adep_var_mi", "adep_tarihi",
+        "tatbikat_tarihi", "tatbikat_turu", "tatbikat_katilimci_sayisi",
+        "ilkyardimci_personel_sayisi", "ozel_guvenlik_sayisi",
+        "toplam_kamera_sayisi"
+    ]
+    metric_updates = []
+    metric_params = []
+    for col in metric_cols:
+        val = fields.get(col)
+        if val is not None and str(val).strip():
+            metric_updates.append(f"{col} = ?")
+            metric_params.append(val)
+
+    if metric_updates:
+        metric_updates.append("updated_at = ?")
+        metric_params.extend([now_str, school_id])
+        c.execute(f"UPDATE inspection_metrics SET {', '.join(metric_updates)} WHERE school_id = ?", tuple(metric_params))
+
+    # 4. periodic_controls eklemeleri
+    added_controls_count = 0
+    for ctrl in controls:
+        ekipman = ctrl.get("ekipman_turu")
+        tarih = ctrl.get("son_kontrol_tarihi")
+        if ekipman and tarih:
+            gecerlilik = int(ctrl.get("gecerlilik_ayi") or 12)
+            sonraki = ctrl.get("sonraki_kontrol_tarihi")
+            if not sonraki:
+                try:
+                    dt = datetime.strptime(tarih, "%Y-%m-%d")
+                    sonraki = (dt + timedelta(days=gecerlilik * 30)).strftime("%Y-%m-%d")
+                except Exception:
+                    sonraki = tarih
+            kurum = ctrl.get("kontrol_yapan_kurum") or "MEBBİS Yetkili Muayene Kuruluşu"
+            sonuc = ctrl.get("rapor_sonucu") or "Gecerli"
+            notlar = ctrl.get("notlar") or "Yapay Zeka (MEBBİS AI Aktarımı) ile otomatik işlendi."
+            c.execute("""
+                INSERT INTO periodic_controls (school_id, ekipman_turu, son_kontrol_tarihi, gecerlilik_ayi, sonraki_kontrol_tarihi, kontrol_yapan_kurum, rapor_sonucu, alarm_seviyesi, notlar)
+                VALUES (?, ?, ?, ?, ?, ?, ?, 'Gecerli', ?)
+            """, (school_id, ekipman, tarih, gecerlilik, sonraki, kurum, sonuc, notlar))
+            added_controls_count += 1
+
+    # 5. documents_archive kaydı
+    if file_info and file_info.get("file_path"):
+        c.execute("""
+            INSERT INTO documents_archive (school_id, belge_turu, belge_adi, dosya_yolu, yukleyen_user_id, yukleme_tarihi)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (school_id, belge_turu, file_info.get("filename", "MEBBİS Belgesi"), file_info.get("file_path"), user["id"], now_str))
+
+    conn.commit()
+    conn.close()
+
+    return {
+        "success": True,
+        "message": f"{school['kurum_adi']} okulunun verileri ve periyodik kontrolleri başarıyla güncellendi.",
+        "updated_school": school["kurum_adi"],
+        "added_controls": added_controls_count
+    }
+
 # MODÜL 4: OKULUM TEMİZ DIŞ TETKİK VE BELGELENDİRME PORTALI
 @app.get("/okulum-temiz", response_class=HTMLResponse)
 def okulum_temiz_page(request: Request, auditor: Optional[str] = None):

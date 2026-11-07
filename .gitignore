@@ -10,3 +10,5 @@ ENV/
 *.log
 auth_url.txt
 test_*.py
+static/uploads/isg_belgeler/*
+!static/uploads/isg_belgeler/.gitkeep

@@ -37,12 +37,17 @@ CANDIDATE_MODELS = [
 
 def call_gemini(prompt: str, json_mode: bool = False, timeout: int = 25) -> str:
     """Gemini API'sini çağırır. Model meşgulse (503/404) otomatik olarak yedek modele geçer."""
+    parts = [{"text": prompt}]
+    return call_gemini_multimodal(parts, json_mode=json_mode, timeout=timeout)
+
+def call_gemini_multimodal(parts: list, json_mode: bool = False, timeout: int = 35) -> str:
+    """Gemini API'sini metin ve görsellerle (Multimodal) çağırır."""
     api_key = get_api_key()
     if not api_key:
         raise ValueError("GEMINI_API_KEY bulunamadı.")
 
     payload = {
-        "contents": [{"parts": [{"text": prompt}]}]
+        "contents": [{"parts": parts}]
     }
     if json_mode:
         payload["generationConfig"] = {"response_mime_type": "application/json"}
@@ -68,6 +73,147 @@ def call_gemini(prompt: str, json_mode: bool = False, timeout: int = 25) -> str:
             continue
 
     raise RuntimeError(f"Tüm Gemini modelleri denendi fakat yanıt alınamadı. Son hata: {last_error}")
+
+def extract_file_content(filename: str, file_bytes: bytes) -> tuple:
+    """
+    Yüklenen dosyanın içeriğini türüne göre çıkarır.
+    Döndürür: (metin_icerik: str, inline_image_dict: Optional[dict])
+    """
+    ext = os.path.splitext(filename)[1].lower()
+
+    # Görsel / Fotoğraf
+    if ext in [".jpg", ".jpeg", ".png", ".webp"]:
+        import base64
+        mime = "image/jpeg" if ext in [".jpg", ".jpeg"] else ("image/png" if ext == ".png" else "image/webp")
+        b64 = base64.b64encode(file_bytes).decode("utf-8")
+        return f"[Görsel/Fotoğraf Dosyası: {filename}]", {"mime_type": mime, "data": b64}
+
+    # Excel Tabloları (MEBBİS İSG Çıktıları)
+    elif ext in [".xlsx", ".xls"]:
+        import io
+        import openpyxl
+        wb = openpyxl.load_workbook(io.BytesIO(file_bytes), data_only=True)
+        text_lines = []
+        for sheet in wb.sheetnames[:3]:
+            ws = wb[sheet]
+            text_lines.append(f"--- Sayfa: {sheet} ---")
+            for row in ws.iter_rows(max_row=120, values_only=True):
+                non_empty = [str(cell) for cell in row if cell is not None]
+                if non_empty:
+                    text_lines.append(" | ".join(non_empty))
+        return "\n".join(text_lines), None
+
+    # PDF Rapor ve Tutanaklar
+    elif ext == ".pdf":
+        import io
+        import pypdf
+        reader = pypdf.PdfReader(io.BytesIO(file_bytes))
+        pages_text = []
+        for i, page in enumerate(reader.pages[:10]):
+            txt = page.extract_text()
+            if txt:
+                pages_text.append(f"--- Sayfa {i+1} ---\n{txt}")
+        return "\n".join(pages_text), None
+
+    # Word Dokümanları
+    elif ext == ".docx":
+        import io
+        import docx
+        doc = docx.Document(io.BytesIO(file_bytes))
+        paragraphs = [p.text for p in doc.paragraphs if p.text.strip()]
+        for t in doc.tables:
+            for row in t.rows:
+                row_txt = [c.text.strip() for c in row.cells if c.text.strip()]
+                if row_txt:
+                    paragraphs.append(" | ".join(row_txt))
+        return "\n".join(paragraphs), None
+
+    # Düz Metin / CSV
+    else:
+        try:
+            return file_bytes.decode("utf-8"), None
+        except UnicodeDecodeError:
+            return file_bytes.decode("iso-8859-9", errors="replace"), None
+
+def analyze_and_extract_mebbis_report(file_text: str, inline_image: dict, user_instruction: str, schools: list) -> dict:
+    """
+    Yüklenen MEBBİS raporunu, denetim tutanağını veya fotoğrafı analiz eder,
+    ilgili okulu eşler ve veritabanı güncellemelerini JSON şemasıyla döker.
+    """
+    schools_ctx = "\n".join([f"ID:{s['id']} | KOD:{s['kurum_kodu']} | {s['kurum_adi']}" for s in schools])
+
+    prompt = f"""
+Sen Türkiye Cumhuriyeti MEB ve 6331 sayılı İSG Kanunu standartlarına hakim bir İSG ve MEBBİS Veri İşleme Başuzmanısın.
+Muratpaşa İlçe MEM bünyesindeki 268 okulun MEBBİS İSG raporları, saha fotoğrafları ve periyodik muayene evrakları sana iletiliyor.
+
+Kullanıcının Açıklaması / Talimatı:
+\"\"\"{user_instruction or 'Belgedeki veya fotoğraftaki okul bilgilerini, periyodik kontrolleri ve güvenlik verilerini otomatik tespit et.'}\"\"\"
+
+Belge Metni / OCR İçeriği:
+\"\"\"{file_text[:8000]}\"\"\"
+
+Sistemdeki Resmi Okul Listesi (Eşleştirme için referans al):
+{schools_ctx}
+
+GÖREVİN:
+1. Yüklenen belge/fotoğraf ve kullanıcının açıklamasına göre hangi okul olduğunu tespit et ('matched_school_id' ve 'okul_adi_tespit').
+2. Belgedeki periyodik kontrol tarihlerini (kazan, elektrik topraklama, paratoner, yangın tüpü, asansör, su deposu), muayene durumlarını ('Gecerli' veya 'Kusurlu') tespit et.
+3. Varsa tatbikat tarihi, ilk yardımcı sayısı, güvenlik görevlisi, kamera sayısı veya öğrenci/öğretmen sayılarını tespit et.
+4. 'periodic_controls_ekle' listesi içine eklenebilecek yeni periyodik kontrol muayenelerini yapılandır.
+5. Aşağıdaki JSON şemasında eksiksiz ve geçerli bir JSON döndür. Tarihler YYYY-MM-DD formatında olmalıdır. Bulunmayan alanları null bırak.
+
+JSON ŞEMASI:
+{{
+  "matched_school_id": integer veya null,
+  "okul_adi_tespit": "Tespit edilen okul adı",
+  "kurum_kodu_tespit": "Varsa kurum kodu" veya null,
+  "belge_turu": "MEBBİS İSG Raporu" | "Periyodik Kontrol Belgesi" | "Saha Fotoğrafı / Tutanak" | "Fatura / Dolum Etiketi" | "Diğer",
+  "guven_derecesi": "Yüksek" | "Orta" | "Düşük",
+  "tespit_edilen_alanlar": {{
+    "kazan_kontrol_tarihi": "YYYY-MM-DD" veya null,
+    "kazan_durumu": "Gecerli" | "Kusurlu" veya null,
+    "elektrik_topraklama_tarihi": "YYYY-MM-DD" veya null,
+    "paratoner_kontrol_tarihi": "YYYY-MM-DD" veya null,
+    "paratoner_durumu": "Gecerli" | "Kusurlu" veya null,
+    "yangin_tupleri_kontrol_tarihi": "YYYY-MM-DD" veya null,
+    "asansor_muayene_tarihi": "YYYY-MM-DD" veya null,
+    "asansor_durumu": "Gecerli" | "Kusurlu" veya null,
+    "su_deposu_temizlik_tarihi": "YYYY-MM-DD" veya null,
+    "su_deposu_durumu": "Gecerli" | "Kusurlu" veya null,
+    "adep_var_mi": "Var" | "Yok" veya null,
+    "adep_tarihi": "YYYY-MM-DD" veya null,
+    "tatbikat_tarihi": "YYYY-MM-DD" veya null,
+    "tatbikat_turu": "Deprem Tahliye" | "Yangın" | "İkaz-Alarm" veya null,
+    "tatbikat_katilimci_sayisi": integer veya null,
+    "ilkyardimci_personel_sayisi": integer veya null,
+    "ozel_guvenlik_sayisi": integer veya null,
+    "toplam_kamera_sayisi": integer veya null,
+    "ogrenci_sayisi": integer veya null,
+    "ogretmen_sayisi": integer veya null,
+    "mudur_ad_soyad": string veya null,
+    "mudur_tel": string veya null
+  }},
+  "periodic_controls_ekle": [
+    {{
+      "ekipman_turu": "Kalorifer Kazanı" | "Yangın Söndürme Tüpleri" | "Elektrik İç Tesisat / Topraklama" | "Paratoner" | "Asansör" | "Su Deposu",
+      "son_kontrol_tarihi": "YYYY-MM-DD",
+      "gecerlilik_ayi": 12,
+      "sonraki_kontrol_tarihi": "YYYY-MM-DD",
+      "kontrol_yapan_kurum": "Yetkili Kuruluş / Firma",
+      "rapor_sonucu": "Gecerli" | "Kusurlu",
+      "notlar": "Muayene detayı"
+    }}
+  ],
+  "ai_ozeti": "Kullanıcıya gösterilecek 1-2 cümlelik işlem özeti"
+}}
+"""
+    parts = [{"text": prompt}]
+    if inline_image:
+        parts.append({"inline_data": inline_image})
+
+    raw_json = call_gemini_multimodal(parts, json_mode=True)
+    return json.loads(raw_json)
+
 
 def analyze_incident_ai(raw_text: str, schools: list = None) -> dict:
     """
