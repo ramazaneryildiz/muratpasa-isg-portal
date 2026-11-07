@@ -34,6 +34,54 @@
         </div>
     </div>
 
+    <!-- ==================== AKILLI DEPOLAMA & ARŞİV İSTATİSTİKLERİ ==================== -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Kart 1: Toplam Arşivlenen Belge -->
+        <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-xs flex items-center gap-3.5">
+            <div class="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-xl flex-shrink-0">
+                <i class="fa-solid fa-folder-tree"></i>
+            </div>
+            <div>
+                <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Arşivlenen Belge</div>
+                <div class="text-xl font-extrabold text-slate-900 font-mono">{{ storage_stats.total_files }} <span class="text-xs font-normal text-slate-400">dosya</span></div>
+            </div>
+        </div>
+
+        <!-- Kart 2: Disk Alanı -->
+        <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-xs flex items-center gap-3.5">
+            <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl flex-shrink-0">
+                <i class="fa-solid fa-hard-drive"></i>
+            </div>
+            <div>
+                <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Kullanılan Alan</div>
+                <div class="text-xl font-extrabold text-slate-900 font-mono">{{ storage_stats.total_mb }} <span class="text-xs font-normal text-slate-400">MB</span></div>
+            </div>
+        </div>
+
+        <!-- Kart 3: Akıllı Sıkıştırma Oranı -->
+        <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-xs flex items-center gap-3.5">
+            <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl flex-shrink-0">
+                <i class="fa-solid fa-compress"></i>
+            </div>
+            <div>
+                <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">AI Boyut Tasarrufu</div>
+                <div class="text-xl font-extrabold text-emerald-600 font-mono">~%92 <span class="text-xs font-bold text-emerald-500">(LANCZOS)</span></div>
+            </div>
+        </div>
+
+        <!-- Kart 4: Yıllık Zip Arşivi İndir -->
+        <div class="bg-gradient-to-r from-purple-900 to-indigo-900 rounded-2xl p-4 text-white shadow-xs flex items-center justify-between">
+            <div class="space-y-0.5">
+                <div class="text-[10px] font-bold uppercase tracking-wider text-purple-300">Yedekleme & Boşaltma</div>
+                <div class="text-xs font-extrabold text-white">Yıllık Arşivi İndir</div>
+            </div>
+            <a href="/admin/arsiv-indir/2026" class="px-3 py-2 rounded-xl bg-white/10 hover:bg-white text-white hover:text-purple-950 text-xs font-extrabold border border-white/20 transition flex items-center gap-1.5 shadow-sm" title="2026 Yılı Tüm Okul Evraklarını ZIP Olarak İndir">
+                <i class="fa-solid fa-file-zipper text-purple-300"></i>
+                <span>2026 .ZIP</span>
+            </a>
+        </div>
+    </div>
+
     <!-- ==================== BİLDİRİM KARTI (DİNAMİK) ==================== -->
     <div id="aiSuccessAlert" class="hidden p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center justify-between shadow-xs">
         <div class="flex items-center gap-2.5">
@@ -430,7 +478,13 @@
 
             if (res.success) {
                 const alertBox = document.getElementById('aiSuccessAlert');
-                document.getElementById('aiSuccessMessage').innerText = res.message;
+                let extraMsg = '';
+                if (res.storage_savings && res.storage_savings.is_image && res.storage_savings.savings_pct > 0) {
+                    extraMsg = ` — 🚀 Görsel Akıllı Sıkıştırma: ${res.storage_savings.original_kb} KB ➔ ${res.storage_savings.saved_kb} KB (%${res.storage_savings.savings_pct} Boyut Tasarrufu Sağlandı!)`;
+                } else if (res.storage_savings) {
+                    extraMsg = ` — 📁 Belge kurumsal okul arşivine kaydedildi (${res.storage_savings.saved_kb} KB).`;
+                }
+                document.getElementById('aiSuccessMessage').innerText = res.message + extraMsg;
                 alertBox.classList.remove('hidden');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
 

@@ -8,6 +8,7 @@ import json
 from typing import Optional
 import requests
 import isg_ai
+import isg_storage
 from adep_generator import generate_adep_docx, calculate_quotas, get_architectural_units
 from okulum_temiz_criteria import OKULUM_TEMIZ_SECTIONS, get_all_questions_flat
 
@@ -2305,10 +2306,13 @@ def ai_ingestion_page(request: Request):
     recent_docs = [dict(r) for r in c.fetchall()]
     conn.close()
 
+    storage_stats = isg_storage.get_storage_statistics()
+
     return templates.TemplateResponse(request=request, name="ai_ingestion.html", context={
         "user": user,
         "schools": schools,
         "recent_docs": recent_docs,
+        "storage_stats": storage_stats,
         "active_page": "ai_ingestion"
     })
 
@@ -2380,7 +2384,7 @@ async def api_apply_updates(request: Request):
     c = conn.cursor()
 
     # 1. Okul kontrolü
-    c.execute("SELECT id, kurum_adi FROM schools WHERE id = ?", (school_id,))
+    c.execute("SELECT id, kurum_kodu, kurum_adi FROM schools WHERE id = ?", (school_id,))
     school = c.fetchone()
     if not school:
         conn.close()
@@ -2456,12 +2460,39 @@ async def api_apply_updates(request: Request):
             """, (school_id, ekipman, tarih, gecerlilik, sonraki, kurum, sonuc, notlar))
             added_controls_count += 1
 
-    # 5. documents_archive kaydı
+    # 5. documents_archive kaydı & Akıllı Hiyerarşik Depolama
+    final_file_url = None
+    storage_savings = None
     if file_info and file_info.get("file_path"):
+        raw_rel = file_info.get("file_path").lstrip("/\\")
+        temp_abs = os.path.join(BASE_DIR, raw_rel)
+        orig_name = file_info.get("filename", "MEBBİS_Belgesi")
+        if os.path.exists(temp_abs):
+            try:
+                with open(temp_abs, "rb") as tf:
+                    raw_bytes = tf.read()
+                # Akıllı depolama ve görsel sıkıştırma motoru
+                saved_res = isg_storage.save_school_document(
+                    file_bytes=raw_bytes,
+                    original_filename=orig_name,
+                    school_info=dict(school),
+                    belge_turu=belge_turu
+                )
+                final_file_url = saved_res["relative_url"]
+                storage_savings = saved_res
+                try:
+                    os.remove(temp_abs)
+                except Exception:
+                    pass
+            except Exception as e:
+                final_file_url = file_info.get("file_path")
+        else:
+            final_file_url = file_info.get("file_path")
+
         c.execute("""
             INSERT INTO documents_archive (school_id, belge_turu, belge_adi, dosya_yolu, yukleyen_user_id, yukleme_tarihi)
             VALUES (?, ?, ?, ?, ?, ?)
-        """, (school_id, belge_turu, file_info.get("filename", "MEBBİS Belgesi"), file_info.get("file_path"), user["id"], now_str))
+        """, (school_id, belge_turu, orig_name, final_file_url or file_info.get("file_path"), user["id"], now_str))
 
     conn.commit()
     conn.close()
@@ -2470,8 +2501,34 @@ async def api_apply_updates(request: Request):
         "success": True,
         "message": f"{school['kurum_adi']} okulunun verileri ve periyodik kontrolleri başarıyla güncellendi.",
         "updated_school": school["kurum_adi"],
-        "added_controls": added_controls_count
+        "added_controls": added_controls_count,
+        "storage_savings": storage_savings
     }
+
+@app.get("/admin/arsiv-indir/{year}")
+def download_annual_archive(year: int, request: Request):
+    """Belirli bir yıla ait tüm okul belgelerini tek bir zip dosyası olarak indirir."""
+    user = get_current_user(request)
+    if not user or user["role"] not in ["koordinator", "uzman", "admin", "isg_uzmani"]:
+        raise HTTPException(status_code=403, detail="Yalnızca koordinatör ve İSG uzmanları yıllık arşiv indirebilir.")
+
+    relative_url, zip_abs_path, zip_size_mb = isg_storage.export_annual_archive_zip(year)
+    if not os.path.exists(zip_abs_path):
+        raise HTTPException(status_code=404, detail=f"{year} yılına ait arşiv bulunamadı.")
+
+    return FileResponse(
+        path=zip_abs_path,
+        filename=f"muratpasa_isg_arsiv_{year}.zip",
+        media_type="application/zip"
+    )
+
+@app.get("/api/storage/stats")
+def api_storage_stats(request: Request):
+    """Canlı depolama ve arşivleme istatistiklerini döner."""
+    user = get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Oturum açmanız gerekiyor.")
+    return isg_storage.get_storage_statistics()
 
 # MODÜL 4: OKULUM TEMİZ DIŞ TETKİK VE BELGELENDİRME PORTALI
 @app.get("/okulum-temiz", response_class=HTMLResponse)
