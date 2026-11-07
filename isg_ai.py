@@ -30,18 +30,19 @@ def get_api_key():
 
 CANDIDATE_MODELS = [
     os.environ.get("GEMINI_MODEL", "gemini-3.5-flash"),
-    "gemini-3.8-flash",
+    "gemini-3.5-flash-lite",
     "gemini-flash-latest",
-    "gemini-2.5-flash"
+    "gemini-3.1-flash-lite"
 ]
 
-def call_gemini(prompt: str, json_mode: bool = False, timeout: int = 25) -> str:
+def call_gemini(prompt: str, json_mode: bool = False, timeout: int = 35) -> str:
     """Gemini API'sini çağırır. Model meşgulse (503/404) otomatik olarak yedek modele geçer."""
     parts = [{"text": prompt}]
     return call_gemini_multimodal(parts, json_mode=json_mode, timeout=timeout)
 
-def call_gemini_multimodal(parts: list, json_mode: bool = False, timeout: int = 35) -> str:
+def call_gemini_multimodal(parts: list, json_mode: bool = False, timeout: int = 45) -> str:
     """Gemini API'sini metin ve görsellerle (Multimodal) çağırır."""
+    import time
     api_key = get_api_key()
     if not api_key:
         raise ValueError("GEMINI_API_KEY bulunamadı.")
@@ -55,22 +56,28 @@ def call_gemini_multimodal(parts: list, json_mode: bool = False, timeout: int = 
     last_error = None
     for model_name in CANDIDATE_MODELS:
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={api_key}"
-        try:
-            resp = requests.post(url, json=payload, headers={"Content-Type": "application/json"}, timeout=timeout)
-            if resp.status_code == 200:
-                data = resp.json()
-                text = data["candidates"][0]["content"]["parts"][0]["text"]
-                return text
-            elif resp.status_code in [404, 503, 429]:
-                logger.warning(f"Model {model_name} HTTP {resp.status_code} verdi, bir sonraki modele geçiliyor.")
-                last_error = f"HTTP {resp.status_code}: {resp.text[:120]}"
+        for attempt in range(2):
+            try:
+                resp = requests.post(url, json=payload, headers={"Content-Type": "application/json"}, timeout=timeout)
+                if resp.status_code == 200:
+                    data = resp.json()
+                    text = data["candidates"][0]["content"]["parts"][0]["text"]
+                    return text
+                elif resp.status_code in [503, 429]:
+                    logger.warning(f"Model {model_name} HTTP {resp.status_code} verdi (deneme {attempt+1}), 1 sn bekleniyor.")
+                    time.sleep(1.2)
+                    last_error = f"HTTP {resp.status_code}: {resp.text[:120]}"
+                    continue
+                elif resp.status_code == 404:
+                    last_error = f"HTTP 404: {resp.text[:120]}"
+                    break
+                else:
+                    resp.raise_for_status()
+            except requests.exceptions.RequestException as e:
+                logger.warning(f"Model {model_name} çağrısında hata: {e}")
+                last_error = str(e)
+                time.sleep(0.5)
                 continue
-            else:
-                resp.raise_for_status()
-        except requests.exceptions.RequestException as e:
-            logger.warning(f"Model {model_name} çağrısında hata: {e}")
-            last_error = str(e)
-            continue
 
     raise RuntimeError(f"Tüm Gemini modelleri denendi fakat yanıt alınamadı. Son hata: {last_error}")
 
@@ -140,7 +147,7 @@ def analyze_and_extract_mebbis_report(file_text: str, inline_image: dict, user_i
     Yüklenen MEBBİS raporunu, denetim tutanağını veya fotoğrafı analiz eder,
     ilgili okulu eşler ve veritabanı güncellemelerini JSON şemasıyla döker.
     """
-    schools_ctx = "\n".join([f"ID:{s['id']} | KOD:{s['kurum_kodu']} | {s['kurum_adi']}" for s in schools])
+    schools_ctx = ", ".join([f"{s['id']}:{s['kurum_adi']}" for s in schools])
 
     prompt = f"""
 Sen Türkiye Cumhuriyeti MEB ve 6331 sayılı İSG Kanunu standartlarına hakim bir İSG ve MEBBİS Veri İşleme Başuzmanısın.
