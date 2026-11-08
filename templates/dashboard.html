@@ -6,15 +6,15 @@
 <div class="space-y-6">
 
     <!-- ==================== SAKİN YÖNETİCİ BAŞLIĞI (CALM EXECUTIVE HERO) ==================== -->
-    <div class="rounded-2xl bg-white p-6 sm:p-7 border border-slate-200/90 shadow-xs">
+    <div class="rounded-2xl bg-white p-6 sm:p-7 border border-slate-200 shadow-xs">
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
             <div class="space-y-2">
                 <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-700 text-xs font-semibold">
-                    <span class="w-2 h-2 rounded-full bg-blue-600"></span>
+                    <span class="w-2 h-2 rounded-full bg-slate-500"></span>
                     <span>T.C. Millî Eğitim Bakanlığı — Antalya Muratpaşa İSG Bürosu</span>
                 </div>
                 <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 flex items-center gap-3">
-                    <i class="fa-solid fa-shield-halved text-blue-600"></i>
+                    <i class="fa-solid fa-shield-halved text-slate-700"></i>
                     <span>İSG Yönetim & Karar Destek Paneli</span>
                 </h1>
                 <p class="text-sm text-slate-600 max-w-2xl leading-relaxed">
@@ -24,7 +24,7 @@
 
             <!-- Hızlı Aksiyon Butonları -->
             <div class="flex flex-wrap items-center gap-2.5">
-                <a href="/dinamik-risk-degerlendirme" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-xs transition">
+                <a href="/dinamik-risk-degerlendirme" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shadow-xs transition">
                     <i class="fa-solid fa-calculator text-sm"></i>
                     <span>Dinamik Risk Analizi</span>
                 </a>
@@ -33,7 +33,7 @@
                     <span>Kritik Muayene Alarmları</span>
                 </a>
                 <a href="/export/excel" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 text-xs font-semibold border border-slate-200 transition">
-                    <i class="fa-solid fa-file-excel text-emerald-600"></i>
+                    <i class="fa-solid fa-file-excel text-slate-600"></i>
                     <span>268 Okul İcmali (Excel)</span>
                 </a>
             </div>
@@ -50,16 +50,16 @@
                     <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Toplam Kurum</span>
                     <div class="text-3xl font-extrabold text-slate-900 mt-1 tracking-tight">{{ stats.total_schools }}</div>
                 </div>
-                <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl">
+                <div class="w-12 h-12 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center text-xl">
                     <i class="fa-solid fa-school"></i>
                 </div>
             </div>
             <div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-                <span class="inline-flex items-center font-semibold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md">
-                    <i class="fa-solid fa-building-columns mr-1 text-[10px]"></i> {{ stats.official_schools }} Resmî
+                <span class="inline-flex items-center font-semibold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-md">
+                    <i class="fa-solid fa-building-columns mr-1 text-[10px] text-slate-500"></i> {{ stats.official_schools }} Resmî
                 </span>
                 <span class="inline-flex items-center font-semibold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-md">
-                    <i class="fa-solid fa-graduation-cap mr-1 text-[10px]"></i> {{ stats.private_schools }} Özel
+                    <i class="fa-solid fa-graduation-cap mr-1 text-[10px] text-slate-500"></i> {{ stats.private_schools }} Özel
                 </span>
             </div>
         </div>
@@ -79,8 +79,8 @@
                 </div>
             </div>
             <div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-                <span class="text-rose-600 font-bold">Kazan, Asansör, Yangın, Elektrik</span>
-                <a href="/risk-alarmlari" class="text-blue-600 hover:text-blue-800 font-bold">Takvim →</a>
+                <span class="{% if stats.expired_controls > 0 %}text-rose-600 font-bold{% else %}text-slate-500{% endif %}">Kazan, Asansör, Yangın, Elektrik</span>
+                <a href="/risk-alarmlari" class="text-slate-700 hover:text-slate-900 font-bold">Takvim →</a>
             </div>
         </div>
 
@@ -91,13 +91,13 @@
                     <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Saha Riskleri & Açık DÖF</span>
                     <div class="text-3xl font-extrabold text-slate-900 mt-1 tracking-tight">{{ stats.open_dof_count }}</div>
                 </div>
-                <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl">
+                <div class="w-12 h-12 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center text-xl">
                     <i class="fa-solid fa-triangle-exclamation"></i>
                 </div>
             </div>
             <div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
                 <span class="text-slate-500">Fine-Kinney / MEBBİS Köprüsü</span>
-                <a href="/dinamik-risk-degerlendirme" class="text-blue-600 hover:text-blue-800 font-bold">Risk Gir →</a>
+                <a href="/dinamik-risk-degerlendirme" class="text-slate-700 hover:text-slate-900 font-bold">Risk Gir →</a>
             </div>
         </div>
 
@@ -108,13 +108,13 @@
                     <span class="text-xs font-bold uppercase tracking-wider text-slate-400">1. Derece Öncelikli (MTAL)</span>
                     <div class="text-3xl font-extrabold text-slate-900 mt-1 tracking-tight">{{ stats.priority_1_count }}</div>
                 </div>
-                <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl">
+                <div class="w-12 h-12 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center text-xl">
                     <i class="fa-solid fa-industry"></i>
                 </div>
             </div>
             <div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
                 <span class="text-slate-500">Atölyeli ve Yüksek Riskli</span>
-                <a href="/?filter=priority1" class="text-blue-600 hover:text-blue-800 font-bold">Listele →</a>
+                <a href="/?filter=priority1" class="text-slate-700 hover:text-slate-900 font-bold">Listele →</a>
             </div>
         </div>
 
@@ -122,20 +122,20 @@
 
     <!-- ==================== AMİR & KOORDİNATÖR KRİTİK ALARMLAR ÖZETİ ==================== -->
     {% if urgent_periodic or urgent_risks %}
-    <div class="bg-white rounded-2xl border border-rose-200 shadow-xs overflow-hidden">
-        <div class="p-4 sm:p-5 bg-gradient-to-r from-rose-50/80 to-amber-50/40 border-b border-rose-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+    <div class="bg-white rounded-2xl border border-slate-200 border-l-4 border-l-rose-500 shadow-xs overflow-hidden">
+        <div class="p-4 sm:p-5 bg-slate-50/80 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-xl bg-rose-600 text-white flex items-center justify-center text-sm shadow-xs flex-shrink-0">
-                    <i class="fa-solid fa-bell animate-pulse"></i>
+                <div class="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 border border-rose-200 flex items-center justify-center text-sm flex-shrink-0">
+                    <i class="fa-solid fa-bell"></i>
                 </div>
                 <div>
                     <h2 class="text-sm font-extrabold text-slate-900">İlçe Amiri ve İSG Koordinatörü Acil Eylem Masası</h2>
-                    <p class="text-xs text-slate-600 mt-0.5">Süresi dolan periyodik cihazlar ve derhal müdahale gerektiren yüksek saha riskleri.</p>
+                    <p class="text-xs text-slate-500 mt-0.5">Süresi dolan periyodik cihazlar ve derhal müdahale gerektiren yüksek saha riskleri.</p>
                 </div>
             </div>
-            <a href="/risk-alarmlari" class="px-3.5 py-1.5 rounded-xl bg-white text-rose-700 hover:bg-rose-600 hover:text-white border border-rose-200 text-xs font-bold transition flex items-center gap-1.5 self-start sm:self-auto shadow-xs">
-                <i class="fa-solid fa-arrow-right text-[10px]"></i>
+            <a href="/risk-alarmlari" class="px-3.5 py-1.5 rounded-xl bg-white text-slate-700 hover:bg-slate-900 hover:text-white border border-slate-300 text-xs font-semibold transition flex items-center gap-1.5 self-start sm:self-auto shadow-xs">
                 <span>Tüm Alarmları Gör</span>
+                <i class="fa-solid fa-arrow-right text-[10px]"></i>
             </a>
         </div>
 
@@ -211,62 +211,66 @@
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         
         <!-- Hub 1: Dinamik Risk Analizi & MEBBİS DÖF -->
-        <a href="/dinamik-risk-degerlendirme" class="group bg-white p-5 rounded-2xl border border-slate-200 shadow-xs hover:border-blue-400 hover:shadow-sm transition">
+        <a href="/dinamik-risk-degerlendirme" class="group bg-white p-5 rounded-2xl border border-slate-200 shadow-xs hover:border-slate-400 hover:shadow-xs transition">
             <div class="flex items-center justify-between mb-3">
-                <span class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-base group-hover:bg-blue-600 group-hover:text-white transition">
+                <span class="w-10 h-10 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center text-base group-hover:bg-slate-900 group-hover:text-white transition">
                     <i class="fa-solid fa-calculator"></i>
                 </span>
-                <i class="fa-solid fa-arrow-right text-xs text-slate-300 group-hover:text-blue-600 group-hover:translate-x-1 transition"></i>
+                <i class="fa-solid fa-arrow-right text-xs text-slate-300 group-hover:text-slate-900 group-hover:translate-x-1 transition"></i>
             </div>
-            <h3 class="font-extrabold text-slate-900 text-sm group-hover:text-blue-600 transition">Saha Risk & MEBBİS DÖF</h3>
+            <h3 class="font-extrabold text-slate-900 text-sm group-hover:text-slate-900 transition">Saha Risk & MEBBİS DÖF</h3>
             <p class="text-xs text-slate-500 mt-1 leading-snug">Fine-Kinney matrisi, MEBBİS köprü kodları ve 12 MTAL meslek alanı risk motoru.</p>
-            <div class="mt-3 pt-2 border-t border-slate-100 text-[11px] font-bold text-blue-600">
-                Risk Girişi ve Raporlama →
+            <div class="mt-3 pt-2 border-t border-slate-100 text-[11px] font-semibold text-slate-600 group-hover:text-slate-900 flex items-center justify-between">
+                <span>Risk Girişi & Rapor</span>
+                <span>→</span>
             </div>
         </a>
 
         <!-- Hub 2: Periyodik Teknik Muayeneler -->
-        <a href="/risk-alarmlari" class="group bg-white p-5 rounded-2xl border border-slate-200 shadow-xs hover:border-rose-400 hover:shadow-sm transition">
+        <a href="/risk-alarmlari" class="group bg-white p-5 rounded-2xl border border-slate-200 shadow-xs hover:border-slate-400 hover:shadow-xs transition">
             <div class="flex items-center justify-between mb-3">
-                <span class="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-base group-hover:bg-rose-600 group-hover:text-white transition">
+                <span class="w-10 h-10 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center text-base group-hover:bg-slate-900 group-hover:text-white transition">
                     <i class="fa-solid fa-wrench"></i>
                 </span>
-                <i class="fa-solid fa-arrow-right text-xs text-slate-300 group-hover:text-rose-600 group-hover:translate-x-1 transition"></i>
+                <i class="fa-solid fa-arrow-right text-xs text-slate-300 group-hover:text-slate-900 group-hover:translate-x-1 transition"></i>
             </div>
-            <h3 class="font-extrabold text-slate-900 text-sm group-hover:text-rose-600 transition">Periyodik Cihaz Muayeneleri</h3>
+            <h3 class="font-extrabold text-slate-900 text-sm group-hover:text-slate-900 transition">Periyodik Cihaz Muayeneleri</h3>
             <p class="text-xs text-slate-500 mt-1 leading-snug">Kalorifer kazanı, asansör, topraklama, paratoner ve yangın tüpü geçerlilik takvimi.</p>
-            <div class="mt-3 pt-2 border-t border-slate-100 text-[11px] font-bold text-rose-600">
-                Hayati Muayene Alarmları →
+            <div class="mt-3 pt-2 border-t border-slate-100 text-[11px] font-semibold text-slate-600 group-hover:text-slate-900 flex items-center justify-between">
+                <span>Hayati Muayene Takvimi</span>
+                <span>→</span>
             </div>
         </a>
 
         <!-- Hub 3: Acil Durum & Kaza Bildirim Merkezi -->
-        <a href="/kriz-yonetimi" class="group bg-white p-5 rounded-2xl border border-slate-200 shadow-xs hover:border-indigo-400 hover:shadow-sm transition">
+        <a href="/kriz-yonetimi" class="group bg-white p-5 rounded-2xl border border-slate-200 shadow-xs hover:border-slate-400 hover:shadow-xs transition">
             <div class="flex items-center justify-between mb-3">
-                <span class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-base group-hover:bg-indigo-600 group-hover:text-white transition">
+                <span class="w-10 h-10 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center text-base group-hover:bg-slate-900 group-hover:text-white transition">
                     <i class="fa-solid fa-file-shield"></i>
                 </span>
-                <i class="fa-solid fa-arrow-right text-xs text-slate-300 group-hover:text-indigo-600 group-hover:translate-x-1 transition"></i>
+                <i class="fa-solid fa-arrow-right text-xs text-slate-300 group-hover:text-slate-900 group-hover:translate-x-1 transition"></i>
             </div>
-            <h3 class="font-extrabold text-slate-900 text-sm group-hover:text-indigo-600 transition">Kaza Bildirim & Acil Durum</h3>
+            <h3 class="font-extrabold text-slate-900 text-sm group-hover:text-slate-900 transition">Kaza Bildirim & Acil Durum</h3>
             <p class="text-xs text-slate-500 mt-1 leading-snug">SGK 3 iş günü kaza bildirimi, ramak kala kaydı, ADEP yönerge motoru ve ÇDE takibi.</p>
-            <div class="mt-3 pt-2 border-t border-slate-100 text-[11px] font-bold text-indigo-600">
-                Kaza & Acil Durum Masası →
+            <div class="mt-3 pt-2 border-t border-slate-100 text-[11px] font-semibold text-slate-600 group-hover:text-slate-900 flex items-center justify-between">
+                <span>Kaza & Acil Masası</span>
+                <span>→</span>
             </div>
         </a>
 
         <!-- Hub 4: DYS & Resmî Doküman Kütüphanesi -->
-        <a href="/dokuman-kutuphanesi" class="group bg-white p-5 rounded-2xl border border-slate-200 shadow-xs hover:border-emerald-400 hover:shadow-sm transition">
+        <a href="/dokuman-kutuphanesi" class="group bg-white p-5 rounded-2xl border border-slate-200 shadow-xs hover:border-slate-400 hover:shadow-xs transition">
             <div class="flex items-center justify-between mb-3">
-                <span class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-base group-hover:bg-emerald-600 group-hover:text-white transition">
+                <span class="w-10 h-10 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center text-base group-hover:bg-slate-900 group-hover:text-white transition">
                     <i class="fa-solid fa-folder-closed"></i>
                 </span>
-                <i class="fa-solid fa-arrow-right text-xs text-slate-300 group-hover:text-emerald-600 group-hover:translate-x-1 transition"></i>
+                <i class="fa-solid fa-arrow-right text-xs text-slate-300 group-hover:text-slate-900 group-hover:translate-x-1 transition"></i>
             </div>
-            <h3 class="font-extrabold text-slate-900 text-sm group-hover:text-emerald-600 transition">DYS & Doküman Kütüphanesi</h3>
+            <h3 class="font-extrabold text-slate-900 text-sm group-hover:text-slate-900 transition">DYS & Doküman Kütüphanesi</h3>
             <p class="text-xs text-slate-500 mt-1 leading-snug">Drive bağlantılı 12 master şablon, onaylı ADEP yönergeleri, acil eylem kartları.</p>
-            <div class="mt-3 pt-2 border-t border-slate-100 text-[11px] font-bold text-emerald-600">
-                Resmî Şablonları İndir →
+            <div class="mt-3 pt-2 border-t border-slate-100 text-[11px] font-semibold text-slate-600 group-hover:text-slate-900 flex items-center justify-between">
+                <span>Resmî Şablon Arşivi</span>
+                <span>→</span>
             </div>
         </a>
 
@@ -278,31 +282,31 @@
         <!-- Sekme Filtreleri -->
         <div class="flex flex-wrap items-center gap-1.5">
             <a href="/?filter=all" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 {% if current_filter == 'all' %}bg-slate-900 text-white shadow-xs{% else %}bg-slate-100 text-slate-600 hover:bg-slate-200{% endif %}">
-                <i class="fa-solid fa-globe"></i>
+                <i class="fa-solid fa-globe text-[11px]"></i>
                 <span>Tüm Kurumlar</span>
                 <span class="px-1.5 py-0.2 rounded-md text-[10px] {% if current_filter == 'all' %}bg-white/20 text-white{% else %}bg-slate-200 text-slate-700{% endif %} font-mono">{{ stats.total_schools }}</span>
             </a>
             
-            <a href="/?filter=my" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 {% if current_filter == 'my' %}bg-blue-600 text-white shadow-xs{% else %}bg-slate-100 text-slate-600 hover:bg-slate-200{% endif %}">
-                <i class="fa-solid fa-user-shield"></i>
+            <a href="/?filter=my" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 {% if current_filter == 'my' %}bg-slate-900 text-white shadow-xs{% else %}bg-slate-100 text-slate-600 hover:bg-slate-200{% endif %}">
+                <i class="fa-solid fa-user-shield text-[11px]"></i>
                 <span>Sorumlu Olduklarım</span>
                 <span class="px-1.5 py-0.2 rounded-md text-[10px] {% if current_filter == 'my' %}bg-white/20 text-white{% else %}bg-slate-200 text-slate-700{% endif %} font-mono">{{ stats.my_schools_count }}</span>
             </a>
 
-            <a href="/?filter=official" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 {% if current_filter == 'official' %}bg-blue-700 text-white shadow-xs{% else %}bg-slate-100 text-slate-600 hover:bg-slate-200{% endif %}">
-                <i class="fa-solid fa-building-columns"></i>
+            <a href="/?filter=official" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 {% if current_filter == 'official' %}bg-slate-900 text-white shadow-xs{% else %}bg-slate-100 text-slate-600 hover:bg-slate-200{% endif %}">
+                <i class="fa-solid fa-building-columns text-[11px]"></i>
                 <span>Resmî Okullar</span>
                 <span class="px-1.5 py-0.2 rounded-md text-[10px] {% if current_filter == 'official' %}bg-white/20 text-white{% else %}bg-slate-200 text-slate-700{% endif %} font-mono">{{ stats.official_schools }}</span>
             </a>
 
-            <a href="/?filter=private" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 {% if current_filter == 'private' %}bg-slate-700 text-white shadow-xs{% else %}bg-slate-100 text-slate-600 hover:bg-slate-200{% endif %}">
-                <i class="fa-solid fa-graduation-cap"></i>
+            <a href="/?filter=private" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 {% if current_filter == 'private' %}bg-slate-900 text-white shadow-xs{% else %}bg-slate-100 text-slate-600 hover:bg-slate-200{% endif %}">
+                <i class="fa-solid fa-graduation-cap text-[11px]"></i>
                 <span>Özel Okullar</span>
                 <span class="px-1.5 py-0.2 rounded-md text-[10px] {% if current_filter == 'private' %}bg-white/20 text-white{% else %}bg-slate-200 text-slate-700{% endif %} font-mono">{{ stats.private_schools }}</span>
             </a>
 
-            <a href="/?filter=priority1" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 {% if current_filter == 'priority1' %}bg-amber-600 text-white shadow-xs{% else %}bg-slate-100 text-slate-600 hover:bg-slate-200{% endif %}">
-                <i class="fa-solid fa-fire"></i>
+            <a href="/?filter=priority1" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 {% if current_filter == 'priority1' %}bg-slate-900 text-white shadow-xs{% else %}bg-slate-100 text-slate-600 hover:bg-slate-200{% endif %}">
+                <i class="fa-solid fa-triangle-exclamation text-[11px] text-rose-500"></i>
                 <span>1. Derece Öncelik</span>
                 <span class="px-1.5 py-0.2 rounded-md text-[10px] {% if current_filter == 'priority1' %}bg-white/20 text-white{% else %}bg-slate-200 text-slate-700{% endif %} font-mono">{{ stats.priority_1_count }}</span>
             </a>
@@ -310,7 +314,7 @@
 
         <!-- Bilgi İpucu -->
         <div class="text-xs text-slate-500 font-medium flex items-center gap-1.5">
-            <i class="fa-solid fa-circle-info text-blue-500"></i>
+            <i class="fa-solid fa-circle-info text-slate-400"></i>
             <span>Kurum adına veya İncele butonuna tıklayarak 360° Okul Masasına ulaşabilirsiniz.</span>
         </div>
     </div>
@@ -467,7 +471,7 @@
                         
                         <!-- İşlem Butonu -->
                         <td class="py-3 px-3 text-center">
-                            <a href="/okul/{{ s.id }}" class="inline-flex items-center justify-center gap-1 px-3 py-1.5 bg-blue-50 hover:bg-blue-600 text-blue-700 hover:text-white rounded-xl transition text-xs font-bold border border-blue-200/60 shadow-xs">
+                            <a href="/okul/{{ s.id }}" class="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-900 text-slate-700 hover:text-white rounded-lg transition text-xs font-semibold border border-slate-200 shadow-xs">
                                 <span>İncele</span>
                                 <i class="fa-solid fa-arrow-right text-[10px]"></i>
                             </a>

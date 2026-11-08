@@ -83,7 +83,7 @@
             align-items: center;
             gap: 0.75rem;
             padding: 0.55rem 0.85rem;
-            border-radius: 0.65rem;
+            border-radius: 0.5rem;
             font-size: 0.8125rem;
             font-weight: 500;
             color: #94a3b8;
@@ -92,13 +92,12 @@
         }
         .sidebar-item:hover {
             color: #ffffff;
-            background-color: rgba(255, 255, 255, 0.07);
-            transform: translateX(2px);
+            background-color: rgba(255, 255, 255, 0.05);
         }
         .sidebar-item.active {
             color: #ffffff;
-            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-            box-shadow: 0 4px 14px -2px rgba(37, 99, 235, 0.45);
+            background-color: #1e293b;
+            border-left: 3px solid #cbd5e1;
             font-weight: 600;
         }
         .sidebar-item.active i {
@@ -175,14 +174,13 @@
             <!-- Logo & Kurum Başlığı -->
             <div class="p-5 border-b border-slate-800/80 flex items-center justify-between">
                 <a href="/" class="flex items-center space-x-3 group">
-                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/20 group-hover:scale-105 transition-transform flex-shrink-0">
-                        <i class="fa-solid fa-shield-halved text-lg"></i>
+                    <div class="w-9 h-9 rounded-xl bg-slate-800 text-slate-200 border border-slate-700 flex items-center justify-center flex-shrink-0">
+                        <i class="fa-solid fa-shield-halved text-base text-slate-300"></i>
                     </div>
                     <div>
-                        <div class="text-[10px] font-bold uppercase tracking-wider text-blue-400">T.C. Muratpaşa İlçe MEM</div>
-                        <div class="text-base font-extrabold text-white tracking-tight flex items-center gap-1.5">
-                            İSG-BYS
-                            <span class="text-[10px] bg-blue-500/20 text-blue-300 px-1.5 py-0.2 rounded font-semibold border border-blue-500/30">v2.6</span>
+                        <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">T.C. Muratpaşa İlçe MEM</div>
+                        <div class="text-sm font-extrabold text-white tracking-tight flex items-center gap-1.5">
+                            İSG Yönetim Portalı
                         </div>
                     </div>
                 </a>
@@ -193,11 +191,11 @@
 
             <!-- Durum Hapı -->
             <div class="px-5 pt-3 pb-1">
-                <div class="bg-slate-900/80 border border-slate-800 rounded-lg px-3 py-1.5 flex items-center justify-between text-xs">
-                    <span class="flex items-center text-emerald-400 font-semibold">
-                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse mr-2"></span> Canlı Veri Sistemi
+                <div class="bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 flex items-center justify-between text-xs">
+                    <span class="flex items-center text-slate-300 font-semibold">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 mr-2"></span> Canlı Veri Sistemi
                     </span>
-                    <span class="text-blue-400 font-mono text-[11px] font-bold">268 Okul</span>
+                    <span class="text-slate-400 font-mono text-[11px] font-bold">268 Okul</span>
                 </div>
             </div>
 
@@ -211,11 +209,11 @@
                     </div>
                     <div class="space-y-0.5">
                         <a href="/" class="sidebar-item {% if active_page == 'dashboard' %}active{% endif %}">
-                            <i class="fa-solid fa-chart-pie w-4 text-center text-blue-400"></i>
+                            <i class="fa-solid fa-chart-pie w-4 text-center text-slate-400"></i>
                             <span>İlçe İSG Durum Paneli</span>
                         </a>
                         <a href="/okullar" class="sidebar-item {% if active_page == 'schools' %}active{% endif %}">
-                            <i class="fa-solid fa-school w-4 text-center text-indigo-400"></i>
+                            <i class="fa-solid fa-school w-4 text-center text-slate-400"></i>
                             <span>360° Okul Masası (268 Kurum)</span>
                         </a>
                     </div>
@@ -223,17 +221,17 @@
 
                 <!-- 1. PERİYODİK KONTROLLER (Hayati Muayene Takvimi) -->
                 <div>
-                    <div class="px-3 mb-1 text-[10px] font-extrabold uppercase tracking-wider text-rose-400 flex items-center justify-between">
+                    <div class="px-3 mb-1 text-[10px] font-extrabold uppercase tracking-wider text-slate-400 flex items-center justify-between">
                         <span>1. PERİYODİK KONTROLLER</span>
-                        <i class="fa-solid fa-wrench text-[9px]"></i>
+                        <i class="fa-solid fa-wrench text-[9px] text-slate-500"></i>
                     </div>
                     <div class="space-y-0.5">
                         <a href="/risk-alarmlari" class="sidebar-item {% if active_page == 'risks' %}active{% endif %}">
-                            <i class="fa-solid fa-bell w-4 text-center text-rose-400"></i>
-                            <span class="text-rose-200 font-semibold">Hayati Muayene Takvimi</span>
+                            <i class="fa-solid fa-bell w-4 text-center text-slate-400"></i>
+                            <span>Hayati Muayene Takvimi</span>
                         </a>
                         <a href="/export/periyodik-muayeneler" class="sidebar-item">
-                            <i class="fa-solid fa-file-excel w-4 text-center text-emerald-400"></i>
+                            <i class="fa-solid fa-file-excel w-4 text-center text-slate-400"></i>
                             <span>Amir Listesi İndir (Excel)</span>
                         </a>
                     </div>
@@ -241,21 +239,21 @@
 
                 <!-- 2. SAHA RİSKLERİ & DÖF (Okulun Gerçek Arızaları) -->
                 <div>
-                    <div class="px-3 mb-1 text-[10px] font-extrabold uppercase tracking-wider text-amber-400 flex items-center justify-between">
+                    <div class="px-3 mb-1 text-[10px] font-extrabold uppercase tracking-wider text-slate-400 flex items-center justify-between">
                         <span>2. SAHA RİSKLERİ & DÖF</span>
-                        <i class="fa-solid fa-triangle-exclamation text-[9px]"></i>
+                        <i class="fa-solid fa-triangle-exclamation text-[9px] text-slate-500"></i>
                     </div>
                     <div class="space-y-0.5">
                         <a href="/dinamik-risk-degerlendirme" class="sidebar-item {% if active_page == 'dynamic_risk' %}active{% endif %}">
-                            <i class="fa-solid fa-calculator w-4 text-center text-amber-400"></i>
+                            <i class="fa-solid fa-calculator w-4 text-center text-slate-400"></i>
                             <span>Saha Risk Analizi & MEBBİS DÖF</span>
                         </a>
                         <a href="/ai-veri-aktarimi" class="sidebar-item {% if active_page == 'ai_ingestion' %}active{% endif %}">
-                            <i class="fa-solid fa-camera w-4 text-center text-purple-400"></i>
+                            <i class="fa-solid fa-camera w-4 text-center text-slate-400"></i>
                             <span>Fotoğraf & Belge Yükleme</span>
                         </a>
                         <a href="/dof-takip" class="sidebar-item {% if active_page == 'dof_takip' %}active{% endif %}">
-                            <i class="fa-solid fa-clock-rotate-left w-4 text-center text-teal-400"></i>
+                            <i class="fa-solid fa-clock-rotate-left w-4 text-center text-slate-400"></i>
                             <span>Açık DÖF & Termin Takibi</span>
                         </a>
                     </div>
@@ -263,21 +261,21 @@
 
                 <!-- 3. ACİL DURUM & EVRAK ARŞİVİ -->
                 <div>
-                    <div class="px-3 mb-1 text-[10px] font-extrabold uppercase tracking-wider text-blue-400 flex items-center justify-between">
+                    <div class="px-3 mb-1 text-[10px] font-extrabold uppercase tracking-wider text-slate-400 flex items-center justify-between">
                         <span>3. ACİL DURUM & EVRAK</span>
-                        <i class="fa-solid fa-folder-closed text-[9px]"></i>
+                        <i class="fa-solid fa-folder-closed text-[9px] text-slate-500"></i>
                     </div>
                     <div class="space-y-0.5">
                         <a href="/adep-yonerge-motoru" class="sidebar-item {% if active_page == 'adep' %}active{% endif %}">
-                            <i class="fa-solid fa-file-shield w-4 text-center text-blue-400"></i>
+                            <i class="fa-solid fa-file-shield w-4 text-center text-slate-400"></i>
                             <span>ADEP & Tatbikat Motoru</span>
                         </a>
                         <a href="/kriz-yonetimi" class="sidebar-item {% if active_page == 'crisis' %}active{% endif %}">
-                            <i class="fa-solid fa-kit-medical w-4 text-center text-rose-400"></i>
+                            <i class="fa-solid fa-kit-medical w-4 text-center text-slate-400"></i>
                             <span>İş Kazası & Ramak Kala</span>
                         </a>
                         <a href="/dokuman-kutuphanesi" class="sidebar-item {% if active_page == 'library' %}active{% endif %}">
-                            <i class="fa-solid fa-folder-open w-4 text-center text-emerald-400"></i>
+                            <i class="fa-solid fa-folder-open w-4 text-center text-slate-400"></i>
                             <span>Resmî Doküman Kütüphanesi</span>
                         </a>
                     </div>
@@ -290,15 +288,15 @@
                     </div>
                     <div class="space-y-0.5">
                         <a href="/isg-asistan" class="sidebar-item {% if active_page == 'ai_advisor' %}active{% endif %}">
-                            <i class="fa-solid fa-brain w-4 text-center text-purple-400"></i>
+                            <i class="fa-solid fa-brain w-4 text-center text-slate-400"></i>
                             <span>İSG Danışmanı (Gemini AI)</span>
                         </a>
                         <a href="/istek-havuzu" class="sidebar-item {% if active_page == 'feedback_hub' %}active{% endif %}">
-                            <i class="fa-solid fa-lightbulb w-4 text-center text-amber-400"></i>
+                            <i class="fa-solid fa-lightbulb w-4 text-center text-slate-400"></i>
                             <span>İstek Havuzu & Backlog</span>
                         </a>
                         <a href="/igu-gorevlendirme" class="sidebar-item {% if active_page == 'igu' %}active{% endif %}">
-                            <i class="fa-solid fa-user-shield w-4 text-center text-sky-400"></i>
+                            <i class="fa-solid fa-user-shield w-4 text-center text-slate-400"></i>
                             <span>İGU Dağılım Çizelgesi</span>
                         </a>
                         {% if user and user.role == 'koordinator' %}
@@ -308,7 +306,7 @@
                         </a>
                         {% endif %}
                         <a href="/okul-portal" target="_blank" class="sidebar-item">
-                            <i class="fa-solid fa-school-flag w-4 text-center text-amber-400"></i>
+                            <i class="fa-solid fa-school-flag w-4 text-center text-slate-400"></i>
                             <span>Okul Kolay Girişi (Ayrı Sekme)</span>
                         </a>
                     </div>
@@ -320,16 +318,16 @@
             <div class="p-3 border-t border-slate-800 bg-slate-900/90">
                 <div class="flex items-center justify-between p-2 rounded-xl bg-slate-800/60 border border-slate-700/50">
                     <div class="flex items-center space-x-2.5 truncate">
-                        <div class="w-8 h-8 rounded-lg bg-blue-600/30 text-blue-400 font-bold text-xs flex items-center justify-center border border-blue-500/30 flex-shrink-0">
+                        <div class="w-8 h-8 rounded-lg bg-slate-700 text-slate-200 font-bold text-xs flex items-center justify-center border border-slate-600 flex-shrink-0">
                             {{ user.full_name[:2] | upper }}
                         </div>
                         <div class="truncate">
                             <div class="text-xs font-bold text-white truncate leading-tight">{{ user.full_name }}</div>
                             <div class="text-[10px] text-slate-400 mt-0.5">
                                 {% if user.role == 'koordinator' %}
-                                <span class="text-amber-400 font-bold">Koordinatör</span>
+                                <span class="text-slate-300 font-bold">Koordinatör</span>
                                 {% else %}
-                                <span class="text-blue-400 font-semibold">İSG Uzmanı</span>
+                                <span class="text-slate-300 font-semibold">İSG Uzmanı</span>
                                 {% endif %}
                             </div>
                         </div>
@@ -358,7 +356,7 @@
                             <div class="text-[11px] font-semibold text-slate-600 uppercase tracking-wider flex items-center gap-1.5">
                                 <span>İSG Yönetim Merkezi</span>
                                 <span>/</span>
-                                <span class="text-blue-600">Muratpaşa</span>
+                                <span class="text-slate-700 font-bold">Muratpaşa</span>
                             </div>
                             <h2 class="text-sm font-bold text-slate-800 leading-tight">İş Sağlığı ve Güvenliği Bilgi Sistemi</h2>
                         </div>
@@ -370,7 +368,7 @@
                             <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-xs"></i>
                             <input type="text" id="globalSchoolSearch" placeholder="283 okulda ara... (Örn: MTAL, Gazi, 970149)" 
                                 autocomplete="off"
-                                class="w-full pl-9 pr-16 py-2 bg-slate-100/90 hover:bg-slate-100 focus:bg-white text-xs border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition shadow-inner">
+                                class="w-full pl-9 pr-16 py-2 bg-slate-100/90 hover:bg-slate-100 focus:bg-white text-xs border border-slate-200 rounded-xl focus:ring-2 focus:ring-slate-400 focus:border-slate-400 focus:outline-none transition shadow-inner">
                             <span class="absolute right-2.5 top-2 text-[10px] bg-slate-200 text-slate-500 font-mono px-1.5 py-0.5 rounded border border-slate-300">Ctrl + K</span>
                         </div>
                         
@@ -382,7 +380,7 @@
                     <!-- Sağ: Hızlı Eylemler & Kullanıcı -->
                     <div class="flex items-center space-x-2.5">
                         <a href="/mufettis-raporu" class="hidden sm:flex items-center px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition border border-slate-200">
-                            <i class="fa-solid fa-file-shield mr-1.5 text-blue-600"></i> 16 Tablo
+                            <i class="fa-solid fa-file-shield mr-1.5 text-slate-600"></i> 16 Tablo
                         </a>
                         <a href="/risk-alarmlari" class="flex items-center px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-lg text-xs font-bold transition border border-rose-200">
                             <i class="fa-solid fa-bell mr-1.5 text-rose-500"></i> Alarmlar
@@ -469,7 +467,7 @@
                             resultsDropdown.innerHTML = '<div class="p-3 text-xs text-slate-400 text-center">Kurum bulunamadı.</div>';
                         } else {
                             resultsDropdown.innerHTML = data.map(item => `
-                                <a href="/okul/${item.id}" class="flex items-center justify-between p-3 hover:bg-blue-50 transition text-xs">
+                                <a href="/okul/${item.id}" class="flex items-center justify-between p-3 hover:bg-slate-50 transition text-xs">
                                     <div class="truncate pr-2">
                                         <div class="font-bold text-slate-800">${item.kurum_adi}</div>
                                         <div class="text-[11px] text-slate-500 font-mono mt-0.5">Kod: ${item.kurum_kodu} • ${item.kurum_turu || item.kurum_statusu}</div>
@@ -498,10 +496,9 @@
 
     <!-- ==================== GLOBAL YÜZEN WIDGET: GELİŞTİRİCİYE & AI ASİSTANINA NOT BIRAK ==================== -->
     <div class="fixed bottom-6 right-6 z-40">
-        <button onclick="openFeedbackModal()" class="px-4 py-3 rounded-full bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 hover:from-purple-500 hover:to-indigo-500 text-white font-extrabold text-xs shadow-2xl shadow-purple-600/50 flex items-center gap-2.5 transition transform hover:scale-105 border border-purple-400/40 group">
-            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
-            <i class="fa-solid fa-lightbulb text-amber-300 text-sm group-hover:rotate-12 transition-transform"></i>
-            <span>Geliştiriciye & AI'a Not Bırak</span>
+        <button onclick="openFeedbackModal()" class="px-4 py-2.5 rounded-full bg-slate-900 hover:bg-slate-800 text-slate-200 text-xs font-semibold shadow-lg border border-slate-700 flex items-center gap-2 transition">
+            <i class="fa-solid fa-lightbulb text-slate-400 text-xs"></i>
+            <span>Geliştiriciye Not Bırak</span>
         </button>
     </div>
 
@@ -511,7 +508,7 @@
             
             <div class="flex items-center justify-between pb-3 border-b border-slate-100">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-2xl bg-purple-100 text-purple-600 flex items-center justify-center text-lg">
+                    <div class="w-10 h-10 rounded-2xl bg-slate-100 text-slate-700 flex items-center justify-center text-lg">
                         <i class="fa-solid fa-wand-magic-sparkles"></i>
                     </div>
                     <div>
@@ -529,7 +526,7 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                         <label class="block text-[11px] font-bold text-slate-700 mb-1">Adınız Soyadınız:</label>
-                        <input type="text" id="fbAdSoyad" value="{{ user.full_name if user else '' }}" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold focus:ring-2 focus:ring-purple-500">
+                        <input type="text" id="fbAdSoyad" value="{{ user.full_name if user else '' }}" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold focus:ring-2 focus:ring-slate-400">
                     </div>
                     <div>
                         <label class="block text-[11px] font-bold text-slate-700 mb-1">Unvanınız:</label>
@@ -565,12 +562,12 @@
 
                 <div>
                     <label class="block text-[11px] font-bold text-slate-700 mb-1">Talep Başlığı:</label>
-                    <input type="text" id="fbBaslik" required placeholder="Örn: Pansiyonlu Okullar İçin Ayrı Bir Gece Nöbet Çizelgesi Şablonu Eklensin" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold focus:ring-2 focus:ring-purple-500">
+                    <input type="text" id="fbBaslik" required placeholder="Örn: Pansiyonlu Okullar İçin Ayrı Bir Gece Nöbet Çizelgesi Şablonu Eklensin" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold focus:ring-2 focus:ring-slate-400">
                 </div>
 
                 <div>
                     <label class="block text-[11px] font-bold text-slate-700 mb-1">Detaylı Açıklama:</label>
-                    <textarea id="fbAciklama" rows="3" required placeholder="İhtiyacınızı detaylıca açıklayınız. Örn: 'Pansiyonda kalan öğrencilerin tahliyesi ve gece yangın tatbikatı için ADEP içine şu maddeler eklensin...'" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-purple-500"></textarea>
+                    <textarea id="fbAciklama" rows="3" required placeholder="İhtiyacınızı detaylıca açıklayınız. Örn: 'Pansiyonda kalan öğrencilerin tahliyesi ve gece yangın tatbikatı için ADEP içine şu maddeler eklensin...'" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-slate-400"></textarea>
                 </div>
 
                 <div>
@@ -582,9 +579,9 @@
                     <button type="button" onclick="closeFeedbackModal()" class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition">
                         Vazgeç
                     </button>
-                    <button type="submit" id="fbSubmitBtn" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-extrabold text-xs shadow-lg shadow-purple-600/30 transition flex items-center gap-2">
-                        <i class="fa-solid fa-paper-plane"></i>
-                        <span>AI Analizi ile İlet</span>
+                    <button type="submit" id="fbSubmitBtn" class="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-xs transition flex items-center gap-2">
+                        <i class="fa-solid fa-paper-plane text-slate-300"></i>
+                        <span>Talebi İlet</span>
                     </button>
                 </div>
             </form>

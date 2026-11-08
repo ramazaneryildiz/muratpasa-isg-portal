@@ -5,26 +5,25 @@
 {% block content %}
 <div class="space-y-6">
 
-    <!-- Header Hero -->
-    <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-amber-950 via-slate-900 to-slate-950 p-6 sm:p-8 text-white shadow-xl border border-amber-800/50">
-        <div class="absolute -right-16 -top-16 w-80 h-80 rounded-full bg-amber-600/20 blur-3xl pointer-events-none"></div>
-        <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+    <!-- Header Hero (Calm Executive) -->
+    <div class="rounded-2xl bg-white p-6 sm:p-7 border border-slate-200 shadow-xs">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
             <div class="space-y-2">
-                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 border border-amber-400/30 text-amber-300 text-xs font-semibold backdrop-blur-sm">
-                    <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
-                    <span>Modül 5: DÖF Terminleri ve Yasal Muayene Alarmları</span>
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-700 text-xs font-semibold">
+                    <span class="w-2 h-2 rounded-full bg-slate-500"></span>
+                    <span>MEBBİS İSG Modülü • DÖF ve Termin Takip Masası</span>
                 </div>
-                <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white flex items-center gap-3">
-                    <i class="fa-solid fa-clock-rotate-left text-amber-400"></i>
+                <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 flex items-center gap-3">
+                    <i class="fa-solid fa-clock-rotate-left text-slate-700"></i>
                     <span>DÖF ve Periyodik Kontrol Takip Motoru</span>
                 </h1>
-                <p class="text-sm text-slate-300 max-w-3xl leading-relaxed">
-                    Şehit Serkan Çölkesen MTAL (160 DÖF) ve Muratpaşa MTAL (27 DÖF) gibi kritik okulların düzeltici faaliyetlerini, 31.12.2026 Yangın Tüpü dolumunu, elektrik topraklama ve kazan muayenelerini anlık izleyen ve uyarı üreten sistem.
+                <p class="text-sm text-slate-600 max-w-3xl leading-relaxed">
+                    Kritik okulların açık düzeltici faaliyetlerini, yangın tüpü dolumunu, elektrik topraklama ve kazan muayenelerini anlık izleyen ve uyarı üreten sistem.
                 </p>
             </div>
             <div class="flex flex-wrap items-center gap-2.5">
-                <button onclick="triggerNotificationSimulation()" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold shadow-lg shadow-amber-600/30 transition hover:-translate-y-0.5">
-                    <i class="fa-solid fa-bell text-sm"></i>
+                <button onclick="triggerNotificationSimulation()" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shadow-xs transition">
+                    <i class="fa-solid fa-bell text-slate-300"></i>
                     <span>Toplu Termin Uyarısı Gönder</span>
                 </button>
             </div>

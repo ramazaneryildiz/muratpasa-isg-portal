@@ -6,47 +6,42 @@
 <div class="space-y-6">
 
     <!-- ==================== EXECUTIVE HEADER ==================== -->
-    <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-950 via-indigo-950 to-slate-900 p-6 sm:p-8 text-white shadow-2xl border border-indigo-900/50">
-        <div class="absolute -right-16 -top-16 w-80 h-80 rounded-full bg-indigo-600/20 blur-3xl pointer-events-none"></div>
-        <div class="absolute right-1/3 -bottom-16 w-64 h-64 rounded-full bg-blue-500/15 blur-2xl pointer-events-none"></div>
-
-        <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div class="space-y-2">
-                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 border border-indigo-400/30 text-indigo-300 text-xs font-semibold backdrop-blur-sm">
-                    <span class="w-2 h-2 rounded-full bg-indigo-400 animate-pulse"></span>
-                    <span>Modül 8: 6331 Sayılı Kanun & MEBBİS Köprüleme Motoru</span>
-                </div>
-                <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white flex items-center gap-3">
-                    <i class="fa-solid fa-calculator text-indigo-400"></i>
-                    <span>Dinamik Saha Risk Değerlendirme & MEBBİS Köprüleme</span>
-                </h1>
-                <p class="text-xs sm:text-sm text-slate-300 max-w-3xl leading-relaxed">
-                    Atölyeler ve makineler için maruziyet odaklı <strong>Fine-Kinney (O × F × Ş)</strong>, derslikler için <strong>5×5 L-Tipi Matris</strong> ile saha risklerini puanlayın. Gemini 3.5 Flash ile MEBBİS İSG standart kütüphane koduna eşleyin ve 2024/38 Bakanlık ödenek listesini otomatik hazırlayın.
-                </p>
+    <div class="rounded-2xl bg-white p-6 border border-slate-200/90 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div class="space-y-1.5">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-700 text-xs font-semibold">
+                <span class="w-2 h-2 rounded-full bg-blue-600"></span>
+                <span>T.C. Millî Eğitim Bakanlığı — MEBBİS İSG Köprüleme Motoru</span>
             </div>
-
-            {% if selected_school %}
-            <div class="flex items-center gap-3 flex-shrink-0">
-                <a href="/risk-analizi-raporu/{{ selected_school.id }}" target="_blank" class="px-4 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-extrabold transition flex items-center gap-2 shadow-lg shadow-emerald-600/30">
-                    <i class="fa-solid fa-file-signature text-base"></i>
-                    <span>Resmî Tutanak & İmza Sirküsü Çıktısı</span>
-                </a>
-            </div>
-            {% endif %}
+            <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900 flex items-center gap-2.5">
+                <i class="fa-solid fa-calculator text-slate-700"></i>
+                <span>Dinamik Saha Risk Değerlendirmesi</span>
+            </h1>
+            <p class="text-xs text-slate-600 max-w-2xl leading-relaxed">
+                Atölye ve makineler için <strong>Fine-Kinney (O × F × Ş)</strong>, genel alanlar için <strong>5×5 L-Tipi Matris</strong> ile saha risklerini puanlayın ve MEBBİS İSG standart kodlarıyla eşleştirin.
+            </p>
         </div>
+
+        {% if selected_school %}
+        <div class="flex items-center gap-2 flex-shrink-0">
+            <a href="/risk-analizi-raporu/{{ selected_school.id }}" target="_blank" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold transition flex items-center gap-2 shadow-xs">
+                <i class="fa-solid fa-print"></i>
+                <span>Resmî 6331 Raporu Yazdır</span>
+            </a>
+        </div>
+        {% endif %}
     </div>
 
     <!-- ==================== OKUL SEÇİM ÇUBUĞU ==================== -->
-    <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div class="bg-white rounded-2xl p-5 shadow-xs border border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div class="flex items-center gap-3 w-full md:w-2/3">
-            <div class="w-10 h-10 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg flex-shrink-0">
+            <div class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center text-base flex-shrink-0">
                 <i class="fa-solid fa-school"></i>
             </div>
             <div class="flex-1">
                 <label class="block text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-1">
                     Risk Değerlendirmesi Yapılacak Kurum:
                 </label>
-                <select id="schoolSelector" onchange="window.location.href='/dinamik-risk-degerlendirme?school_id=' + this.value" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-indigo-500">
+                <select id="schoolSelector" onchange="window.location.href='/dinamik-risk-degerlendirme?school_id=' + this.value" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:bg-white focus:border-slate-500 focus:outline-none">
                     <option value="">-- Okul Seçiniz (268 Kurum) --</option>
                     {% for sc in schools %}
                     <option value="{{ sc.id }}" {% if selected_school and selected_school.id == sc.id %}selected{% endif %}>
@@ -59,12 +54,10 @@
 
         {% if selected_school %}
         <div class="flex items-center gap-2 flex-wrap">
-            <span class="px-3 py-1 rounded-full text-xs font-bold 
-                {% if selected_school.tehlike_sinifi == 'TEHLIKELI' %}bg-rose-100 text-rose-800 border border-rose-200
-                {% else %}bg-emerald-100 text-emerald-800 border border-emerald-200{% endif %}">
+            <span class="px-3 py-1 rounded-md text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200">
                 {{ selected_school.tehlike_sinifi or 'AZ TEHLİKELİ' }}
             </span>
-            <span class="px-3 py-1 rounded-full text-xs font-bold bg-indigo-100 text-indigo-800 border border-indigo-200 font-mono">
+            <span class="px-3 py-1 rounded-md text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200 font-mono">
                 {{ school_risks|length }} Aktif Risk Maddesi
             </span>
         </div>
@@ -114,11 +107,11 @@
                 </div>
 
                 <!-- MTAL Atölye Seçimi (Dinamik Açılır) -->
-                <div id="workshopModuleWrapper" class="p-3.5 rounded-2xl bg-amber-50/70 border border-amber-200 space-y-1.5">
-                    <label class="block text-xs font-extrabold text-amber-950 flex items-center gap-1.5">
-                        <i class="fa-solid fa-wrench text-amber-600"></i> Meslek Alanı / Atölye Modülü:
+                <div id="workshopModuleWrapper" class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-1.5">
+                    <label class="block text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                        <i class="fa-solid fa-wrench text-slate-500"></i> Meslek Alanı / Atölye Modülü:
                     </label>
-                    <select id="meslekAlani" class="w-full bg-white border border-amber-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800">
+                    <select id="meslekAlani" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800">
                         <option value="">-- Genel Atölye / Laboratuvar --</option>
                         {% for w_id, w_name in workshop_modules %}
                         <option value="{{ w_name }}">{{ w_name }}</option>
@@ -130,12 +123,12 @@
                 <div class="space-y-3">
                     <div>
                         <label class="block text-xs font-bold text-slate-700 mb-1">Tehlike Kaynağı:</label>
-                        <input type="text" id="tehlikeKaynagi" placeholder="Örn: Basınçlı Hava Kompresörü Emniyet Ventili Arızası" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold focus:ring-2 focus:ring-indigo-500">
+                        <input type="text" id="tehlikeKaynagi" placeholder="Örn: Basınçlı Hava Kompresörü Emniyet Ventili Arızası" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold focus:ring-2 focus:ring-slate-400">
                     </div>
 
                     <div>
                         <label class="block text-xs font-bold text-slate-700 mb-1">Olası Tehlike ve Risk Senaryosu:</label>
-                        <textarea id="riskSenaryosu" rows="2" placeholder="Örn: Kompresör tankında aşırı basınç artışı sonucu patlama riski, çalışanlarda şarapnel yaralanması ve ağır işitme kaybı." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-indigo-500"></textarea>
+                        <textarea id="riskSenaryosu" rows="2" placeholder="Örn: Kompresör tankında aşırı basınç artışı sonucu patlama riski, çalışanlarda şarapnel yaralanması ve ağır işitme kaybı." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-slate-400"></textarea>
                     </div>
 
                     <div>
@@ -148,7 +141,7 @@
                 <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
                     <div class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 flex items-center justify-between">
                         <span>Risk Hesaplama Parametreleri</span>
-                        <span id="formulaLabel" class="text-indigo-600 font-mono font-bold">R = O × F × Ş</span>
+                        <span id="formulaLabel" class="text-slate-700 font-mono font-bold">R = O × F × Ş</span>
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -192,13 +185,13 @@
                         </div>
                     </div>
 
-                    <!-- Canlı Risk Skoru Göstergesi -->
-                    <div id="liveScoreCard" class="p-3 rounded-xl bg-orange-100 border border-orange-300 flex items-center justify-between">
+                    <!-- Canlı Risk Skoru Göstergesi (Calm) -->
+                    <div id="liveScoreCard" class="p-3 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-between">
                         <div class="space-y-0.5">
-                            <div class="text-[10px] font-extrabold uppercase tracking-wider text-orange-950">Hesaplanan Risk Skoru</div>
-                            <div id="liveLevelLabel" class="text-xs font-extrabold text-orange-900">Önemli Risk (70 - 200)</div>
+                            <div class="text-[10px] font-extrabold uppercase tracking-wider text-slate-500">Hesaplanan Risk Skoru</div>
+                            <div id="liveLevelLabel" class="text-xs font-bold text-slate-800">Önemli Risk (70 - 200)</div>
                         </div>
-                        <div id="liveScoreVal" class="text-2xl font-black font-mono text-orange-700">45.0</div>
+                        <div id="liveScoreVal" class="text-2xl font-black font-mono text-slate-900">45.0</div>
                     </div>
                 </div>
 
@@ -206,7 +199,7 @@
                 <div class="space-y-3">
                     <div>
                         <label class="block text-xs font-bold text-slate-700 mb-1">Alınması Gereken DÖF (Düzeltici/Önleyici Faaliyet):</label>
-                        <textarea id="dofOnlem" rows="2" placeholder="Örn: Kompresör emniyet ventili yetkili servise yenilettirilmeli ve basınç testi tutanağı dosyalanmalıdır." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-indigo-500"></textarea>
+                        <textarea id="dofOnlem" rows="2" placeholder="Örn: Kompresör emniyet ventili yetkili servise yenilettirilmeli ve basınç testi tutanağı dosyalanmalıdır." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-slate-400"></textarea>
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -221,15 +214,15 @@
                     </div>
                 </div>
 
-                <!-- Butonlar -->
+                <!-- Butonlar (Calm Executive) -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-                    <button type="button" onclick="runAiMebbisBridge()" id="btnBridgeAi" class="py-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-extrabold text-xs shadow-lg shadow-purple-600/30 transition flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    <button type="button" onclick="runAiMebbisBridge()" id="btnBridgeAi" class="py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-xs transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-wand-magic-sparkles text-slate-300"></i>
                         <span>MEBBİS'e Eşle & DÖF Metni Üret</span>
                     </button>
 
-                    <button type="button" onclick="saveRiskRecord()" id="btnSaveRisk" class="py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs shadow-lg shadow-emerald-600/30 transition flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-floppy-disk"></i>
+                    <button type="button" onclick="saveRiskRecord()" id="btnSaveRisk" class="py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs shadow-xs transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-floppy-disk text-slate-300"></i>
                         <span>Veritabanına Kaydet</span>
                     </button>
                 </div>
@@ -241,8 +234,8 @@
         <div class="lg:col-span-5 space-y-4">
             
             <!-- Boş Durum Placeholder -->
-            <div id="bridgePlaceholder" class="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm text-center space-y-3 h-full flex flex-col items-center justify-center text-slate-400">
-                <div class="w-16 h-16 rounded-3xl bg-slate-100 flex items-center justify-center text-2xl text-slate-400">
+            <div id="bridgePlaceholder" class="bg-white rounded-2xl p-8 border border-slate-200 shadow-xs text-center space-y-3 h-full flex flex-col items-center justify-center text-slate-400">
+                <div class="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center text-xl text-slate-400">
                     <i class="fa-solid fa-bridge-water"></i>
                 </div>
                 <h4 class="text-sm font-bold text-slate-700">MEBBİS Köprüleme Bekleniyor</h4>
@@ -251,28 +244,28 @@
                 </p>
             </div>
 
-            <!-- MEBBİS Bridge Sonuç Kartı (Dinamik Açılır) -->
-            <div id="bridgeResultCard" class="hidden bg-white rounded-3xl p-6 border-2 border-indigo-400 shadow-xl space-y-4">
+            <!-- MEBBİS Bridge Sonuç Kartı (Calm) -->
+            <div id="bridgeResultCard" class="hidden bg-white rounded-2xl p-6 border border-slate-200 shadow-xs space-y-4">
                 
                 <div class="flex items-center justify-between pb-3 border-b border-slate-100">
                     <div>
-                        <div class="text-[10px] font-extrabold uppercase tracking-wider text-indigo-600">MEBBİS İSG Modülü Eşleşmesi</div>
-                        <h4 class="text-sm font-extrabold text-slate-900" id="resMebbisCode">İSG-MAK-08</h4>
+                        <div class="text-[10px] font-extrabold uppercase tracking-wider text-slate-500">MEBBİS İSG Modülü Eşleşmesi</div>
+                        <h4 class="text-sm font-extrabold text-slate-900 font-mono" id="resMebbisCode">İSG-MAK-08</h4>
                     </div>
-                    <span id="resOdenekBadge" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200">
+                    <span id="resOdenekBadge" class="px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">
                         2024/38 Ödenek Kapsamında
                     </span>
                 </div>
 
                 <!-- Kopyalanabilir MEBBİS DÖF Metni -->
                 <div class="space-y-1.5">
-                    <div class="flex items-center justify-between text-[11px] font-extrabold text-slate-700">
+                    <div class="flex items-center justify-between text-[11px] font-bold text-slate-700">
                         <span>MEBBİS'e Yapıştırılacak Resmî Açıklama:</span>
-                        <button onclick="copyMebbisText()" class="text-indigo-600 hover:text-indigo-800 font-bold text-[10px] flex items-center gap-1">
+                        <button onclick="copyMebbisText()" class="text-slate-700 hover:text-slate-900 font-bold text-[10px] flex items-center gap-1">
                             <i class="fa-regular fa-copy"></i> Kopyala
                         </button>
                     </div>
-                    <textarea id="resMebbisText" rows="4" readonly class="w-full bg-slate-50 border border-indigo-200 rounded-xl p-3 text-xs font-mono text-slate-800 focus:outline-none"></textarea>
+                    <textarea id="resMebbisText" rows="4" readonly class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs font-mono text-slate-800 focus:outline-none"></textarea>
                 </div>
 
                 <!-- Yasal Dayanak Mevzuat -->
@@ -282,8 +275,10 @@
                 </div>
 
                 <!-- AI Uzman Tavsiyesi -->
-                <div class="p-3 rounded-xl bg-purple-50 border border-purple-200 text-xs text-purple-900 leading-relaxed" id="resAiAdvice">
+                <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700 leading-relaxed" id="resAiAdvice">
                 </div>
+
+            </div>
 
             </div>
 
@@ -292,17 +287,17 @@
     </div>
 
     <!-- ==================== BU OKULA AİT MEVCUT RİSK KAYITLARI TABLOSU ==================== -->
-    <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200 space-y-4">
+    <div class="bg-white rounded-2xl p-6 shadow-xs border border-slate-200 space-y-4">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
             <div>
                 <h3 class="text-base font-extrabold text-slate-900 flex items-center gap-2">
-                    <i class="fa-solid fa-list-check text-indigo-600"></i> {{ selected_school.kurum_adi }} — Kayıtlı Risk Analizleri
+                    <i class="fa-solid fa-list-check text-slate-700"></i> {{ selected_school.kurum_adi }} — Kayıtlı Risk Analizleri
                 </h3>
                 <p class="text-xs text-slate-500 mt-0.5">Saha ortam gözetiminde tespit edilen ve MEBBİS'e köprülenen maddeler</p>
             </div>
             
-            <a href="/risk-analizi-raporu/{{ selected_school.id }}" target="_blank" class="px-3.5 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-600 hover:text-white text-indigo-700 text-xs font-bold transition flex items-center gap-1.5 self-start sm:self-auto">
-                <i class="fa-solid fa-print"></i> Resmî Çıktı Al
+            <a href="/risk-analizi-raporu/{{ selected_school.id }}" target="_blank" class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold border border-slate-200 transition flex items-center gap-1.5 self-start sm:self-auto shadow-xs">
+                <i class="fa-solid fa-print text-slate-500"></i> <span>Resmî Çıktı Al</span>
             </a>
         </div>
 
@@ -336,7 +331,7 @@
                                 {{ rk.risk_skoru or rk.risk_puani or 10 }}
                             </span>
                         </td>
-                        <td class="py-3 px-3 font-mono text-[11px] text-indigo-700 font-bold">
+                        <td class="py-3 px-3 font-mono text-[11px] text-slate-800 font-bold">
                             {{ rk.mebbis_kutuphane_kodu or 'İSG-GENEL-01' }}
                         </td>
                         <td class="py-3 px-3 text-slate-600 truncate max-w-xs">
@@ -345,7 +340,7 @@
                         <td class="py-3 px-3 font-mono text-[11px] text-slate-500">{{ rk.termin_tarihi or '-' }}</td>
                         <td class="py-3 px-3 text-center">
                             {% if rk.odenek_talep_kapsaminda_mi %}
-                            <span class="px-2 py-0.5 rounded text-[9px] font-bold bg-purple-100 text-purple-800 border border-purple-200">2024/38</span>
+                            <span class="px-2 py-0.5 rounded text-[9px] font-bold bg-slate-100 text-slate-700 border border-slate-200">2024/38</span>
                             {% else %}
                             <span class="text-slate-300">-</span>
                             {% endif %}
@@ -365,8 +360,8 @@
 
     {% else %}
     <!-- Okul Seçilmediğinde Gösterilecek Hoşgeldiniz Kartı -->
-    <div class="bg-white rounded-3xl p-12 text-center border border-slate-200 shadow-sm space-y-4">
-        <div class="w-20 h-20 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center text-3xl mx-auto">
+    <div class="bg-white rounded-2xl p-12 text-center border border-slate-200 shadow-xs space-y-4">
+        <div class="w-16 h-16 rounded-2xl bg-slate-100 text-slate-600 flex items-center justify-center text-2xl mx-auto">
             <i class="fa-solid fa-magnifying-glass"></i>
         </div>
         <div class="space-y-1">
@@ -547,10 +542,10 @@
                 const odenekBadge = document.getElementById('resOdenekBadge');
                 if (res.bridge.odenek_talep_kapsaminda_mi) {
                     odenekBadge.innerText = '2024/38 Bakanlık Ödenek Kapsamında';
-                    odenekBadge.className = 'px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 text-purple-800 border border-purple-200';
+                    odenekBadge.className = 'px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-800 border border-slate-300';
                 } else {
                     odenekBadge.innerText = 'Okul Aile Birliği / İşletme Bütçesi';
-                    odenekBadge.className = 'px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200';
+                    odenekBadge.className = 'px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-700 border border-slate-200';
                 }
 
                 // Eğer DÖF kutusu boşsa AI önerisini doldur
