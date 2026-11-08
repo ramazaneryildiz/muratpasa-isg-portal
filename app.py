@@ -1,3 +1,4 @@
+import socket
 import os
 import sqlite3
 import hashlib
@@ -3387,6 +3388,28 @@ def print_risk_report_page(request: Request, school_id: int):
 
 # ==================== SAHA SESLİ & GÖRSEL AI ASİSTANI (FIELD COPILOT) ====================
 
+def get_local_server_ip() -> str:
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        s.connect(('10.255.255.255', 1))
+        ip = s.getsockname()[0]
+    except Exception:
+        ip = '127.0.0.1'
+    finally:
+        s.close()
+    return ip
+
+@app.get("/api/qr-code")
+def api_qr_code(url: Optional[str] = None):
+    import qrcode
+    import qrcode.image.svg
+    target_url = url or f"http://{get_local_server_ip()}:8000/saha-asistani"
+    factory = qrcode.image.svg.SvgPathImage
+    img = qrcode.make(target_url, image_factory=factory, box_size=8, border=2)
+    stream = io.BytesIO()
+    img.save(stream)
+    return Response(content=stream.getvalue(), media_type="image/svg+xml")
+
 @app.get("/saha-asistani", response_class=HTMLResponse)
 def saha_asistani_page(request: Request):
     """Mobil sahada sesli ve fotoğraflı hızlı risk & DÖF tespit ekranı."""
@@ -3400,10 +3423,15 @@ def saha_asistani_page(request: Request):
     all_schools = [dict(r) for r in c.fetchall()]
     conn.close()
 
+    local_ip = get_local_server_ip()
+    mobile_url = f"http://{local_ip}:8000/saha-asistani"
+
     return templates.TemplateResponse(request=request, name="saha_asistani.html", context={
         "user": user,
         "active_page": "saha_asistani",
-        "all_schools": all_schools
+        "all_schools": all_schools,
+        "local_ip": local_ip,
+        "mobile_url": mobile_url
     })
 
 @app.post("/api/ai/field-voice-inspect")
