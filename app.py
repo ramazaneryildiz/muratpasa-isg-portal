@@ -3188,7 +3188,7 @@ def dynamic_risk_assessment_page(request: Request, school_id: Optional[int] = No
             c.execute("""
                 SELECT * FROM risk_assessments 
                 WHERE school_id = ? 
-                ORDER BY risk_skoru DESC, id DESC
+                ORDER BY COALESCE(risk_skoru, risk_puani, 0) DESC, id DESC
             """, (school_id,))
             school_risks = [dict(r) for r in c.fetchall()]
 

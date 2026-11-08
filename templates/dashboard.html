@@ -190,7 +190,7 @@
                             </div>
                         </div>
                         <div class="text-right flex-shrink-0">
-                            <span class="px-2 py-0.5 rounded text-[10px] font-extrabold {% if r.risk_puani >= 15 %}bg-rose-100 text-rose-700 border border-rose-200{% else %}bg-amber-100 text-amber-700 border border-amber-200{% endif %}">
+                            <span class="px-2 py-0.5 rounded text-[10px] font-extrabold {% if r.risk_puani and r.risk_puani >= 15 %}bg-rose-100 text-rose-700 border border-rose-200{% else %}bg-amber-100 text-amber-700 border border-amber-200{% endif %}">
                                 Skor: {{ r.risk_puani or 10 }}
                             </span>
                         </div>
