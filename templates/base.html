@@ -201,163 +201,102 @@
                 </div>
             </div>
 
-            <!-- Menü Linkleri (Kaydırılabilir) -->
-            <nav class="flex-1 px-3 py-3 space-y-5 overflow-y-auto">
+            <!-- Menü Linkleri (4 Temel Hub - Sade ve Odaklı) -->
+            <nav class="flex-1 px-3 py-3 space-y-4 overflow-y-auto">
                 
-                <!-- BÖLÜM 1: GENEL YÖNETİM -->
+                <!-- HUB 1: GENEL BAKIŞ & ALARMLAR -->
                 <div>
-                    <div class="px-3 mb-1.5 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
-                        Genel Yönetim
+                    <div class="px-3 mb-1 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
+                        Genel Bakış & Alarmlar
                     </div>
-                    <div class="space-y-1">
+                    <div class="space-y-0.5">
                         <a href="/" class="sidebar-item {% if active_page == 'dashboard' %}active{% endif %}">
                             <i class="fa-solid fa-chart-pie w-4 text-center text-blue-400"></i>
-                            <span>Kontrol Paneli (Dashboard)</span>
-                        </a>
-                        <a href="/okullar" class="sidebar-item {% if active_page == 'schools' %}active{% endif %}">
-                            <i class="fa-solid fa-school w-4 text-center text-indigo-400"></i>
-                            <span>Kurum Listesi (268 Okul)</span>
-                        </a>
-                    </div>
-                </div>
-
-                <!-- BÖLÜM: YAPAY ZEKA ASİSTANI (GEMINI AI) -->
-                <div>
-                    <div class="px-3 mb-1.5 text-[10px] font-extrabold uppercase tracking-wider text-purple-400 flex items-center justify-between">
-                        <span class="flex items-center gap-1.5">
-                            <i class="fa-solid fa-wand-magic-sparkles text-[9px]"></i> Gemini AI Zekası
-                        </span>
-                        <span class="px-1.5 py-0.2 rounded text-[8px] font-black bg-purple-500/20 text-purple-300 border border-purple-500/30">CANLI</span>
-                    </div>
-                    <div class="space-y-1">
-                        <a href="/isg-asistan" class="sidebar-item {% if active_page == 'ai_advisor' %}active{% endif %}">
-                            <i class="fa-solid fa-brain w-4 text-center text-purple-400"></i>
-                            <span class="font-bold text-white">İSG Mevzuat Danışmanı</span>
-                            <span class="ml-auto text-[9px] bg-purple-600 text-white px-1.5 py-0.5 rounded font-mono font-extrabold shadow-xs shadow-purple-600/30">AI</span>
-                        </a>
-                        <a href="/ai-veri-aktarimi" class="sidebar-item {% if active_page == 'ai_ingestion' %}active{% endif %}">
-                            <i class="fa-solid fa-file-circle-check w-4 text-center text-purple-400"></i>
-                            <span class="font-bold text-white">MEBBİS & Belge Aktarımı</span>
-                            <span class="ml-auto text-[9px] bg-indigo-600 text-white px-1.5 py-0.5 rounded font-mono font-extrabold shadow-xs shadow-indigo-600/30">VISION</span>
-                        </a>
-                    </div>
-                </div>
-
-                <!-- BÖLÜM 2: 2026–2027 ENTEGRE OPERASYON MODÜLLERİ -->
-                <div>
-                    <div class="px-3 mb-1.5 text-[10px] font-extrabold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
-                        <i class="fa-solid fa-star text-[9px]"></i> 2026–2027 Modülleri
-                    </div>
-                    <div class="space-y-1">
-                        <a href="/kriz-yonetimi" class="sidebar-item {% if active_page == 'crisis' %}active{% endif %}">
-                            <i class="fa-solid fa-triangle-exclamation w-4 text-center text-rose-500"></i>
-                            <span class="text-white font-semibold">Kriz & Lockdown Portalı</span>
-                        </a>
-                        <a href="/adep-yonerge-motoru" class="sidebar-item {% if active_page == 'adep' %}active{% endif %}">
-                            <i class="fa-solid fa-file-shield w-4 text-center text-indigo-400"></i>
-                            <span>ADEP & Yönerge Motoru</span>
-                        </a>
-                        <a href="/okulum-temiz" class="sidebar-item {% if active_page == 'okulum_temiz' %}active{% endif %}">
-                            <i class="fa-solid fa-certificate w-4 text-center text-emerald-400"></i>
-                            <span>Okulum Temiz Belgelendirme</span>
-                        </a>
-                        <a href="/dof-takip" class="sidebar-item {% if active_page == 'dof_takip' %}active{% endif %}">
-                            <i class="fa-solid fa-clock-rotate-left w-4 text-center text-amber-400"></i>
-                            <span>DÖF & Muayene Takip</span>
-                        </a>
-                        <a href="/dokuman-kutuphanesi" class="sidebar-item {% if active_page == 'library' %}active{% endif %}">
-                            <i class="fa-solid fa-folder-open w-4 text-center text-blue-400"></i>
-                            <span>Doküman Kütüphanesi</span>
-                        </a>
-                        <a href="/dinamik-risk-degerlendirme" class="sidebar-item {% if active_page == 'dynamic_risk' %}active{% endif %}">
-                            <i class="fa-solid fa-calculator w-4 text-center text-teal-400"></i>
-                            <span class="text-white font-semibold">Dinamik Risk Değerlendirme</span>
-                            <span class="ml-auto text-[8px] bg-teal-600 text-white px-1.5 py-0.5 rounded font-mono font-extrabold shadow-xs">KINNEY</span>
-                        </a>
-                        <a href="/istek-havuzu" class="sidebar-item {% if active_page == 'feedback_hub' %}active{% endif %}">
-                            <i class="fa-solid fa-lightbulb w-4 text-center text-purple-400"></i>
-                            <span>İstek Havuzu & AI Backlog</span>
-                            <span class="ml-auto text-[8px] bg-purple-600 text-white px-1.5 py-0.5 rounded font-mono font-extrabold shadow-xs">DEV</span>
-                        </a>
-                    </div>
-                </div>
-
-                <!-- BÖLÜM 3: DENETİM & MÜFETTİŞ İCMALİ -->
-                <div>
-                    <div class="px-3 mb-1.5 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
-                        Denetim & İcmaller
-                    </div>
-                    <div class="space-y-1">
-                        <a href="/mufettis-raporu" class="sidebar-item {% if active_page == 'inspection' %}active{% endif %}">
-                            <i class="fa-solid fa-table-list w-4 text-center text-amber-400"></i>
-                            <span>Müfettiş İcmali (16 Tablo)</span>
-                        </a>
-                        <a href="/veri-tamamlama" class="sidebar-item {% if active_page == 'completion' %}active{% endif %}">
-                            <i class="fa-solid fa-percent w-4 text-center text-teal-300"></i>
-                            <span>24 Kriterli Veri Matrisi</span>
+                            <span>İlçe İSG Durum Paneli</span>
                         </a>
                         <a href="/risk-alarmlari" class="sidebar-item {% if active_page == 'risks' %}active{% endif %}">
                             <i class="fa-solid fa-bell w-4 text-center text-rose-400"></i>
-                            <span>Risk & Muayene Alarmları</span>
-                        </a>
-                        <a href="/okul/1#checklistTab" class="sidebar-item {% if active_page == 'checklist' %}active{% endif %}">
-                            <i class="fa-solid fa-list-check w-4 text-center text-indigo-300"></i>
-                            <span>44 Maddelik Saha Checklist</span>
+                            <span class="text-rose-200 font-semibold">Kritik Muayene Alarmları</span>
                         </a>
                     </div>
                 </div>
 
-                <!-- BÖLÜM 4: TEMATİK İSG RAPORLARI -->
+                <!-- HUB 2: OKUL & SAHA İŞLEMLERİ (360° OPERASYON) -->
                 <div>
-                    <div class="px-3 mb-1.5 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
-                        Tematik Raporlar & Saha
+                    <div class="px-3 mb-1 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
+                        Okul & Saha İşlemleri
                     </div>
-                    <div class="space-y-1">
-                        <a href="/raporlar/guvenlik-kamera" class="sidebar-item {% if active_page == 'report_camera' %}active{% endif %}">
-                            <i class="fa-solid fa-video w-4 text-center text-cyan-400"></i>
-                            <span>Kamera & Güvenlik Raporu</span>
+                    <div class="space-y-0.5">
+                        <a href="/okullar" class="sidebar-item {% if active_page == 'schools' %}active{% endif %}">
+                            <i class="fa-solid fa-school w-4 text-center text-indigo-400"></i>
+                            <span>360° Okul Masası (268 Kurum)</span>
                         </a>
-                        <a href="/raporlar/siginak-afet" class="sidebar-item {% if active_page == 'report_shelter' %}active{% endif %}">
-                            <i class="fa-solid fa-person-shelter w-4 text-center text-emerald-400"></i>
-                            <span>Sığınak & Afet Kapasitesi</span>
+                        <a href="/dinamik-risk-degerlendirme" class="sidebar-item {% if active_page == 'dynamic_risk' %}active{% endif %}">
+                            <i class="fa-solid fa-calculator w-4 text-center text-teal-400"></i>
+                            <span>Saha Risk Analizi & MEBBİS DÖF</span>
                         </a>
-                        <a href="/raporlar/sifir-atik" class="sidebar-item {% if active_page == 'report_zero_waste' %}active{% endif %}">
-                            <i class="fa-solid fa-recycle w-4 text-center text-teal-400"></i>
-                            <span>Sıfır Atık Belge & Çevre</span>
+                        <a href="/ai-veri-aktarimi" class="sidebar-item {% if active_page == 'ai_ingestion' %}active{% endif %}">
+                            <i class="fa-solid fa-cloud-arrow-up w-4 text-center text-purple-400"></i>
+                            <span>MEBBİS & Belge Yükleme</span>
                         </a>
-                        <a href="/dinamik-rapor" class="sidebar-item {% if active_page == 'reports' %}active{% endif %}">
-                            <i class="fa-solid fa-filter w-4 text-center text-purple-400"></i>
-                            <span>Özel Rapor / Filtreleme</span>
+                        <a href="/dof-takip" class="sidebar-item {% if active_page == 'dof_takip' %}active{% endif %}">
+                            <i class="fa-solid fa-clock-rotate-left w-4 text-center text-amber-400"></i>
+                            <span>DÖF & Termin Takip</span>
                         </a>
                     </div>
                 </div>
 
-                <!-- BÖLÜM 5: KOORDİNASYON & OKUL PORTALI -->
+                <!-- HUB 3: ACİL DURUM & MEVZUAT -->
                 <div>
-                    <div class="px-3 mb-1.5 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
-                        Koordinasyon & Okul Portalı
+                    <div class="px-3 mb-1 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
+                        Acil Durum & Mevzuat
                     </div>
-                    <div class="space-y-1">
-                        {% if user.role == 'koordinator' %}
-                        <a href="/kullanicilar" class="sidebar-item {% if active_page == 'users' %}active{% endif %}">
-                            <i class="fa-solid fa-users-gear w-4 text-center text-rose-400"></i>
-                            <span class="text-white font-semibold">Kullanıcı Yönetimi</span>
-                            <span class="ml-auto text-[9px] bg-rose-500/20 text-rose-300 px-1.5 py-0.2 rounded font-bold border border-rose-500/30">Koordinatör</span>
+                    <div class="space-y-0.5">
+                        <a href="/kriz-yonetimi" class="sidebar-item {% if active_page == 'crisis' %}active{% endif %}">
+                            <i class="fa-solid fa-kit-medical w-4 text-center text-rose-400"></i>
+                            <span>İş Kazası & Olay Bildirimi</span>
                         </a>
-                        {% endif %}
+                        <a href="/adep-yonerge-motoru" class="sidebar-item {% if active_page == 'adep' %}active{% endif %}">
+                            <i class="fa-solid fa-file-shield w-4 text-center text-indigo-400"></i>
+                            <span>ADEP & Yönerge Üretici</span>
+                        </a>
+                        <a href="/dokuman-kutuphanesi" class="sidebar-item {% if active_page == 'library' %}active{% endif %}">
+                            <i class="fa-solid fa-folder-open w-4 text-center text-blue-400"></i>
+                            <span>Resmî Doküman Kütüphanesi</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- HUB 4: DESTEK & GELİŞTİRİCİ -->
+                <div>
+                    <div class="px-3 mb-1 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
+                        Destek & Koordinasyon
+                    </div>
+                    <div class="space-y-0.5">
+                        <a href="/isg-asistan" class="sidebar-item {% if active_page == 'ai_advisor' %}active{% endif %}">
+                            <i class="fa-solid fa-brain w-4 text-center text-purple-400"></i>
+                            <span>İSG Danışmanı (Gemini AI)</span>
+                        </a>
+                        <a href="/istek-havuzu" class="sidebar-item {% if active_page == 'feedback_hub' %}active{% endif %}">
+                            <i class="fa-solid fa-lightbulb w-4 text-center text-amber-400"></i>
+                            <span>İstek Havuzu & Backlog</span>
+                        </a>
                         <a href="/igu-gorevlendirme" class="sidebar-item {% if active_page == 'igu' %}active{% endif %}">
                             <i class="fa-solid fa-user-shield w-4 text-center text-sky-400"></i>
                             <span>İGU Dağılım Çizelgesi</span>
                         </a>
-                        <a href="/okul-baglantilari" class="sidebar-item {% if active_page == 'links' %}active{% endif %}">
-                            <i class="fa-solid fa-link w-4 text-center text-emerald-300"></i>
-                            <span>Okul Veri Giriş Linkleri</span>
+                        {% if user and user.role == 'koordinator' %}
+                        <a href="/kullanicilar" class="sidebar-item {% if active_page == 'users' %}active{% endif %}">
+                            <i class="fa-solid fa-users-gear w-4 text-center text-slate-400"></i>
+                            <span>Kullanıcı Yönetimi</span>
                         </a>
+                        {% endif %}
                         <a href="/okul-portal" target="_blank" class="sidebar-item">
                             <i class="fa-solid fa-school-flag w-4 text-center text-amber-400"></i>
-                            <span>Okul Portalı (Ayrı Sekme)</span>
+                            <span>Okul Kolay Girişi (Ayrı Sekme)</span>
                         </a>
                     </div>
+                </div>
                 </div>
 
             </nav>

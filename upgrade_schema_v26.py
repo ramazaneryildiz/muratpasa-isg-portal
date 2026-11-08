@@ -72,3 +72,4 @@ def upgrade_schema():
 
 if __name__ == "__main__":
     upgrade_schema()
+

@@ -310,6 +310,27 @@ def dashboard(request: Request, filter: str = "all"):
     query += " ORDER BY s.oncelik_derecesi ASC, s.kurum_adi ASC"
     cursor.execute(query, params)
     raw_schools = cursor.fetchall()
+
+    cursor.execute("""
+        SELECT p.*, s.kurum_adi, s.id as school_id
+        FROM periodic_controls p
+        JOIN schools s ON p.school_id = s.id
+        WHERE p.alarm_seviyesi IN ('Suresi Gecmis', 'Yaklasiyor (30 Gun)')
+        ORDER BY p.alarm_seviyesi DESC, p.sonraki_kontrol_tarihi ASC
+        LIMIT 6
+    """)
+    urgent_periodic = [dict(r) for r in cursor.fetchall()]
+
+    cursor.execute("""
+        SELECT r.*, s.kurum_adi, s.id as school_id
+        FROM risk_assessments r
+        JOIN schools s ON r.school_id = s.id
+        WHERE r.dof_durumu != 'Kapatıldı'
+        ORDER BY r.risk_puani DESC
+        LIMIT 6
+    """)
+    urgent_risks = [dict(r) for r in cursor.fetchall()]
+
     conn.close()
 
     evaluated_schools = []
@@ -326,6 +347,8 @@ def dashboard(request: Request, filter: str = "all"):
         "user": user,
         "stats": stats,
         "schools": evaluated_schools,
+        "urgent_periodic": urgent_periodic,
+        "urgent_risks": urgent_risks,
         "current_filter": filter,
         "active_page": "dashboard"
     })
@@ -391,6 +414,10 @@ def school_detail(request: Request, school_id: int):
     cursor.execute("SELECT * FROM school_isg_checklists WHERE school_id = ? ORDER BY kategori_no ASC, id ASC", (school_id,))
     checklists = cursor.fetchall()
 
+    # Arşiv Belgeleri
+    cursor.execute("SELECT * FROM documents_archive WHERE school_id = ? ORDER BY id DESC", (school_id,))
+    documents = cursor.fetchall()
+
     conn.close()
 
     completion = evaluate_school_data(dict(school), dict(metrics) if metrics else {})
@@ -402,6 +429,7 @@ def school_detail(request: Request, school_id: int):
         "risks": risks,
         "periodics": periodics,
         "checklists": checklists,
+        "documents": documents,
         "completion": completion,
         "active_page": "schools"
     })
