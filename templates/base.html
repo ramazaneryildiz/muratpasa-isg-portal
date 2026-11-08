@@ -244,6 +244,13 @@
                         <i class="fa-solid fa-triangle-exclamation text-[9px] text-slate-500"></i>
                     </div>
                     <div class="space-y-0.5">
+                        <a href="/saha-asistani" class="sidebar-item {% if active_page == 'saha_asistani' %}active{% endif %}">
+                            <i class="fa-solid fa-microphone-lines w-4 text-center text-slate-400"></i>
+                            <span class="flex items-center justify-between flex-1">
+                                <span>Saha Sesli & Görsel Asistan</span>
+                                <span class="text-[9px] font-bold px-1.5 py-0.2 rounded bg-slate-800 text-slate-300 border border-slate-700">Mobil</span>
+                            </span>
+                        </a>
                         <a href="/dinamik-risk-degerlendirme" class="sidebar-item {% if active_page == 'dynamic_risk' %}active{% endif %}">
                             <i class="fa-solid fa-calculator w-4 text-center text-slate-400"></i>
                             <span>Saha Risk Analizi & MEBBİS DÖF</span>
@@ -378,12 +385,16 @@
                     </div>
 
                     <!-- Sağ: Hızlı Eylemler & Kullanıcı -->
-                    <div class="flex items-center space-x-2.5">
-                        <a href="/mufettis-raporu" class="hidden sm:flex items-center px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition border border-slate-200">
-                            <i class="fa-solid fa-file-shield mr-1.5 text-slate-600"></i> 16 Tablo
+                    <div class="flex items-center space-x-2">
+                        <a href="/saha-asistani" class="flex items-center px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-bold transition shadow-xs">
+                            <i class="fa-solid fa-microphone mr-1.5 text-slate-300"></i>
+                            <span>Saha Asistanı</span>
                         </a>
                         <a href="/risk-alarmlari" class="flex items-center px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-lg text-xs font-bold transition border border-rose-200">
                             <i class="fa-solid fa-bell mr-1.5 text-rose-500"></i> Alarmlar
+                        </a>
+                        <a href="/mufettis-raporu" class="hidden md:flex items-center px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition border border-slate-200">
+                            <i class="fa-solid fa-file-shield mr-1.5 text-slate-600"></i> 16 Tablo
                         </a>
                         <div class="h-6 w-px bg-slate-200 hidden sm:block"></div>
                         <div class="text-right hidden xl:block">

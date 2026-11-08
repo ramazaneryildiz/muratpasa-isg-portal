@@ -410,3 +410,159 @@ JSON Şeması:
             "ai_uzman_tavsiyesi": "Tespit edilen uygunsuzluk için ivedilikle DÖF başlatılmalıdır."
         }
 
+def process_field_voice_and_vision_hazard(
+    voice_transcript: str,
+    image_bytes: bytes = None,
+    image_mime: str = "image/jpeg",
+    schools_cache: list = None
+) -> dict:
+    """
+    Sahada sesli not bırakan ve (varsa) fotoğraf çeken İSG uzmanının tespitini
+    Gemini Multimodal yapay zekası ile analiz eder:
+    - 268 okul arasından ilgili okulu tespit eder,
+    - Bölüm / Atölyeyi belirler,
+    - Tehlike kaynağını ve olası risk senaryosunu oluşturur,
+    - Fine-Kinney matris parametrelerini (O, F, Ş, Skor) hesaplar,
+    - Standart MEBBİS İSG kütüphane kodunu ve resmî DÖF metnini üretir,
+    - Yasal termin ve sorumluları belirler.
+    """
+    import base64
+    from datetime import datetime, timedelta
+
+    # Okul ön eşleştirme (Python fuzzy token matcher)
+    matched_school = None
+    if schools_cache:
+        t_lower = voice_transcript.lower().replace("-", " ")
+        tokens = [w for w in t_lower.split() if len(w) > 2]
+        best_score = 0
+        for s in schools_cache:
+            name_lower = s.get("kurum_adi", "").lower().replace("-", " ")
+            score = 0
+            for token in tokens:
+                if token in name_lower:
+                    score += len(token) * 2
+                if token in ["teztur", "tez"] and "tez tur" in name_lower:
+                    score += 25
+            if score > best_score and score >= 6:
+                best_score = score
+                matched_school = s
+
+    prompt = f"""
+Sen Antalya Muratpaşa İlçe Millî Eğitim Müdürlüğü A Sınıfı Baş İSG Denetçisi ve MEBBİS İSG Modülü uzmanısın.
+Saha denetimindeki İSG uzmanı cep telefonundan konuşarak sesli not bıraktı ve olay yerinin fotoğrafını çekti (veya sisteme iletti).
+
+UZMANIN SESLİ SAHA İFADESİ:
+"{voice_transcript}"
+
+GÖREVİN:
+1. Okul Tespiti: Sesli notta geçen okul adını veya kısaltmasını tespit et. (Örn: 'teztur meslek' -> 'Tez-Tur Turizm Mesleki ve Teknik Anadolu Lisesi', 'gazi' -> 'Gazi Anadolu Lisesi', 'serkan çölkesen' -> 'Şehit Serkan Çölkesen Ticaret MTAL').
+2. Bölüm / Atölye: Hangi birimde veya atölyede olduğunu belirle (Örn: Mutfak Atölyesi, Kazan Dairesi, Elektrik Panosu, Kimya Laboratuvarı, Yangın Merdiveni, Spor Salonu).
+3. Tehlike Kaynağı: Kısa, somut tehlike tanımı (Örn: Duvarda dökülen ve kırılan fayans kaplamalar).
+4. Olası Tehlike ve Risk Senaryosu: Durumun doğuracağı tehlike ve olası kaza/sağlık riski (Hijyen, kesilme, kayma, elektrik çarpması vb.).
+5. Fine-Kinney Parametreleri:
+   - Olasılık (O): 0.2 (Hemen hemen imkansız), 0.5 (Çok nadir), 1.0 (Oldukça az), 3.0 (Nadir fakat olabilir), 6.0 (Kuvvetle muhtemel), 10.0 (Beklenir/Kesin)
+   - Frekans (F): 0.5 (Yılda bir), 1.0 (Yılda birkaç kez), 2.0 (Ayda bir), 3.0 (Haftada bir), 6.0 (Günde bir), 10.0 (Sürekli)
+   - Şiddet (Ş): 1 (İlk yardım), 3 (Ayakta tedavi/pansuman), 7 (Hafif yaralanma), 15 (Ciddi yaralanma/kırık), 40 (Kalıcı sakatlık/tek ölüm), 100 (Birden fazla ölüm)
+   - Skor = O * F * Ş
+6. Standart MEBBİS İSG Kütüphane Kodu (Örn: İSG-MUT-04, İSG-BINA-12, İSG-ELK-03, İSG-MAK-06, İSG-LAB-01 vb.).
+7. MEBBİS DÖF Açıklama Metni: Okul idaresi veya uzmanın MEBBİS İSG modülüne doğrudan kopyalayıp yapıştıracağı, 6331 sayılı Kanun ve ilgili yönetmelik diline uygun, resmi, emir kipiyle yazılmış DÖF önlem metni.
+8. Yasal Dayanak Mevzuat (Örn: İş Ekipmanlarının Kullanımında Sağlık ve Güvenlik Şartları Yönetmeliği, Binaların Yangından Korunması Hakkında Yönetmelik vb.).
+9. Termin Süresi (Gün cinsinden: 7, 15, 30 veya 60).
+10. Sorumlular (Örn: Okul Yönetimi / Atölye Şefi / Nöbetçi Müdür Yardımcısı).
+11. MEB 2024/38 Sayılı Ödenek Kapsamında mı (Bakanlıktan onarım bütçesi istenecek yapısal bir iş mi? true/false).
+12. Görsel Tespit Notu: (Eğer fotoğraf yüklendiyse fotoğraftaki durumu kısaca özetle, fotoğraf yoksa 'Sesli beyan üzerinden analiz yapıldı' de).
+
+YANITINI SADECE AŞAĞIDAKİ JSON ŞEMASINDA DÖNDÜR:
+{{
+  "school_name_detected": "Okulun tespit edilen adı",
+  "unit_or_workshop": "Bölüm veya Atölye",
+  "bolum_unite_kategori": "ATOLYE_LABORATUVAR | KAZAN_DAIRESI | BINA_GENEL | ELEKTRIK_TRAFO | YANGIN_YOLU",
+  "tehlike_kaynagi": "Kısa tehlike kaynağı",
+  "risk_senaryosu": "Olası risk senaryosu ve doğuracağı zarar",
+  "fine_kinney": {{
+    "olasilik": 6.0,
+    "frekans": 6.0,
+    "siddet": 3.0,
+    "skor": 108.0,
+    "seviye": "Önemli Risk (70 - 200)",
+    "seviye_kod": "YUKSEK_ONEMLI"
+  }},
+  "mebbis_kutuphane_kodu": "İSG-MUT-04",
+  "mebbis_dof_aciklama_metni": "Resmî MEBBİS DÖF metni...",
+  "dayanak_mevzuat": "İlgili yönetmelik adı",
+  "termin_gun": 15,
+  "sorumlular": "Okul Yönetimi & Atölye Şefi",
+  "odenek_talep_kapsaminda_mi": true,
+  "gorsel_analiz_notu": "Fotoğrafta görülen hasar/uygunsuzluk özeti"
+}}
+"""
+
+    parts = [{"text": prompt}]
+    if image_bytes:
+        try:
+            b64_img = base64.b64encode(image_bytes).decode("utf-8")
+            parts.append({
+                "inline_data": {
+                    "mime_type": image_mime or "image/jpeg",
+                    "data": b64_img
+                }
+            })
+        except Exception as img_err:
+            logger.warning(f"Görsel base64 çevrim hatası: {img_err}")
+
+    today = datetime.now()
+    default_termin = (today + timedelta(days=15)).strftime("%Y-%m-%d")
+
+    try:
+        raw_json = call_gemini_multimodal(parts, json_mode=True, timeout=30)
+        data = json.loads(raw_json)
+        
+        # Termin tarihi hesapla
+        days = int(data.get("termin_gun") or 15)
+        data["termin_tarihi"] = (today + timedelta(days=days)).strftime("%Y-%m-%d")
+        
+        # Okul eşleşmesini ekle
+        if matched_school:
+            data["matched_school"] = {
+                "id": matched_school.get("id"),
+                "kurum_kodu": matched_school.get("kurum_kodu"),
+                "kurum_adi": matched_school.get("kurum_adi")
+            }
+        else:
+            data["matched_school"] = None
+
+        return {"success": True, "data": data}
+    except Exception as e:
+        logger.error(f"Saha Sesli & Görsel AI hatası: {e}")
+        # Akıllı yedek (Fallback)
+        fallback_data = {
+            "school_name_detected": matched_school.get("kurum_adi") if matched_school else "Belirtilmedi",
+            "unit_or_workshop": "Saha Tespit Birimi",
+            "bolum_unite_kategori": "ATOLYE_LABORATUVAR",
+            "tehlike_kaynagi": voice_transcript[:80],
+            "risk_senaryosu": f"Sözlü saha tespiti: {voice_transcript}",
+            "fine_kinney": {
+                "olasilik": 6.0,
+                "frekans": 6.0,
+                "siddet": 3.0,
+                "skor": 108.0,
+                "seviye": "Önemli Risk / DÖF Başlatılmalı (70 - 200)",
+                "seviye_kod": "YUKSEK_ONEMLI"
+            },
+            "mebbis_kutuphane_kodu": "İSG-SAHA-01",
+            "mebbis_dof_aciklama_metni": f"Sahada tespit edilen uygunsuzluk ({voice_transcript}) giderilmeli ve koruyucu önlemler alınmalıdır.",
+            "dayanak_mevzuat": "6331 sayılı İş Sağlığı ve Güvenliği Kanunu Madde 4, 10 ve 16",
+            "termin_gun": 15,
+            "termin_tarihi": default_termin,
+            "sorumlular": "Okul Yönetimi / İSG Kurulu",
+            "odenek_talep_kapsaminda_mi": False,
+            "gorsel_analiz_notu": "Sesli beyan üzerinden kural tabanlı analiz yapıldı.",
+            "matched_school": {
+                "id": matched_school.get("id"),
+                "kurum_kodu": matched_school.get("kurum_kodu"),
+                "kurum_adi": matched_school.get("kurum_adi")
+            } if matched_school else None
+        }
+        return {"success": True, "data": fallback_data, "fallback": True}
+
+

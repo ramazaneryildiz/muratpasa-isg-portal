@@ -3,6 +3,8 @@ import sqlite3
 import hashlib
 import io
 import csv
+import time
+import uuid
 from datetime import datetime, timedelta
 import json
 from typing import Optional
@@ -3382,6 +3384,159 @@ def print_risk_report_page(request: Request, school_id: int):
         "expert_title": "A Sınıfı İş Güvenliği Uzmanı (İlçe MEM İSG Büro)",
         "today": datetime.now().strftime("%d.%m.%Y")
     })
+
+# ==================== SAHA SESLİ & GÖRSEL AI ASİSTANI (FIELD COPILOT) ====================
+
+@app.get("/saha-asistani", response_class=HTMLResponse)
+def saha_asistani_page(request: Request):
+    """Mobil sahada sesli ve fotoğraflı hızlı risk & DÖF tespit ekranı."""
+    user = get_current_user(request)
+    if not user:
+        return RedirectResponse("/login", status_code=303)
+
+    conn = get_db()
+    c = conn.cursor()
+    c.execute("SELECT id, kurum_kodu, kurum_adi FROM schools WHERE is_active_school = 1 ORDER BY kurum_adi ASC")
+    all_schools = [dict(r) for r in c.fetchall()]
+    conn.close()
+
+    return templates.TemplateResponse(request=request, name="saha_asistani.html", context={
+        "user": user,
+        "active_page": "saha_asistani",
+        "all_schools": all_schools
+    })
+
+@app.post("/api/ai/field-voice-inspect")
+async def api_field_voice_inspect(
+    request: Request,
+    transcript: str = Form(...),
+    photo: Optional[UploadFile] = File(None)
+):
+    """Sözlü saha tespiti ve olay yeri fotoğrafını Gemini Multimodal ile analiz eder."""
+    user = get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Oturum açmanız gerekiyor.")
+
+    photo_url = None
+    image_bytes = None
+    image_mime = "image/jpeg"
+
+    if photo and photo.filename:
+        image_bytes = await photo.read()
+        image_mime = photo.content_type or "image/jpeg"
+        upload_dir = os.path.join(BASE_DIR, "static", "uploads", "saha_photos")
+        os.makedirs(upload_dir, exist_ok=True)
+        ext = os.path.splitext(photo.filename)[1] or ".jpg"
+        safe_filename = f"saha_{int(time.time())}_{uuid.uuid4().hex[:6]}{ext}"
+        file_path = os.path.join(upload_dir, safe_filename)
+        with open(file_path, "wb") as f:
+            f.write(image_bytes)
+        photo_url = f"/static/uploads/saha_photos/{safe_filename}"
+
+    conn = get_db()
+    c = conn.cursor()
+    c.execute("SELECT id, kurum_kodu, kurum_adi FROM schools WHERE is_active_school = 1")
+    schools_cache = [dict(r) for r in c.fetchall()]
+    conn.close()
+
+    result = isg_ai.process_field_voice_and_vision_hazard(
+        voice_transcript=transcript,
+        image_bytes=image_bytes,
+        image_mime=image_mime,
+        schools_cache=schools_cache
+    )
+
+    if result.get("success"):
+        result["photo_url"] = photo_url
+        return result
+    else:
+        return {"success": False, "error": result.get("error", "Analiz yapılamadı.")}
+
+@app.post("/api/ai/field-save-dof")
+async def api_field_save_dof(request: Request):
+    """Saha asistanı tarafından üretilen DÖF kaydını veritabanına ve fotoğraf arşivine ekler."""
+    user = get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Oturum açmanız gerekiyor.")
+
+    body = await request.json()
+    school_id = body.get("school_id")
+    if not school_id:
+        raise HTTPException(status_code=400, detail="Okul seçilmedi.")
+
+    conn = get_db()
+    c = conn.cursor()
+
+    c.execute("""
+        INSERT INTO risk_assessments (
+            school_id, kontrol_edilen_birim, bolum_unite, meslek_alani_veya_atolye_adi,
+            tehlike, tehlike_unsurlari, riskler,
+            degerlendirme_metodu, olasilik, frekans, siddet, risk_skoru, risk_puani, risk_seviyesi,
+            alinan_onlemler, alinmasi_gereken_dof_onlem,
+            dayanak_mevzuat, mebbis_kutuphane_kodu, mebbis_dof_aciklama_metni,
+            odenek_talep_kapsaminda_mi, termin_tarihi, sorumlular, dof_durumu,
+            denetleyen_uzman, ekip_onayi
+        ) VALUES (
+            ?, ?, ?, ?,
+            ?, ?, ?,
+            ?, ?, ?, ?, ?, ?, ?,
+            ?, ?,
+            ?, ?, ?,
+            ?, ?, ?, 'Süresi Devam Ediyor',
+            ?, 1
+        )
+    """, (
+        school_id,
+        body.get("kontrol_edilen_birim") or "Saha Birimi",
+        body.get("bolum_unite") or "ATOLYE_LABORATUVAR",
+        body.get("meslek_alani_veya_atolye_adi") or "",
+        body.get("tehlike_kaynagi") or "Saha Uygunsuzluğu",
+        body.get("olasi_tehlike_ve_risk_senaryosu") or "",
+        body.get("olasi_tehlike_ve_risk_senaryosu") or "",
+        body.get("degerlendirme_metodu", "FINE_KINNEY"),
+        float(body.get("olasilik") or 6.0),
+        float(body.get("frekans") or 6.0),
+        float(body.get("siddet") or 3.0),
+        float(body.get("risk_skoru") or 108.0),
+        float(body.get("risk_skoru") or 108.0),
+        body.get("risk_seviyesi") or "Önemli Risk",
+        body.get("alinan_onlemler") or "Saha tespiti yapıldı.",
+        body.get("alinmasi_gereken_dof_onlem") or body.get("mebbis_dof_aciklama_metni") or "",
+        body.get("dayanak_mevzuat") or "6331 s. Kanun",
+        body.get("mebbis_kutuphane_kodu") or "İSG-SAHA-01",
+        body.get("mebbis_dof_aciklama_metni") or "",
+        1 if body.get("odenek_talep_kapsaminda_mi") else 0,
+        body.get("termin_tarihi"),
+        body.get("sorumlular") or "Okul Yönetimi / İSG Kurulu",
+        user["full_name"]
+    ))
+
+    new_risk_id = c.lastrowid
+
+    # Fotoğraf varsa okulun documents_archive tablosuna bağla
+    photo_url = body.get("photo_url")
+    if photo_url:
+        c.execute("""
+            INSERT INTO documents_archive (
+                school_id, belge_turu, belge_adi, dosya_yolu, yukleyen_user_id, yukleme_tarihi
+            ) VALUES (?, 'Saha Denetim Fotoğrafı', ?, ?, ?, ?)
+        """, (
+            school_id,
+            f"Saha Tespiti (Risk ID: {new_risk_id}) - {body.get('kontrol_edilen_birim') or 'Atölye'}",
+            photo_url,
+            user["id"],
+            datetime.now().strftime("%Y-%m-%d %H:%M")
+        ))
+
+    conn.commit()
+    conn.close()
+
+    return {
+        "success": True,
+        "message": "Saha tespiti başarıyla kaydedildi ve okulun açık DÖF listesine işlendi.",
+        "risk_id": new_risk_id,
+        "school_id": school_id
+    }
 
 if __name__ == "__main__":
     import uvicorn

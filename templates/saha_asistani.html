@@ -1,0 +1,546 @@
+{% extends "base.html" %}
+
+{% block title %}Saha Sesli & Görsel AI Asistanı — Muratpaşa İlçe MEM{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-6">
+
+    <!-- ==================== ÜST BAŞLIK (CALM EXECUTIVE) ==================== -->
+    <div class="rounded-2xl bg-white p-5 sm:p-6 border border-slate-200 shadow-xs">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="space-y-1.5">
+                <div class="inline-flex items-center gap-2 px-3 py-0.5 rounded-full bg-slate-100 border border-slate-200 text-slate-700 text-xs font-semibold">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                    <span>Mobil Saha Denetim Kılavuzu • Gemini Multimodal</span>
+                </div>
+                <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2.5">
+                    <i class="fa-solid fa-microphone-lines text-slate-700"></i>
+                    <span>Saha Sesli & Görsel AI Asistanı</span>
+                </h1>
+                <p class="text-xs text-slate-500 max-w-2xl leading-relaxed">
+                    Sahada klavyeyle yazı yazmadan; mikrofona konuşup fotoğraf çekerek okul, atölye, Fine-Kinney risk skoru ve resmî MEBBİS DÖF kaydını saniyeler içinde oluşturun.
+                </p>
+            </div>
+            <div class="flex items-center gap-2">
+                <a href="/dinamik-risk-degerlendirme" class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold border border-slate-200 transition flex items-center gap-1.5 shadow-xs">
+                    <i class="fa-solid fa-table-list text-slate-500"></i>
+                    <span>Masaüstü Risk Matrisi</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== SAHA GİRİŞ FORMU: SESLİ VE FOTOĞRAFLI ==================== -->
+    <div class="bg-white rounded-2xl p-5 sm:p-7 border border-slate-200 shadow-xs space-y-5">
+        
+        <div class="border-b border-slate-100 pb-3 flex items-center justify-between">
+            <div>
+                <h2 class="text-sm font-extrabold text-slate-900">Sözlü Tespit ve Olay Yeri Fotoğrafı</h2>
+                <p class="text-xs text-slate-500 mt-0.5">Mikrofonla konuşun veya kameradan fotoğraf ekleyin</p>
+            </div>
+            <span class="text-[11px] font-mono text-slate-400 bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-200">
+                <i class="fa-solid fa-mobile-screen mr-1"></i> Mobil Uyumlu
+            </span>
+        </div>
+
+        <!-- Mikrofon & Ses Kayıt Butonu -->
+        <div class="bg-slate-50 rounded-2xl p-5 border border-slate-200 text-center space-y-3">
+            <div class="flex items-center justify-center">
+                <button type="button" id="voiceRecordBtn" onclick="toggleSpeechRecognition()" class="w-20 h-20 rounded-full bg-slate-900 hover:bg-slate-800 text-white flex flex-col items-center justify-center shadow-md transition-all duration-200 hover:scale-105 active:scale-95 group focus:outline-none">
+                    <i class="fa-solid fa-microphone text-2xl group-hover:scale-110 transition-transform" id="voiceIcon"></i>
+                    <span class="text-[10px] font-bold mt-1 tracking-wider uppercase text-slate-300" id="voiceBtnText">Konuş</span>
+                </button>
+            </div>
+            
+            <div id="voiceStatusMsg" class="text-xs font-semibold text-slate-600 flex items-center justify-center gap-1.5">
+                <i class="fa-solid fa-circle-info text-slate-400"></i>
+                <span>Butona basıp konuşun: <em>"Şimdi Tez-Tur Meslek'te mutfak atölyesindeyim, duvarda fayanslar dökülmüş..."</em></span>
+            </div>
+
+            <!-- Canlı Dinleme İpuçları -->
+            <div id="liveListeningIndicator" class="hidden py-1">
+                <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-50 border border-rose-200 text-rose-700 text-xs font-bold animate-pulse">
+                    <span class="w-2 h-2 rounded-full bg-rose-600"></span>
+                    <span>Sizi Dinliyorum... Konuşabilirsiniz</span>
+                </span>
+            </div>
+        </div>
+
+        <!-- Yazıya Dökülen Metin (Transkript) -->
+        <div class="space-y-1.5">
+            <div class="flex items-center justify-between">
+                <label class="block text-xs font-bold text-slate-700">
+                    Saha Tespiti (Sesli Metin / Klavyeyle Düzenlenebilir):
+                </label>
+                <button type="button" onclick="clearTranscript()" class="text-[11px] text-slate-400 hover:text-slate-600">
+                    Temizle
+                </button>
+            </div>
+            <textarea id="fieldTranscript" rows="3" placeholder="Mikrofona basarak konuşun veya doğrudan buraya yazınız. Örn: 'Gazi Anadolu Lisesi kazan dairesinde emniyet ventili su akıtıyor, basınç göstergesi arızalı...'" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs text-slate-800 focus:bg-white focus:border-slate-400 focus:outline-none transition leading-relaxed"></textarea>
+        </div>
+
+        <!-- Fotoğraf / Kamera Girişi -->
+        <div class="space-y-2">
+            <label class="block text-xs font-bold text-slate-700">
+                Olay Yeri Fotoğrafı (İsteğe Bağlı):
+            </label>
+            
+            <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                <label class="cursor-pointer inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold border border-slate-200 transition shadow-xs">
+                    <i class="fa-solid fa-camera text-slate-500"></i>
+                    <span>Fotoğraf Çek / Galeriden Seç</span>
+                    <input type="file" id="cameraInput" accept="image/*" capture="environment" onchange="handleImageSelected(this)" class="hidden">
+                </label>
+
+                <div id="photoPreviewContainer" class="hidden flex items-center gap-2 p-1.5 bg-slate-50 border border-slate-200 rounded-xl">
+                    <img id="photoPreviewImg" src="" alt="Önizleme" class="w-12 h-12 rounded-lg object-cover border border-slate-300">
+                    <div class="text-[11px] pr-2">
+                        <div id="photoFileName" class="font-bold text-slate-800 truncate max-w-xs">foto.jpg</div>
+                        <button type="button" onclick="removePhoto()" class="text-rose-600 hover:text-rose-800 font-semibold text-[10px]">
+                            Kaldır
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analiz Butonu -->
+        <div class="pt-2">
+            <button type="button" id="btnAnalyze" onclick="runAiFieldInspection()" class="w-full py-3.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs shadow-md transition flex items-center justify-center gap-2">
+                <i class="fa-solid fa-wand-magic-sparkles text-slate-300"></i>
+                <span id="analyzeBtnText">Yapay Zeka ile Analiz Et & DÖF Çıkar</span>
+            </button>
+        </div>
+
+    </div>
+
+    <!-- ==================== YÜKLENİYOR PROGRESS BARI ==================== -->
+    <div id="loadingBox" class="hidden bg-white rounded-2xl p-8 border border-slate-200 shadow-xs text-center space-y-3">
+        <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-700 flex items-center justify-center text-xl mx-auto animate-spin">
+            <i class="fa-solid fa-spinner"></i>
+        </div>
+        <h4 class="text-sm font-extrabold text-slate-900">Gemini Multimodal Analiz Ediyor...</h4>
+        <p class="text-xs text-slate-500 max-w-md mx-auto">
+            Sesli beyan ve olay yeri fotoğrafı taranıyor: Okul ve atölye eşleştiriliyor, Fine-Kinney risk puanı hesaplanıyor, MEBBİS DÖF metni hazırlanıyor.
+        </p>
+    </div>
+
+    <!-- ==================== SAHA AKILLI KARTI (SONUÇLAR) ==================== -->
+    <div id="resultCard" class="hidden bg-white rounded-2xl p-6 sm:p-7 border border-slate-200 shadow-xs space-y-5 animate-in fade-in duration-200">
+        
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
+            <div>
+                <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Yapay Zeka Saha Değerlendirmesi</span>
+                <h3 class="text-base sm:text-lg font-extrabold text-slate-900 flex items-center gap-2 mt-0.5" id="resSchoolTitle">
+                    <i class="fa-solid fa-school text-slate-600"></i>
+                    <span id="resSchoolName">Tez-Tur Turizm MTAL</span>
+                </h3>
+            </div>
+            
+            <div class="flex items-center gap-2 flex-wrap">
+                <span id="resWorkshopBadge" class="px-3 py-1 rounded-lg text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                    Mutfak Atölyesi
+                </span>
+                <span id="resOdenekBadge" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                    2024/38 Kapsamında
+                </span>
+            </div>
+        </div>
+
+        <!-- Okul Eşleşmesi Dropdown (Gerekirse Değiştirme) -->
+        <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+            <div class="text-slate-600 font-semibold flex items-center gap-1.5">
+                <i class="fa-solid fa-circle-check text-emerald-600"></i>
+                <span>Eşleşen Kurum:</span>
+            </div>
+            <select id="selectSchoolOverride" class="bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs font-bold text-slate-800 focus:outline-none flex-1 max-w-md">
+                {% for sc in all_schools %}
+                <option value="{{ sc.id }}">{{ sc.kurum_kodu }} — {{ sc.kurum_adi }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Tehlike & Olası Senaryo -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
+                <div class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Tehlike Kaynağı:</div>
+                <div id="resHazardSource" class="text-xs font-bold text-slate-900 leading-snug">Duvarda dökülen fayans kaplamalar</div>
+            </div>
+            <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
+                <div class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Olası Risk & Zarar Senaryosu:</div>
+                <div id="resRiskScenario" class="text-xs text-slate-700 leading-snug">Kesilme ve hijyen riski</div>
+            </div>
+        </div>
+
+        <!-- Fine-Kinney Skor Kutusu -->
+        <div class="p-4 rounded-xl bg-slate-100 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div class="space-y-1">
+                <div class="text-[10px] font-extrabold uppercase tracking-wider text-slate-500">Fine-Kinney Risk Skoru (O × F × Ş)</div>
+                <div class="text-xs font-mono text-slate-700 font-semibold" id="resScoreFormula">
+                    O: 6.0 • F: 6.0 • Ş: 3.0
+                </div>
+                <div id="resLevelLabel" class="text-xs font-extrabold text-slate-900">
+                    Önemli Risk / DÖF Başlatılmalı (70 - 200)
+                </div>
+            </div>
+            <div class="text-3xl sm:text-4xl font-black font-mono text-slate-900 tracking-tight" id="resScoreVal">
+                108.0
+            </div>
+        </div>
+
+        <!-- MEBBİS DÖF Metni & Kopyalama -->
+        <div class="space-y-2">
+            <div class="flex items-center justify-between text-xs font-bold text-slate-700">
+                <span class="flex items-center gap-1.5">
+                    <i class="fa-solid fa-file-signature text-slate-500"></i>
+                    <span>MEBBİS İSG Modülü DÖF Metni (Hazır Resmî İfade):</span>
+                </span>
+                <button type="button" onclick="copyMebbisText()" class="text-slate-700 hover:text-slate-900 font-bold text-[11px] flex items-center gap-1">
+                    <i class="fa-regular fa-copy"></i>
+                    <span>Metni Kopyala</span>
+                </button>
+            </div>
+            <textarea id="resMebbisText" rows="4" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-xs font-mono text-slate-800 leading-relaxed focus:bg-white focus:outline-none"></textarea>
+            
+            <div class="flex flex-wrap items-center justify-between text-[11px] text-slate-500 pt-1">
+                <div>MEBBİS Kodu: <strong class="font-mono text-slate-800" id="resMebbisCode">İSG-MUT-04</strong></div>
+                <div>Dayanak: <span class="font-semibold text-slate-700" id="resMevzuat">İş Ekipmanları Yönetmeliği</span></div>
+                <div>Termin: <strong class="font-mono text-slate-800" id="resTerminDate">2026-11-23</strong> (<span id="resTerminDays">15</span> Gün)</div>
+            </div>
+        </div>
+
+        <!-- Fotoğraf Görsel Notu (Varsa) -->
+        <div id="resVisualNoteBox" class="hidden p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-600">
+            <span class="font-bold text-slate-800"><i class="fa-solid fa-camera mr-1 text-slate-500"></i> Görsel İnceleme:</span>
+            <span id="resVisualNoteText">Fotoğraftaki hasar onaylandı.</span>
+        </div>
+
+        <!-- Aksiyon Butonları -->
+        <div class="pt-3 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <button type="button" onclick="resetInspectionForm()" class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold border border-slate-200 transition">
+                <i class="fa-solid fa-rotate-left mr-1"></i> Yeni Tespit Yap
+            </button>
+
+            <button type="button" id="btnSaveDof" onclick="saveFieldDofRecord()" class="w-full sm:w-auto px-6 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs shadow-md transition flex items-center justify-center gap-2">
+                <i class="fa-solid fa-floppy-disk text-slate-300"></i>
+                <span id="saveBtnText">Veritabanına Kaydet & DÖF'ü Aç</span>
+            </button>
+        </div>
+
+        <!-- Başarı Bildirimi -->
+        <div id="saveSuccessAlert" class="hidden p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs space-y-1">
+            <div class="font-bold flex items-center gap-1.5 text-emerald-800">
+                <i class="fa-solid fa-circle-check text-emerald-600"></i>
+                <span>DÖF Kaydı Başarıyla Oluşturuldu!</span>
+            </div>
+            <p id="saveSuccessMsg">Risk değerlendirmesi veritabanına işlendi ve açık DÖF takip listesine eklendi.</p>
+            <div class="pt-1">
+                <a id="saveSchoolLink" href="#" class="font-bold text-emerald-700 hover:underline">
+                    Okulun 360° Masasına Git →
+                </a>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let speechRecognition = null;
+    let isListening = false;
+    let selectedImageFile = null;
+    let lastAnalysisResult = null;
+
+    // Web Speech API Kurulumu (Türkçe Destekli)
+    function initSpeech() {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognition) {
+            document.getElementById('voiceStatusMsg').innerHTML = 
+                '<span class="text-amber-700 font-semibold"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Tarayıcınız ses tanımayı desteklemiyor; klavye ile yazabilirsiniz.</span>';
+            return;
+        }
+
+        speechRecognition = new SpeechRecognition();
+        speechRecognition.continuous = false;
+        speechRecognition.interimResults = true;
+        speechRecognition.lang = 'tr-TR';
+
+        speechRecognition.onstart = () => {
+            isListening = true;
+            document.getElementById('liveListeningIndicator').classList.remove('hidden');
+            document.getElementById('voiceIcon').className = 'fa-solid fa-waveform-lines text-2xl text-rose-400 animate-bounce';
+            document.getElementById('voiceBtnText').innerText = 'Dinliyor';
+        };
+
+        speechRecognition.onresult = (event) => {
+            let transcript = '';
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+                transcript += event.results[i][0].transcript;
+            }
+            const textarea = document.getElementById('fieldTranscript');
+            if (transcript.trim()) {
+                textarea.value = transcript;
+            }
+        };
+
+        speechRecognition.onerror = (event) => {
+            console.warn('Ses hatası:', event.error);
+            stopListening();
+        };
+
+        speechRecognition.onend = () => {
+            stopListening();
+        };
+    }
+
+    function toggleSpeechRecognition() {
+        if (!speechRecognition) {
+            initSpeech();
+        }
+        if (!speechRecognition) return;
+
+        if (isListening) {
+            speechRecognition.stop();
+            stopListening();
+        } else {
+            try {
+                speechRecognition.start();
+            } catch (err) {
+                console.error(err);
+            }
+        }
+    }
+
+    function stopListening() {
+        isListening = false;
+        document.getElementById('liveListeningIndicator').classList.add('hidden');
+        document.getElementById('voiceIcon').className = 'fa-solid fa-microphone text-2xl group-hover:scale-110 transition-transform';
+        document.getElementById('voiceBtnText').innerText = 'Konuş';
+    }
+
+    function clearTranscript() {
+        document.getElementById('fieldTranscript').value = '';
+    }
+
+    // Fotoğraf Seçimi
+    function handleImageSelected(input) {
+        if (input.files && input.files[0]) {
+            selectedImageFile = input.files[0];
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                document.getElementById('photoPreviewImg').src = e.target.result;
+                document.getElementById('photoFileName').innerText = selectedImageFile.name;
+                document.getElementById('photoPreviewContainer').classList.remove('hidden');
+            };
+            reader.readAsDataURL(selectedImageFile);
+        }
+    }
+
+    function removePhoto() {
+        selectedImageFile = null;
+        document.getElementById('cameraInput').value = '';
+        document.getElementById('photoPreviewContainer').classList.add('hidden');
+    }
+
+    // AI ile Analiz Et
+    async function runAiFieldInspection() {
+        const text = document.getElementById('fieldTranscript').value.trim();
+        if (!text) {
+            alert('Lütfen mikrofona konuşarak veya metin alanına yazarak tespiti belirtiniz.');
+            return;
+        }
+
+        const btn = document.getElementById('btnAnalyze');
+        const btnText = document.getElementById('analyzeBtnText');
+        btn.disabled = true;
+        btnText.innerText = 'Analiz Ediliyor...';
+
+        document.getElementById('loadingBox').classList.remove('hidden');
+        document.getElementById('resultCard').classList.add('hidden');
+        document.getElementById('saveSuccessAlert').classList.add('hidden');
+
+        const formData = new FormData();
+        formData.append('transcript', text);
+        if (selectedImageFile) {
+            formData.append('photo', selectedImageFile);
+        }
+
+        try {
+            const resp = await fetch('/api/ai/field-voice-inspect', {
+                method: 'POST',
+                body: formData
+            });
+            const res = await resp.json();
+
+            if (res.success && res.data) {
+                lastAnalysisResult = res.data;
+                lastAnalysisResult.photo_url = res.photo_url || null;
+                renderAnalysisResult(res.data);
+            } else {
+                alert('Analiz başarısız: ' + (res.error || 'Bilinmeyen hata'));
+            }
+        } catch (e) {
+            alert('Bağlantı hatası: ' + e.message);
+        } finally {
+            btn.disabled = false;
+            btnText.innerText = 'Yapay Zeka ile Analiz Et & DÖF Çıkar';
+            document.getElementById('loadingBox').classList.add('hidden');
+        }
+    }
+
+    function renderAnalysisResult(d) {
+        const card = document.getElementById('resultCard');
+        card.classList.remove('hidden');
+
+        // Okul Bilgisi
+        const matched = d.matched_school;
+        if (matched) {
+            document.getElementById('resSchoolName').innerText = `${matched.kurum_adi} (${matched.kurum_kodu})`;
+            document.getElementById('selectSchoolOverride').value = matched.id;
+        } else {
+            document.getElementById('resSchoolName').innerText = d.school_name_detected || 'Okul Belirtilmedi';
+        }
+
+        // Birim / Atölye
+        document.getElementById('resWorkshopBadge').innerText = d.unit_or_workshop || 'Genel Saha';
+
+        // Ödenek Rozeti
+        const odenek = document.getElementById('resOdenekBadge');
+        if (d.odenek_talep_kapsaminda_mi) {
+            odenek.innerText = '2024/38 Bakanlık Ödenek Kapsamında';
+            odenek.className = 'px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-900 text-white border border-slate-800';
+        } else {
+            odenek.innerText = 'Okul Aile Birliği / İşletme Bütçesi';
+            odenek.className = 'px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200';
+        }
+
+        // Tehlike & Senaryo
+        document.getElementById('resHazardSource').innerText = d.tehlike_kaynagi || '';
+        document.getElementById('resRiskScenario').innerText = d.risk_senaryosu || '';
+
+        // Fine-Kinney
+        const fk = d.fine_kinney || {};
+        document.getElementById('resScoreFormula').innerText = `O: ${fk.olasilik || 1} • F: ${fk.frekans || 1} • Ş: ${fk.siddet || 1}`;
+        document.getElementById('resLevelLabel').innerText = fk.seviye || 'Önemli Risk';
+        document.getElementById('resScoreVal').innerText = (fk.skor || 0).toFixed(1);
+
+        // MEBBİS DÖF Metni
+        document.getElementById('resMebbisText').value = d.mebbis_dof_aciklama_metni || '';
+        document.getElementById('resMebbisCode').innerText = d.mebbis_kutuphane_kodu || 'İSG-GENEL-01';
+        document.getElementById('resMevzuat').innerText = d.dayanak_mevzuat || '6331 sayılı Kanun';
+        document.getElementById('resTerminDate').innerText = d.termin_tarihi || '-';
+        document.getElementById('resTerminDays').innerText = d.termin_gun || 15;
+
+        // Görsel Not
+        const vBox = document.getElementById('resVisualNoteBox');
+        if (d.gorsel_analiz_notu) {
+            document.getElementById('resVisualNoteText').innerText = d.gorsel_analiz_notu;
+            vBox.classList.remove('hidden');
+        } else {
+            vBox.classList.add('hidden');
+        }
+
+        // Aşağıya yumuşak kaydır
+        card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function copyMebbisText() {
+        const text = document.getElementById('resMebbisText').value;
+        navigator.clipboard.writeText(text).then(() => {
+            alert('MEBBİS DÖF Metni panoya kopyalandı! Doğrudan MEBBİS İSG modülüne yapıştırabilirsiniz.');
+        });
+    }
+
+    // Veritabanına DÖF Olarak Kaydet
+    async function saveFieldDofRecord() {
+        if (!lastAnalysisResult) {
+            alert('Lütfen önce analiz yapınız.');
+            return;
+        }
+
+        const selectedSchoolId = document.getElementById('selectSchoolOverride').value;
+        if (!selectedSchoolId) {
+            alert('Lütfen geçerli bir okul seçiniz.');
+            return;
+        }
+
+        const btn = document.getElementById('btnSaveDof');
+        const btnText = document.getElementById('saveBtnText');
+        btn.disabled = true;
+        btnText.innerText = 'Kaydediliyor...';
+
+        const fk = lastAnalysisResult.fine_kinney || {};
+
+        const payload = {
+            school_id: parseInt(selectedSchoolId),
+            kontrol_edilen_birim: lastAnalysisResult.unit_or_workshop || 'Genel Saha',
+            bolum_unite: lastAnalysisResult.bolum_unite_kategori || 'ATOLYE_LABORATUVAR',
+            meslek_alani_veya_atolye_adi: lastAnalysisResult.unit_or_workshop || '',
+            tehlike_kaynagi: lastAnalysisResult.tehlike_kaynagi || '',
+            olasi_tehlike_ve_risk_senaryosu: lastAnalysisResult.risk_senaryosu || '',
+            degerlendirme_metodu: 'FINE_KINNEY',
+            olasilik: fk.olasilik || 6.0,
+            frekans: fk.frekans || 6.0,
+            siddet: fk.siddet || 3.0,
+            risk_skoru: fk.skor || 108.0,
+            risk_seviyesi: fk.seviye || 'Önemli Risk',
+            alinan_onlemler: 'Saha denetiminde sözlü uyarı yapıldı, DÖF başlatıldı.',
+            alinmasi_gereken_dof_onlem: document.getElementById('resMebbisText').value,
+            dayanak_mevzuat: lastAnalysisResult.dayanak_mevzuat || '6331 s. Kanun',
+            mebbis_kutuphane_kodu: lastAnalysisResult.mebbis_kutuphane_kodu || 'İSG-SAHA',
+            mebbis_dof_aciklama_metni: document.getElementById('resMebbisText').value,
+            odenek_talep_kapsaminda_mi: lastAnalysisResult.odenek_talep_kapsaminda_mi ? 1 : 0,
+            termin_tarihi: lastAnalysisResult.termin_tarihi,
+            sorumlular: lastAnalysisResult.sorumlular || 'Okul Yönetimi',
+            photo_url: lastAnalysisResult.photo_url || null
+        };
+
+        try {
+            const resp = await fetch('/api/ai/field-save-dof', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const res = await resp.json();
+
+            if (res.success) {
+                const alertBox = document.getElementById('saveSuccessAlert');
+                alertBox.classList.remove('hidden');
+                document.getElementById('saveSuccessMsg').innerText = res.message || 'DÖF başarıyla kaydedildi.';
+                const link = document.getElementById('saveSchoolLink');
+                link.href = `/okul/${selectedSchoolId}#riskTab`;
+                link.innerText = `${document.getElementById('resSchoolName').innerText} — 360° Masasına Git →`;
+                btn.classList.add('hidden');
+                alertBox.scrollIntoView({ behavior: 'smooth' });
+            } else {
+                alert('Kaydetme hatası: ' + (res.error || 'Bilinmeyen hata'));
+                btn.disabled = false;
+                btnText.innerText = 'Veritabanına Kaydet & DÖF\'ü Aç';
+            }
+        } catch (e) {
+            alert('Kayıt bağlantı hatası: ' + e.message);
+            btn.disabled = false;
+            btnText.innerText = 'Veritabanına Kaydet & DÖF\'ü Aç';
+        }
+    }
+
+    function resetInspectionForm() {
+        document.getElementById('fieldTranscript').value = '';
+        removePhoto();
+        document.getElementById('resultCard').classList.add('hidden');
+        document.getElementById('saveSuccessAlert').classList.add('hidden');
+        document.getElementById('btnSaveDof').classList.remove('hidden');
+        document.getElementById('saveBtnText').innerText = 'Veritabanına Kaydet & DÖF\'ü Aç';
+        document.getElementById('btnSaveDof').disabled = false;
+        lastAnalysisResult = null;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Sayfa Yüklendiğinde Ses Modülünü Hazırla
+    window.addEventListener('DOMContentLoaded', () => {
+        initSpeech();
+    });
+</script>
+{% endblock %}
