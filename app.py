@@ -1017,6 +1017,55 @@ def risk_alarms(request: Request):
         "active_page": "risks"
     })
 
+@app.get("/export/periyodik-muayeneler")
+def export_periodic_controls(request: Request):
+    user = get_current_user(request)
+    if not user:
+        return RedirectResponse("/login", status_code=303)
+
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT s.kurum_kodu, s.kurum_adi, s.kurum_statusu,
+               p.ekipman_turu, p.son_kontrol_tarihi, p.sonraki_kontrol_tarihi,
+               p.kontrol_yapan_kurum, p.rapor_sonucu, p.alarm_seviyesi, p.notlar
+        FROM periodic_controls p
+        JOIN schools s ON p.school_id = s.id
+        ORDER BY 
+            CASE p.alarm_seviyesi 
+                WHEN 'Suresi Gecmis' THEN 1 
+                WHEN 'Yaklasiyor (30 Gun)' THEN 2 
+                ELSE 3 
+            END,
+            p.sonraki_kontrol_tarihi ASC
+    """)
+    rows = cursor.fetchall()
+    conn.close()
+
+    output = io.StringIO()
+    output.write('\ufeff')
+    writer = csv.writer(output, delimiter=';')
+    writer.writerow([
+        "Kurum Kodu", "Kurum Adı", "Statü", "Cihaz / Ekipman Türü",
+        "Son Muayene Tarihi", "Sonraki Muayene Tarihi", "Kontrol Yapan Kurum",
+        "Rapor Sonucu", "Alarm Seviyesi", "Notlar / Açıklama"
+    ])
+    for r in rows:
+        alarm_text = "SÜRESİ GEÇMİŞ (KRİTİK)" if r["alarm_seviyesi"] == "Suresi Gecmis" else ("YAKLAŞIYOR (30 GÜN)" if r["alarm_seviyesi"] == "Yaklasiyor (30 Gun)" else "GEÇERLİ")
+        writer.writerow([
+            r["kurum_kodu"], r["kurum_adi"], r["kurum_statusu"], r["ekipman_turu"],
+            r["son_kontrol_tarihi"], r["sonraki_kontrol_tarihi"], r["kontrol_yapan_kurum"] or "",
+            r["rapor_sonucu"] or "", alarm_text, r["notlar"] or ""
+        ])
+
+    today_str = datetime.now().strftime("%Y%m%d")
+    filename = f"Muratpasa_Hayati_Periyodik_Muayene_Takvimi_{today_str}.csv"
+    return Response(
+        content=output.getvalue(),
+        media_type="text/csv; charset=utf-8",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )
+
 # ----------------- EXCEL EXPORT (CSV / UTF-8 BOM) -----------------
 
 @app.get("/export/excel")

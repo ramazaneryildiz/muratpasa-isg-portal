@@ -201,67 +201,83 @@
                 </div>
             </div>
 
-            <!-- Menü Linkleri (4 Temel Hub - Sade ve Odaklı) -->
+            <!-- Menü Linkleri (YALIN ÇEKİRDEK: 3 TEMEL İSG SÜTUNU) -->
             <nav class="flex-1 px-3 py-3 space-y-4 overflow-y-auto">
                 
-                <!-- HUB 1: GENEL BAKIŞ & ALARMLAR -->
+                <!-- GENEL BAKIŞ & PORTFÖY -->
                 <div>
                     <div class="px-3 mb-1 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
-                        Genel Bakış & Alarmlar
+                        Genel Bakış
                     </div>
                     <div class="space-y-0.5">
                         <a href="/" class="sidebar-item {% if active_page == 'dashboard' %}active{% endif %}">
                             <i class="fa-solid fa-chart-pie w-4 text-center text-blue-400"></i>
                             <span>İlçe İSG Durum Paneli</span>
                         </a>
-                        <a href="/risk-alarmlari" class="sidebar-item {% if active_page == 'risks' %}active{% endif %}">
-                            <i class="fa-solid fa-bell w-4 text-center text-rose-400"></i>
-                            <span class="text-rose-200 font-semibold">Kritik Muayene Alarmları</span>
-                        </a>
-                    </div>
-                </div>
-
-                <!-- HUB 2: OKUL & SAHA İŞLEMLERİ (360° OPERASYON) -->
-                <div>
-                    <div class="px-3 mb-1 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
-                        Okul & Saha İşlemleri
-                    </div>
-                    <div class="space-y-0.5">
                         <a href="/okullar" class="sidebar-item {% if active_page == 'schools' %}active{% endif %}">
                             <i class="fa-solid fa-school w-4 text-center text-indigo-400"></i>
                             <span>360° Okul Masası (268 Kurum)</span>
                         </a>
-                        <a href="/dinamik-risk-degerlendirme" class="sidebar-item {% if active_page == 'dynamic_risk' %}active{% endif %}">
-                            <i class="fa-solid fa-calculator w-4 text-center text-teal-400"></i>
-                            <span>Saha Risk Analizi & MEBBİS DÖF</span>
+                    </div>
+                </div>
+
+                <!-- 1. PERİYODİK KONTROLLER (Hayati Muayene Takvimi) -->
+                <div>
+                    <div class="px-3 mb-1 text-[10px] font-extrabold uppercase tracking-wider text-rose-400 flex items-center justify-between">
+                        <span>1. PERİYODİK KONTROLLER</span>
+                        <i class="fa-solid fa-wrench text-[9px]"></i>
+                    </div>
+                    <div class="space-y-0.5">
+                        <a href="/risk-alarmlari" class="sidebar-item {% if active_page == 'risks' %}active{% endif %}">
+                            <i class="fa-solid fa-bell w-4 text-center text-rose-400"></i>
+                            <span class="text-rose-200 font-semibold">Hayati Muayene Takvimi</span>
                         </a>
-                        <a href="/ai-veri-aktarimi" class="sidebar-item {% if active_page == 'ai_ingestion' %}active{% endif %}">
-                            <i class="fa-solid fa-cloud-arrow-up w-4 text-center text-purple-400"></i>
-                            <span>MEBBİS & Belge Yükleme</span>
-                        </a>
-                        <a href="/dof-takip" class="sidebar-item {% if active_page == 'dof_takip' %}active{% endif %}">
-                            <i class="fa-solid fa-clock-rotate-left w-4 text-center text-amber-400"></i>
-                            <span>DÖF & Termin Takip</span>
+                        <a href="/export/periyodik-muayeneler" class="sidebar-item">
+                            <i class="fa-solid fa-file-excel w-4 text-center text-emerald-400"></i>
+                            <span>Amir Listesi İndir (Excel)</span>
                         </a>
                     </div>
                 </div>
 
-                <!-- HUB 3: ACİL DURUM & MEVZUAT -->
+                <!-- 2. SAHA RİSKLERİ & DÖF (Okulun Gerçek Arızaları) -->
                 <div>
-                    <div class="px-3 mb-1 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
-                        Acil Durum & Mevzuat
+                    <div class="px-3 mb-1 text-[10px] font-extrabold uppercase tracking-wider text-amber-400 flex items-center justify-between">
+                        <span>2. SAHA RİSKLERİ & DÖF</span>
+                        <i class="fa-solid fa-triangle-exclamation text-[9px]"></i>
                     </div>
                     <div class="space-y-0.5">
+                        <a href="/dinamik-risk-degerlendirme" class="sidebar-item {% if active_page == 'dynamic_risk' %}active{% endif %}">
+                            <i class="fa-solid fa-calculator w-4 text-center text-amber-400"></i>
+                            <span>Saha Risk Analizi & MEBBİS DÖF</span>
+                        </a>
+                        <a href="/ai-veri-aktarimi" class="sidebar-item {% if active_page == 'ai_ingestion' %}active{% endif %}">
+                            <i class="fa-solid fa-camera w-4 text-center text-purple-400"></i>
+                            <span>Fotoğraf & Belge Yükleme</span>
+                        </a>
+                        <a href="/dof-takip" class="sidebar-item {% if active_page == 'dof_takip' %}active{% endif %}">
+                            <i class="fa-solid fa-clock-rotate-left w-4 text-center text-teal-400"></i>
+                            <span>Açık DÖF & Termin Takibi</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 3. ACİL DURUM & EVRAK ARŞİVİ -->
+                <div>
+                    <div class="px-3 mb-1 text-[10px] font-extrabold uppercase tracking-wider text-blue-400 flex items-center justify-between">
+                        <span>3. ACİL DURUM & EVRAK</span>
+                        <i class="fa-solid fa-folder-closed text-[9px]"></i>
+                    </div>
+                    <div class="space-y-0.5">
+                        <a href="/adep-yonerge-motoru" class="sidebar-item {% if active_page == 'adep' %}active{% endif %}">
+                            <i class="fa-solid fa-file-shield w-4 text-center text-blue-400"></i>
+                            <span>ADEP & Tatbikat Motoru</span>
+                        </a>
                         <a href="/kriz-yonetimi" class="sidebar-item {% if active_page == 'crisis' %}active{% endif %}">
                             <i class="fa-solid fa-kit-medical w-4 text-center text-rose-400"></i>
-                            <span>İş Kazası & Olay Bildirimi</span>
-                        </a>
-                        <a href="/adep-yonerge-motoru" class="sidebar-item {% if active_page == 'adep' %}active{% endif %}">
-                            <i class="fa-solid fa-file-shield w-4 text-center text-indigo-400"></i>
-                            <span>ADEP & Yönerge Üretici</span>
+                            <span>İş Kazası & Ramak Kala</span>
                         </a>
                         <a href="/dokuman-kutuphanesi" class="sidebar-item {% if active_page == 'library' %}active{% endif %}">
-                            <i class="fa-solid fa-folder-open w-4 text-center text-blue-400"></i>
+                            <i class="fa-solid fa-folder-open w-4 text-center text-emerald-400"></i>
                             <span>Resmî Doküman Kütüphanesi</span>
                         </a>
                     </div>
@@ -296,7 +312,6 @@
                             <span>Okul Kolay Girişi (Ayrı Sekme)</span>
                         </a>
                     </div>
-                </div>
                 </div>
 
             </nav>
