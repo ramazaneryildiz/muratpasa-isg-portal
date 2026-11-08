@@ -2931,6 +2931,381 @@ def trigger_drive_backup(request: Request, webhook_url: Optional[str] = Form(Non
         print(f"Drive backup exception: {e}")
         return RedirectResponse("/kullanicilar?error=drive_backup_failed", status_code=303)
 
+# ==================== MODÜL 7: KULLANICI GERİ BİLDİRİM, İSTEK HAVUZU VE AI GELİŞTİRİCİ ASİSTANI ====================
+
+@app.post("/api/feedback/submit")
+async def api_submit_feedback(request: Request):
+    """Kullanıcının ilettiği geliştirme/şablon isteğini Gemini AI ile analiz eder ve veritabanına kaydeder."""
+    body = await request.json()
+    kurum_kodu = (body.get("kurum_kodu") or "").strip()
+    gonderen_ad_soyad = (body.get("gonderen_ad_soyad") or "").strip()
+    unvan = (body.get("unvan") or "").strip()
+    iletisim_bilgisi = (body.get("iletisim_bilgisi") or "").strip()
+    istek_turu = body.get("istek_turu", "DIGER")
+    talep_basligi = (body.get("talep_basligi") or "").strip()
+    detayli_aciklama = (body.get("detayli_aciklama") or "").strip()
+    ornek_yapi = (body.get("ornek_dokuman_veya_form_yapisi") or "").strip()
+
+    if not talep_basligi or not detayli_aciklama:
+        raise HTTPException(status_code=400, detail="Talep başlığı ve detaylı açıklama zorunludur.")
+
+    conn = get_db()
+    c = conn.cursor()
+
+    school_id = None
+    school_name = ""
+    if kurum_kodu:
+        c.execute("SELECT id, kurum_adi FROM schools WHERE kurum_kodu = ?", (kurum_kodu,))
+        sc = c.fetchone()
+        if sc:
+            school_id = sc["id"]
+            school_name = sc["kurum_adi"]
+
+    # Gemini AI ile Analiz & Task Üretimi
+    ai_analysis = isg_ai.analyze_feedback_request(
+        gonderen_ad_soyad=gonderen_ad_soyad,
+        unvan=unvan,
+        okul_adi=school_name or kurum_kodu,
+        talep_basligi=talep_basligi,
+        detayli_aciklama=detayli_aciklama,
+        ornek_yapi=ornek_yapi
+    )
+
+    ai_prompt_text = json.dumps(ai_analysis, ensure_ascii=False, indent=2)
+    ai_cat = ai_analysis.get("oneri_kategori", istek_turu)
+
+    c.execute("""
+        INSERT INTO feature_requests (
+            kurum_kodu, school_id, gonderen_ad_soyad, unvan, iletisim_bilgisi,
+            istek_turu, talep_basligi, detayli_aciklama, ornek_dokuman_veya_form_yapisi,
+            ai_asistan_ozeti_ve_prompt, ai_oneri_kategori, durum
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'AI_ANALIZ_EDILDI')
+    """, (
+        kurum_kodu, school_id, gonderen_ad_soyad, unvan, iletisim_bilgisi,
+        istek_turu, talep_basligi, detayli_aciklama, ornek_yapi,
+        ai_prompt_text, ai_cat
+    ))
+
+    new_id = c.lastrowid
+    conn.commit()
+    conn.close()
+
+    return {
+        "success": True,
+        "message": "Talebiniz başarıyla iletildi. Yapay zeka asistanı teknik analizi tamamlayıp geliştirici iş listesine ekledi.",
+        "request_id": new_id,
+        "ai_analysis": ai_analysis
+    }
+
+@app.get("/istek-havuzu", response_class=HTMLResponse)
+def feedback_hub_page(request: Request, status: Optional[str] = None):
+    """Geliştirici Yönetim Paneli (Ramazan ERYILDIZ Dev Dashboard)."""
+    user = get_current_user(request)
+    if not user:
+        return RedirectResponse("/login", status_code=303)
+
+    conn = get_db()
+    c = conn.cursor()
+
+    query = """
+        SELECT f.*, s.kurum_adi 
+        FROM feature_requests f
+        LEFT JOIN schools s ON f.school_id = s.id
+    """
+    params = []
+    if status:
+        query += " WHERE f.durum = ?"
+        params.append(status)
+    query += " ORDER BY f.id DESC"
+
+    c.execute(query, tuple(params))
+    requests_list = [dict(r) for r in c.fetchall()]
+
+    c.execute("SELECT COUNT(*) FROM feature_requests")
+    total_reqs = c.fetchone()[0]
+
+    c.execute("SELECT COUNT(*) FROM feature_requests WHERE durum IN ('BEKLEMEDE', 'AI_ANALIZ_EDILDI')")
+    pending_reqs = c.fetchone()[0]
+
+    c.execute("SELECT COUNT(*) FROM feature_requests WHERE durum = 'GELISMEDE'")
+    in_progress = c.fetchone()[0]
+
+    c.execute("SELECT COUNT(*) FROM feature_requests WHERE durum = 'YAYINLANDI'")
+    completed = c.fetchone()[0]
+
+    conn.close()
+
+    return templates.TemplateResponse(request=request, name="feedback_hub.html", context={
+        "user": user,
+        "requests": requests_list,
+        "total_reqs": total_reqs,
+        "pending_reqs": pending_reqs,
+        "in_progress": in_progress,
+        "completed": completed,
+        "current_filter": status,
+        "active_page": "feedback_hub"
+    })
+
+@app.post("/api/feedback/update")
+async def api_update_feedback(request: Request):
+    """Geliştirici tarafından durum ve not güncellemesi."""
+    user = get_current_user(request)
+    if not user or user["role"] not in ["koordinator", "uzman", "admin"]:
+        raise HTTPException(status_code=403, detail="Yetkisiz işlem.")
+
+    body = await request.json()
+    req_id = body.get("id")
+    durum = body.get("durum")
+    gelistirici_notu = body.get("gelistirici_notu")
+
+    if not req_id or not durum:
+        raise HTTPException(status_code=400, detail="Eksik parametre.")
+
+    conn = get_db()
+    c = conn.cursor()
+    c.execute("""
+        UPDATE feature_requests 
+        SET durum = ?, gelistirici_notu = ?, updated_at = CURRENT_TIMESTAMP
+        WHERE id = ?
+    """, (durum, gelistirici_notu, req_id))
+    conn.commit()
+    conn.close()
+
+    return {"success": True, "message": "Talep durumu güncellendi."}
+
+# ==================== MODÜL 8: OKULA, ATÖLYEYE VE BİRİME ÖZGÜ DİNAMİK RİSK DEĞERLENDİRME & MEBBİS KÖPRÜLEME MOTORU ====================
+
+MTAL_WORKSHOP_MODULES = [
+    ("MAKINE_CNC", "Makine ve Tasarım Teknolojisi (Torna, Freze, CNC, Taşlama)"),
+    ("ELEKTRIK_ELEKTRONIK", "Elektrik-Elektronik Teknolojisi (Pano, Bobinaj, Yüksek Gerilim)"),
+    ("MOTORLU_ARACLAR", "Motorlu Araçlar Teknolojisi (Lift, Şasi, Fren Test, Akü Şarj)"),
+    ("METAL_KAYNAK", "Metal Teknolojisi (Elektrik Ark, Gazaltı / TIG Kaynağı, Oksigaz)"),
+    ("TESISAT_IKLIMLENDIRME", "Tesisat Teknolojisi ve İklimlendirme (Kombi, Gaz Tesisatı, Brülör)"),
+    ("BILISIM_AG", "Bilişim Teknolojileri ve Ağ İşletmenliği (Server, Kablaj)"),
+    ("YIYECEK_ICECEK", "Yiyecek İçecek Hizmetleri (Mutfak, Endüstriyel Fırın, Gazlı Ocaklar)"),
+    ("KIMYA_TEKNOLOJISI", "Kimya Teknolojisi (Çeker Ocak, Asit-Baz, Kimyasal Depo)"),
+    ("MOBILYA_IC_MEKAN", "Mobilya ve İç Mekan Tasarımı (Daire Testere, Planya)"),
+    ("KONAKLAMA_SEYAHAT", "Konaklama ve Seyahat Hizmetleri (Kat Hizmetleri, Çamaşırhane)"),
+    ("GUZELLIK_SAC", "Güzellik ve Saç Bakım Hizmetleri (Kimyasal Boyalar, Cihazlar)"),
+    ("ENDUSTRIYEL_OTOMASYON", "Endüstriyel Otomasyon (PLC, Robot Kollar, Pnömatik)")
+]
+
+@app.get("/dinamik-risk-degerlendirme", response_class=HTMLResponse)
+def dynamic_risk_assessment_page(request: Request, school_id: Optional[int] = None):
+    user = get_current_user(request)
+    if not user:
+        return RedirectResponse("/login", status_code=303)
+
+    conn = get_db()
+    c = conn.cursor()
+    c.execute("SELECT id, kurum_kodu, kurum_adi, kademe, tehlike_sinifi FROM schools WHERE is_active_school = 1 ORDER BY kurum_adi ASC")
+    schools = [dict(r) for r in c.fetchall()]
+
+    selected_school = None
+    school_risks = []
+    if school_id:
+        c.execute("SELECT * FROM schools WHERE id = ?", (school_id,))
+        s_row = c.fetchone()
+        if s_row:
+            selected_school = dict(s_row)
+            c.execute("""
+                SELECT * FROM risk_assessments 
+                WHERE school_id = ? 
+                ORDER BY risk_skoru DESC, id DESC
+            """, (school_id,))
+            school_risks = [dict(r) for r in c.fetchall()]
+
+    conn.close()
+
+    return templates.TemplateResponse(request=request, name="dynamic_risk.html", context={
+        "user": user,
+        "schools": schools,
+        "selected_school": selected_school,
+        "school_risks": school_risks,
+        "workshop_modules": MTAL_WORKSHOP_MODULES,
+        "active_page": "dynamic_risk"
+    })
+
+@app.post("/api/risk/evaluate-and-bridge")
+async def api_evaluate_and_bridge(request: Request):
+    """Fine-Kinney veya 5x5 skorunu hesaplar ve MEBBİS köprüleme sihirbazını çalıştırır."""
+    body = await request.json()
+    method = body.get("degerlendirme_metodu", "FINE_KINNEY")
+    olasilik = float(body.get("olasilik") or 1.0)
+    frekans = float(body.get("frekans") or 1.0)
+    siddet = float(body.get("siddet") or 1.0)
+
+    bolum_unite = body.get("bolum_unite", "BINA_GENEL")
+    meslek_alani = body.get("meslek_alani_veya_atolye_adi", "")
+    tehlike_kaynagi = body.get("tehlike_kaynagi", "")
+    risk_senaryosu = body.get("olasi_tehlike_ve_risk_senaryosu", "")
+    mevcut_onlemler = body.get("mevcut_onlemler", "")
+    dof_onlem = body.get("alinmasi_gereken_dof_onlem", "")
+
+    # Hesaplama
+    if method == "FINE_KINNEY":
+        risk_skoru = round(olasilik * frekans * siddet, 1)
+        if risk_skoru < 20:
+            risk_seviyesi = "DUSUK_KABUL_EDILEBILIR"
+            seviye_etiket = "Kabul Edilebilir Risk (< 20)"
+            seviye_renk = "emerald"
+        elif risk_skoru < 70:
+            risk_seviyesi = "ORTA_OLASI"
+            seviye_etiket = "Olası Risk / Gözetim Altında Tutulmalı (20 - 70)"
+            seviye_renk = "amber"
+        elif risk_skoru < 200:
+            risk_seviyesi = "YUKSEK_ONEMLI"
+            seviye_etiket = "Önemli Risk / DÖF Başlatılmalı (70 - 200)"
+            seviye_renk = "orange"
+        elif risk_skoru < 400:
+            risk_seviyesi = "YUKSEK_ACIL"
+            seviye_etiket = "Yüksek Risk / Acil Tedbir Alınmalı (200 - 400)"
+            seviye_renk = "rose"
+        else:
+            risk_seviyesi = "COK_YUKSEK_TOLERANS_EDILEMEZ"
+            seviye_etiket = "Tolerans Edilemez / İşi Durdur (>= 400)"
+            seviye_renk = "red"
+    else:  # 5x5 L Tipi
+        risk_skoru = round(olasilik * siddet, 1)
+        if risk_skoru <= 5:
+            risk_seviyesi = "DUSUK_KABUL_EDILEBILIR"
+            seviye_etiket = "Düşük Risk (1 - 5)"
+            seviye_renk = "emerald"
+        elif risk_skoru <= 12:
+            risk_seviyesi = "ORTA_OLASI"
+            seviye_etiket = "Orta Risk (6 - 12)"
+            seviye_renk = "amber"
+        elif risk_skoru < 20:
+            risk_seviyesi = "YUKSEK_ONEMLI"
+            seviye_etiket = "Yüksek Risk (15 - 19)"
+            seviye_renk = "orange"
+        else:
+            risk_seviyesi = "COK_YUKSEK_TOLERANS_EDILEMEZ"
+            seviye_etiket = "Çok Yüksek Risk (20 - 25)"
+            seviye_renk = "red"
+
+    # MEBBİS Köprüleme Sihirbazı
+    bridge_data = isg_ai.bridge_mebbis_risk(
+        bolum_unite=bolum_unite,
+        meslek_alani_veya_atolye=meslek_alani,
+        tehlike_kaynagi=tehlike_kaynagi,
+        risk_senaryosu=risk_senaryosu,
+        mevcut_onlemler=mevcut_onlemler,
+        dof_onlem=dof_onlem,
+        risk_skoru=risk_skoru,
+        risk_seviyesi=seviye_etiket
+    )
+
+    return {
+        "success": True,
+        "risk_skoru": risk_skoru,
+        "risk_seviyesi": risk_seviyesi,
+        "seviye_etiket": seviye_etiket,
+        "seviye_renk": seviye_renk,
+        "bridge": bridge_data
+    }
+
+@app.post("/api/risk/save")
+async def api_save_risk(request: Request):
+    """Yeni risk değerlendirme kaydını veritabanına ekler."""
+    user = get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Oturum açmanız gerekiyor.")
+
+    body = await request.json()
+    school_id = body.get("school_id")
+    if not school_id:
+        raise HTTPException(status_code=400, detail="Okul seçilmedi.")
+
+    conn = get_db()
+    c = conn.cursor()
+
+    c.execute("""
+        INSERT INTO risk_assessments (
+            school_id, kontrol_edilen_birim, bolum_unite, meslek_alani_veya_atolye_adi,
+            tehlike, tehlike_unsurlari, riskler,
+            degerlendirme_metodu, olasilik, frekans, siddet, risk_skoru, risk_puani, risk_seviyesi,
+            alinan_onlemler, alinmasi_gereken_dof_onlem,
+            dayanak_mevzuat, mebbis_kutuphane_kodu, mebbis_dof_aciklama_metni,
+            odenek_talep_kapsaminda_mi, termin_tarihi, sorumlular, dof_durumu,
+            denetleyen_uzman, ekip_onayi
+        ) VALUES (
+            ?, ?, ?, ?,
+            ?, ?, ?,
+            ?, ?, ?, ?, ?, ?, ?,
+            ?, ?,
+            ?, ?, ?,
+            ?, ?, ?, 'Açık DÖF',
+            ?, 1
+        )
+    """, (
+        school_id,
+        body.get("kontrol_edilen_birim") or body.get("bolum_unite") or "Genel Bina",
+        body.get("bolum_unite"),
+        body.get("meslek_alani_veya_atolye_adi"),
+        body.get("tehlike_kaynagi"),
+        body.get("olasi_tehlike_ve_risk_senaryosu"),
+        body.get("olasi_tehlike_ve_risk_senaryosu"),
+        body.get("degerlendirme_metodu", "FINE_KINNEY"),
+        float(body.get("olasilik") or 1.0),
+        float(body.get("frekans") or 1.0),
+        float(body.get("siddet") or 1.0),
+        float(body.get("risk_skoru") or 0.0),
+        float(body.get("risk_skoru") or 0.0),
+        body.get("risk_seviyesi"),
+        body.get("mevcut_onlemler"),
+        body.get("alinmasi_gereken_dof_onlem"),
+        body.get("dayanak_mevzuat"),
+        body.get("mebbis_kutuphane_kodu"),
+        body.get("mebbis_dof_aciklama_metni"),
+        1 if body.get("odenek_talep_kapsaminda_mi") else 0,
+        body.get("termin_tarihi"),
+        body.get("sorumlular") or "İşveren Vekili (Müdür Yrd.) / İSG Çalışan Temsilcisi",
+        user["full_name"]
+    ))
+
+    new_id = c.lastrowid
+    conn.commit()
+    conn.close()
+
+    return {
+        "success": True,
+        "message": "Risk değerlendirmesi başarıyla kaydedildi.",
+        "risk_id": new_id
+    }
+
+@app.get("/risk-analizi-raporu/{school_id}", response_class=HTMLResponse)
+def print_risk_report_page(request: Request, school_id: int):
+    """6331 sayılı Kanun ve Risk Değerlendirmesi Yönetmeliğine tam uyumlu resmî çıktı ekranı."""
+    user = get_current_user(request)
+    if not user:
+        return RedirectResponse("/login", status_code=303)
+
+    conn = get_db()
+    c = conn.cursor()
+    c.execute("SELECT * FROM schools WHERE id = ?", (school_id,))
+    school = c.fetchone()
+    if not school:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Okul bulunamadı.")
+
+    c.execute("""
+        SELECT * FROM risk_assessments 
+        WHERE school_id = ? 
+        ORDER BY risk_skoru DESC, id ASC
+    """, (school_id,))
+    risks = [dict(r) for r in c.fetchall()]
+    conn.close()
+
+    return templates.TemplateResponse(request=request, name="risk_report_print.html", context={
+        "user": user,
+        "school": dict(school),
+        "risks": risks,
+        "expert_name": "Ramazan ERYILDIZ",
+        "expert_title": "A Sınıfı İş Güvenliği Uzmanı (İlçe MEM İSG Büro)",
+        "today": datetime.now().strftime("%d.%m.%Y")
+    })
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=True)

@@ -304,3 +304,109 @@ Lütfen cevabını verirken:
 4. Yanıtın sonuna "Muratpaşa İlçe İSG Büro Koordinatörlüğü" adına iyi çalışmalar dileyen kısa bir not ekle.
 """
     return call_gemini(system_prompt, json_mode=False)
+
+def analyze_feedback_request(
+    gonderen_ad_soyad: str,
+    unvan: str,
+    okul_adi: str,
+    talep_basligi: str,
+    detayli_aciklama: str,
+    ornek_yapi: str = ""
+) -> dict:
+    """
+    Kullanıcıdan gelen portal geliştirme isteğini analiz ederek,
+    Geliştirici Ramazan ERYILDIZ ve Antigravity IDE için teknik bir sprint task ve mimari prompt üretir.
+    """
+    prompt = f"""
+Sen Muratpaşa İlçe MEM İSG Bilgi Yönetim Portalı Baş Yazılım Mimarı ve AI Eş-Geliştiricisisin.
+Saha kullanıcısından bir geri bildirim ve yeni özellik talebi geldi:
+
+GÖNDEREN: {gonderen_ad_soyad} ({unvan or 'Kullanıcı'})
+KURUM / OKUL: {okul_adi or 'Genel İlçe Kullanıcısı'}
+TALEP BAŞLIĞI: {talep_basligi}
+DETAYLI AÇIKLAMA:
+\"\"\"{detayli_aciklama}\"\"\"
+
+EK ÖRNEK FORM / ŞABLON NOTU:
+\"\"\"{ornek_yapi}\"\"\"
+
+Lütfen bu talebi analiz et ve aşağıdaki JSON şemasına uygun olarak yanıt ver:
+
+JSON Şeması:
+{{
+  "ai_ozeti": "Talebin özeti ve sisteme katacağı kurumsal değer (2-3 cümle)",
+  "oneri_kategori": "YENI_DOKUMAN_SABLONU" | "YENI_VERI_GIRISI_FORMU" | "RAPOR_VE_ICMAL_TALEBI" | "ARAYUZ_KULLANILABILIRLIK" | "MEVZUAT_GUNCELLEME" | "HATA_BILDIRIMI" | "DIGER",
+  "oncelik": "ACIL" | "YUKSEK" | "NORMAL" | "DUSUK",
+  "veritabani_degisikligi_var_mi": true | false,
+  "tahmini_mimari_etki": "Hangi tablolar veya endpoint'ler etkilenir (örn: schools tablosuna alan, yeni template vb.)",
+  "teknik_sprint_promptu": "Antigravity IDE kodlama ajanına doğrudan kopyalanıp verilebilecek, net teknik talimat içeren prompt metni."
+}}
+"""
+    try:
+        raw_json = call_gemini(prompt, json_mode=True)
+        return json.loads(raw_json)
+    except Exception as e:
+        logger.error(f"Feedback AI analizi hatası: {e}")
+        return {
+            "ai_ozeti": f"Kullanıcı talebi kaydedildi: {talep_basligi}",
+            "oneri_kategori": "DIGER",
+            "oncelik": "NORMAL",
+            "veritabani_degisikligi_var_mi": False,
+            "tahmini_mimari_etki": "Belirtilmedi",
+            "teknik_sprint_promptu": f"Kullanıcı '{talep_basligi}' başlıklı bir geliştirme talebinde bulundu: {detayli_aciklama}"
+        }
+
+def bridge_mebbis_risk(
+    bolum_unite: str,
+    meslek_alani_veya_atolye: str,
+    tehlike_kaynagi: str,
+    risk_senaryosu: str,
+    mevcut_onlemler: str,
+    dof_onlem: str,
+    risk_skoru: float,
+    risk_seviyesi: str
+) -> dict:
+    """
+    Sahada tespit edilen teknik riski MEBBİS İSG standart kütüphanesine eşleştirir,
+    MEBBİS'e doğrudan kopyalanacak resmî teknik DÖF metnini ve 2024/38 ödenek kapsamını üretir.
+    """
+    prompt = f"""
+Sen 6331 sayılı İSG Kanunu ve Millî Eğitim Bakanlığı MEBBİS İSG Modülü konusunda uzman A Sınıfı İş Güvenliği Uzmanısın.
+Okul sahasında aşağıdaki risk ve tehlike tespit edildi:
+
+BÖLÜM / ÜNİTE: {bolum_unite}
+ATÖLYE / MESLEK ALANI: {meslek_alani_veya_atolye or 'Genel Bina/Eklenti'}
+TEHLİKE KAYNAĞI: {tehlike_kaynagi}
+OLASI TEHLİKE / RİSK SENARYOSU: {risk_senaryosu}
+MEVCUT ÖNLEMLER: {mevcut_onlemler}
+ALINMASI GEREKEN DÖF ÖNERİSİ: {dof_onlem}
+HESAPLANAN RİSK SKORU: {risk_skoru} ({risk_seviyesi})
+
+GÖREVİN:
+1. MEBBİS İSG Kütüphanesi standart kodu (Örn: İSG-ELK-04, İSG-YNG-02, İSG-MAK-07, İSG-BINA-09 vb.) öner.
+2. MEBBİS DÖF Açıklama Metni: Okul idaresi veya İSG uzmanı tarafından MEBBİS'e doğrudan kopyalanıp yapıştırılacak, mevzuat diliyle yazılmış, resmi ve profesyonel DÖF gerekçe metni hazırla.
+3. İlgili yasal dayanak yönetmelik ve maddesini belirt.
+4. Bu iş MEB 2024/38 sayılı Genelge kapsamında Bakanlıktan genel bütçe ödeneği talep edilecek nitelikte ağır fiziki/tesisat işi midir (true/false)?
+
+JSON Şeması:
+{{
+  "mebbis_kutuphane_kodu": "STANDART-KOD-01",
+  "mebbis_dof_aciklama_metni": "Resmi MEBBİS DÖF metni...",
+  "dayanak_mevzuat": "İlgili yönetmelik ve madde",
+  "odenek_talep_kapsaminda_mi": true | false,
+  "ai_uzman_tavsiyesi": "Sahadaki uygulayıcıya 1 cümlelik pratik uzman tavsiyesi"
+}}
+"""
+    try:
+        raw_json = call_gemini(prompt, json_mode=True)
+        return json.loads(raw_json)
+    except Exception as e:
+        logger.error(f"MEBBİS Bridge AI hatası: {e}")
+        return {
+            "mebbis_kutuphane_kodu": "İSG-GENEL-01",
+            "mebbis_dof_aciklama_metni": f"{tehlike_kaynagi} kaynaklı risk için: {dof_onlem}",
+            "dayanak_mevzuat": "6331 sayılı İş Sağlığı ve Güvenliği Kanunu Madde 4 ve 10",
+            "odenek_talep_kapsaminda_mi": False,
+            "ai_uzman_tavsiyesi": "Tespit edilen uygunsuzluk için ivedilikle DÖF başlatılmalıdır."
+        }
+

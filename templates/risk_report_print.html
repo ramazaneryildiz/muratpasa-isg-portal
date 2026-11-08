@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resmî Risk Değerlendirme Raporu — {{ school.kurum_adi }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @media print {
+            body { font-size: 10pt; background: #fff !important; }
+            .no-print { display: none !important; }
+            .page-break { page-break-after: always; }
+            @page { size: A4 landscape; margin: 12mm; }
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-900 font-sans p-4 sm:p-8">
+
+    <!-- Yazdır Butonu (Yalnızca Ekranda Görünür) -->
+    <div class="no-print max-w-7xl mx-auto mb-6 flex items-center justify-between bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
+        <div class="flex items-center gap-3">
+            <a href="/dinamik-risk-degerlendirme?school_id={{ school.id }}" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition flex items-center gap-1.5">
+                <i class="fa-solid fa-arrow-left"></i> Geri Dön
+            </a>
+            <span class="text-xs font-bold text-slate-500">6331 Sayılı Kanun & MEB Standartlarına Uygun Yazdırma Formatı (Yatay A4)</span>
+        </div>
+        <button onclick="window.print()" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold shadow-md transition flex items-center gap-2">
+            <i class="fa-solid fa-print"></i>
+            <span>Raporu Yazdır / PDF Kaydet</span>
+        </button>
+    </div>
+
+    <!-- RESMÎ RAPOR SAYFASI (YATAY A4 TASARIMI) -->
+    <div class="max-w-7xl mx-auto bg-white p-8 rounded-2xl shadow-sm border border-slate-300 space-y-6">
+
+        <!-- RESMÎ ÜST BİLGİ VE LOGO ALANI -->
+        <div class="border-b-2 border-slate-800 pb-4 flex items-center justify-between">
+            <div class="text-center w-full space-y-1">
+                <div class="text-xs font-extrabold uppercase tracking-widest text-slate-700">T.C. ANTALYA VALİLİĞİ</div>
+                <div class="text-sm font-black uppercase tracking-wider text-slate-900">MURATPAŞA İLÇE MİLLÎ EĞİTİM MÜDÜRLÜĞÜ</div>
+                <div class="text-xs font-extrabold text-indigo-900">İŞ SAĞLIĞI VE GÜVENLİĞİ (İSG) BÜROSU</div>
+                <h1 class="text-base font-black uppercase tracking-tight text-slate-950 pt-2">
+                    KURUM SAHA RİSK DEĞERLENDİRMESİ VE DÖF TUTANAĞI
+                </h1>
+            </div>
+        </div>
+
+        <!-- KURUM KÜNYESİ (BİLGİ TABLOSU) -->
+        <div class="grid grid-cols-4 gap-2 text-xs border border-slate-300 rounded-lg p-3 bg-slate-50">
+            <div>
+                <span class="text-slate-500 font-bold">Kurum Adı:</span>
+                <div class="font-extrabold text-slate-900">{{ school.kurum_adi }}</div>
+            </div>
+            <div>
+                <span class="text-slate-500 font-bold">MEBBİS Kodu:</span>
+                <div class="font-mono font-extrabold text-slate-900">{{ school.kurum_kodu }}</div>
+            </div>
+            <div>
+                <span class="text-slate-500 font-bold">Tehlike Sınıfı & Kademe:</span>
+                <div class="font-bold text-slate-900">{{ school.tehlike_sinifi or 'Az Tehlikeli' }} / {{ school.kademe or 'Genel' }}</div>
+            </div>
+            <div>
+                <span class="text-slate-500 font-bold">Denetim / Rapor Tarihi:</span>
+                <div class="font-mono font-bold text-slate-900">{{ today }}</div>
+            </div>
+        </div>
+
+        <!-- RİSK TABLOSU -->
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-[11px] border-collapse border border-slate-300">
+                <thead>
+                    <tr class="bg-slate-200 text-slate-800 font-black border-b border-slate-400">
+                        <th class="border border-slate-300 p-2 text-center w-8">No</th>
+                        <th class="border border-slate-300 p-2 w-32">Bölüm / Atölye</th>
+                        <th class="border border-slate-300 p-2 w-48">Tehlike Kaynağı</th>
+                        <th class="border border-slate-300 p-2">Olası Tehlike & Risk Senaryosu</th>
+                        <th class="border border-slate-300 p-2 text-center w-10">O</th>
+                        <th class="border border-slate-300 p-2 text-center w-10">F</th>
+                        <th class="border border-slate-300 p-2 text-center w-10">Ş</th>
+                        <th class="border border-slate-300 p-2 text-center w-16">Skor</th>
+                        <th class="border border-slate-300 p-2 w-24">MEBBİS Kodu</th>
+                        <th class="border border-slate-300 p-2">Alınması Gereken DÖF</th>
+                        <th class="border border-slate-300 p-2 w-20">Termin</th>
+                        <th class="border border-slate-300 p-2 w-24">Sorumlu</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in risks %}
+                    <tr class="border-b border-slate-300 hover:bg-slate-50">
+                        <td class="border border-slate-300 p-2 text-center font-mono font-bold">{{ loop.index }}</td>
+                        <td class="border border-slate-300 p-2 font-bold">{{ r.meslek_alani_veya_atolye_adi or r.bolum_unite or r.kontrol_edilen_birim }}</td>
+                        <td class="border border-slate-300 p-2 font-semibold text-slate-900">{{ r.tehlike }}</td>
+                        <td class="border border-slate-300 p-2 text-slate-700 leading-tight">{{ r.tehlike_unsurlari or r.riskler }}</td>
+                        <td class="border border-slate-300 p-2 text-center font-mono">{{ r.olasilik or '-' }}</td>
+                        <td class="border border-slate-300 p-2 text-center font-mono">{{ r.frekans or '-' }}</td>
+                        <td class="border border-slate-300 p-2 text-center font-mono">{{ r.siddet or '-' }}</td>
+                        <td class="border border-slate-300 p-2 text-center font-mono font-black text-slate-900">
+                            {{ r.risk_skoru or r.risk_puani }}
+                        </td>
+                        <td class="border border-slate-300 p-2 font-mono text-[10px] text-indigo-900 font-bold">
+                            {{ r.mebbis_kutuphane_kodu or 'İSG-GENEL-01' }}
+                        </td>
+                        <td class="border border-slate-300 p-2 text-slate-800 leading-tight">
+                            {{ r.alinmasi_gereken_dof_onlem or r.alinan_onlemler }}
+                            {% if r.odenek_talep_kapsaminda_mi %}
+                            <span class="font-bold text-[9px] text-purple-700 block mt-0.5">[2024/38 Bakanlık Ödenek Talepli]</span>
+                            {% endif %}
+                        </td>
+                        <td class="border border-slate-300 p-2 font-mono text-[10px]">{{ r.termin_tarihi or '-' }}</td>
+                        <td class="border border-slate-300 p-2 text-[10px]">{{ r.sorumlular or 'İşveren Vekili' }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="12" class="p-6 text-center text-slate-400 border border-slate-300">
+                            Bu kuruma ait kayıtlı bir risk maddesi bulunamadı.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- HUKUKİ BİLGİLENDİRME NOTU -->
+        <div class="text-[10px] text-slate-500 leading-relaxed border-t border-slate-200 pt-3">
+            * İşbu Saha Risk Değerlendirmesi; 6331 sayılı İş Sağlığı ve Güvenliği Kanunu, İş Sağlığı ve Güvenliği Risk Değerlendirmesi Yönetmeliği ve MEB 2024/38 sayılı Genelge hükümleri uyarınca sahada gerçekleştirilen ortam gözetimi neticesinde tanzim edilmiş olup, tespit edilen uygunsuzluklar MEBBİS İSG modülüne ve DÖF takip kütüğüne işlenmiştir.
+        </div>
+
+        <!-- İMZA SİRKÜSÜ VE ONAY BLOĞU (4 KİŞİLİK RESMÎ HEYET) -->
+        <div class="grid grid-cols-4 gap-4 text-center pt-6 text-xs">
+            <div class="space-y-12">
+                <div>
+                    <div class="font-extrabold text-slate-900">{{ school.mudur_ad_soyad or 'Okul Müdürü' }}</div>
+                    <div class="text-[11px] text-slate-600">İşveren / Okul Müdürü</div>
+                </div>
+                <div class="text-slate-400 text-[10px]">İmza / Mühür</div>
+            </div>
+
+            <div class="space-y-12">
+                <div>
+                    <div class="font-extrabold text-slate-900">{{ school.isveren_vekili_ad_soyad or 'Müdür Yardımcısı' }}</div>
+                    <div class="text-[11px] text-slate-600">İşveren Vekili (İSG Md. Yrd.)</div>
+                </div>
+                <div class="text-slate-400 text-[10px]">İmza</div>
+            </div>
+
+            <div class="space-y-12">
+                <div>
+                    <div class="font-extrabold text-slate-900">Ramazan ERYILDIZ</div>
+                    <div class="text-[11px] text-slate-600">A Sınıfı İş Güvenliği Uzmanı<br><span class="text-[10px] text-slate-400">(Muratpaşa İlçe MEM İSG Büro)</span></div>
+                </div>
+                <div class="text-slate-400 text-[10px]">İmza</div>
+            </div>
+
+            <div class="space-y-12">
+                <div>
+                    <div class="font-extrabold text-slate-900">İSG Çalışan Temsilcisi</div>
+                    <div class="text-[11px] text-slate-600">Çalışan Temsilcisi / Destek Elemanı</div>
+                </div>
+                <div class="text-slate-400 text-[10px]">İmza</div>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>
