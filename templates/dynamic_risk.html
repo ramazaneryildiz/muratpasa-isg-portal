@@ -37,18 +37,31 @@
             <div class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center text-base flex-shrink-0">
                 <i class="fa-solid fa-school"></i>
             </div>
-            <div class="flex-1">
-                <label class="block text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-1">
-                    Risk Değerlendirmesi Yapılacak Kurum:
+            <div class="flex-1 relative">
+                <label class="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500 mb-1 flex items-center justify-between">
+                    <span>Risk Değerlendirmesi Yapılacak Kurum:</span>
+                    <span class="text-[10px] text-blue-600 font-semibold lowercase">anında arama & filtreleme</span>
                 </label>
-                <select id="schoolSelector" onchange="window.location.href='/dinamik-risk-degerlendirme?school_id=' + this.value" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:bg-white focus:border-slate-500 focus:outline-none">
-                    <option value="">-- Okul Seçiniz (268 Kurum) --</option>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                        <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                    </span>
+                    <input type="text" id="schoolSearchInput" list="schoolsDatalist" 
+                           value="{% if selected_school %}{{ selected_school.kurum_kodu }} - {{ selected_school.kurum_adi }}{% endif %}"
+                           placeholder="Kurum kodu veya okul adı yazarak arayın... (Örn: Tez-Tur veya 970151)"
+                           class="w-full pl-9 pr-8 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-800 placeholder-slate-400 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition"
+                           oninput="handleSchoolSelect(this.value)">
+                    {% if selected_school %}
+                    <button type="button" onclick="clearSchoolInput()" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600" title="Temizle">
+                        <i class="fa-solid fa-xmark text-xs"></i>
+                    </button>
+                    {% endif %}
+                </div>
+                <datalist id="schoolsDatalist">
                     {% for sc in schools %}
-                    <option value="{{ sc.id }}" {% if selected_school and selected_school.id == sc.id %}selected{% endif %}>
-                        {{ sc.kurum_kodu }} — {{ sc.kurum_adi }} ({{ sc.kademe or 'Okul' }} / {{ sc.tehlike_sinifi or 'Az Tehlikeli' }})
-                    </option>
+                    <option value="{{ sc.kurum_kodu }} - {{ sc.kurum_adi }}"></option>
                     {% endfor %}
-                </select>
+                </datalist>
             </div>
         </div>
 
@@ -631,6 +644,29 @@
 
     // İlk yüklemede skoru hesapla
     calculateLiveScore();
+
+    // Okul Arama & Otomatik Yönlendirme Haritası
+    const schoolsLookup = {
+        {% for sc in schools %}
+        "{{ sc.kurum_kodu }}": {{ sc.id }},
+        {% endfor %}
+    };
+
+    function handleSchoolSelect(val) {
+        if (!val) return;
+        const match = val.match(/^\s*(\d{6})/);
+        if (match && schoolsLookup[match[1]]) {
+            window.location.href = '/dinamik-risk-degerlendirme?school_id=' + schoolsLookup[match[1]];
+        }
+    }
+
+    function clearSchoolInput() {
+        const inp = document.getElementById('schoolSearchInput');
+        if (inp) {
+            inp.value = '';
+            inp.focus();
+        }
+    }
 </script>
 {% endblock %}
 

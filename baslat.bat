@@ -21,3 +21,4 @@ taskkill /F /IM cloudflared.exe >nul 2>&1
 "%PYTHON_EXE%" "%~dp0run_portal.py"
 
 pause
+

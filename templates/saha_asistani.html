@@ -102,17 +102,26 @@
             </div>
 
             <div class="flex items-center gap-2">
-                <select id="activeSchoolSelect" onchange="handleActiveSchoolChange(this.value)" class="flex-1 bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400 transition">
-                    <option value="">⚡ Otomatik (Sesli İfadeden Okulu Algıla)</option>
-                    {% for sc in all_schools %}
-                    <option value="{{ sc.id }}">{{ sc.kurum_adi }} ({{ sc.kurum_kodu }})</option>
-                    {% endfor %}
-                </select>
+                <div class="relative flex-1">
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                        <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                    </span>
+                    <input type="text" id="activeSchoolInput" list="allSchoolsDatalist" 
+                           placeholder="Okul adı veya kurum kodu yazarak arayın... (Örn: Tez-Tur veya 970151)"
+                           class="w-full pl-9 pr-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-400 transition"
+                           oninput="handleActiveSchoolInput(this.value)">
+                </div>
                 <button type="button" id="clearLockBtn" onclick="clearSchoolLock()" class="hidden px-3 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold transition flex items-center gap-1 shadow-xs" title="Kilidi Kaldır">
                     <i class="fa-solid fa-lock-open text-[11px]"></i>
                     <span class="text-[11px]">Aç</span>
                 </button>
             </div>
+
+            <datalist id="allSchoolsDatalist">
+                {% for sc in all_schools %}
+                <option value="{{ sc.kurum_kodu }} - {{ sc.kurum_adi }}"></option>
+                {% endfor %}
+            </datalist>
 
             <div id="schoolLockHint" class="hidden text-[11px] text-emerald-800 bg-emerald-50 p-2 rounded-lg border border-emerald-200 leading-snug">
                 <i class="fa-solid fa-circle-check text-emerald-600 mr-1"></i>
@@ -241,15 +250,20 @@
 
         <!-- Okul Eşleşmesi Dropdown (Gerekirse Değiştirme) -->
         <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-            <div class="text-slate-600 font-semibold flex items-center gap-1.5">
+            <div class="text-slate-600 font-semibold flex items-center gap-1.5 whitespace-nowrap">
                 <i class="fa-solid fa-circle-check text-emerald-600"></i>
                 <span>Eşleşen Kurum:</span>
             </div>
-            <select id="selectSchoolOverride" onchange="onManualSchoolOverride(this.value)" class="bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs font-bold text-slate-800 focus:outline-none flex-1 max-w-md">
-                {% for sc in all_schools %}
-                <option value="{{ sc.id }}">{{ sc.kurum_kodu }} — {{ sc.kurum_adi }}</option>
-                {% endfor %}
-            </select>
+            <div class="relative flex-1 max-w-md w-full">
+                <span class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none text-slate-400">
+                    <i class="fa-solid fa-magnifying-glass text-[11px]"></i>
+                </span>
+                <input type="text" id="selectSchoolOverrideInput" list="allSchoolsDatalist" 
+                       placeholder="Farklı okul adı veya kurum kodu yazarak arayın..."
+                       class="w-full pl-8 pr-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400"
+                       oninput="handleSchoolOverrideInput(this.value)">
+                <input type="hidden" id="selectSchoolOverride" value="">
+            </div>
         </div>
 
         <!-- Hızlı Aday Çipleri (Tek Dokunuşla Okul Değiştirme) -->
@@ -362,34 +376,51 @@
     let lockedSchoolId = null;
     let lockedSchoolName = '';
 
-    // Saha Aktif Okul Kilitleme Yardımcıları
-    function handleActiveSchoolChange(val) {
-        const lockBadge = document.getElementById('schoolLockBadge');
-        const lockHint = document.getElementById('schoolLockHint');
-        const clearBtn = document.getElementById('clearLockBtn');
-        const select = document.getElementById('activeSchoolSelect');
+    const schoolsDataMap = {
+        {% for sc in all_schools %}
+        "{{ sc.kurum_kodu }}": { id: {{ sc.id }}, name: "{{ sc.kurum_adi }}", code: "{{ sc.kurum_kodu }}" },
+        {% endfor %}
+    };
 
-        if (val) {
-            lockedSchoolId = parseInt(val);
-            lockedSchoolName = select.options[select.selectedIndex].text;
-            lockBadge.classList.remove('hidden');
-            lockHint.classList.remove('hidden');
-            clearBtn.classList.remove('hidden');
-            select.classList.add('border-emerald-500', 'bg-emerald-50/50');
-        } else {
+    // Saha Aktif Okul Kilitleme Yardımcıları (Datalist ve Anında Arama)
+    function handleActiveSchoolInput(val) {
+        if (!val) {
             clearSchoolLock();
+            return;
+        }
+        const match = val.match(/^\s*(\d{6})/);
+        if (match && schoolsDataMap[match[1]]) {
+            const sc = schoolsDataMap[match[1]];
+            lockedSchoolId = sc.id;
+            lockedSchoolName = sc.name;
+            document.getElementById('schoolLockBadge').classList.remove('hidden');
+            document.getElementById('schoolLockHint').classList.remove('hidden');
+            document.getElementById('clearLockBtn').classList.remove('hidden');
+            document.getElementById('activeSchoolInput').classList.add('border-emerald-500', 'bg-emerald-50/50');
         }
     }
 
     function clearSchoolLock() {
         lockedSchoolId = null;
         lockedSchoolName = '';
-        const select = document.getElementById('activeSchoolSelect');
-        select.value = '';
-        select.classList.remove('border-emerald-500', 'bg-emerald-50/50');
+        const inp = document.getElementById('activeSchoolInput');
+        if (inp) {
+            inp.value = '';
+            inp.classList.remove('border-emerald-500', 'bg-emerald-50/50');
+        }
         document.getElementById('schoolLockBadge').classList.add('hidden');
         document.getElementById('schoolLockHint').classList.add('hidden');
         document.getElementById('clearLockBtn').classList.add('hidden');
+    }
+
+    function handleSchoolOverrideInput(val) {
+        if (!val) return;
+        const match = val.match(/^\s*(\d{6})/);
+        if (match && schoolsDataMap[match[1]]) {
+            const sc = schoolsDataMap[match[1]];
+            document.getElementById('selectSchoolOverride').value = sc.id;
+            document.getElementById('resSchoolName').innerText = `${sc.name} (${sc.code})`;
+        }
     }
 
     // Mobil URL & QR Yardımcıları
@@ -462,83 +493,6 @@
     }
 
     // Web Speech API Kurulumu (Türkçe Destekli & Kesintisiz, Tekrarsız Dinleme)
-    function initSpeech() {
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        if (!SpeechRecognition) {
-            document.getElementById('voiceStatusMsg').innerHTML = 
-                '<span class="text-slate-700 font-medium"><i class="fa-solid fa-keyboard mr-1 text-slate-500"></i> Cep telefonunuzda aşağıdaki kutucuğa tıklayıp <strong>klavye mikrofonuna (dikte)</strong> basarak konuşabilirsiniz.</span>';
-            return;
-        }
-
-        speechRecognition = new SpeechRecognition();
-        speechRecognition.continuous = true;
-        speechRecognition.interimResults = true;
-        speechRecognition.lang = 'tr-TR';
-
-        speechRecognition.onstart = () => {
-            isListening = true;
-            setListeningUi(true);
-        };
-
-        speechRecognition.onresult = (event) => {
-            let sessionFinal = '';
-            let sessionInterim = '';
-
-            // Android Chrome event.results dizisini yerinde günceller; baştan sona tek geçişte temizce oku
-            for (let i = 0; i < event.results.length; ++i) {
-                const res = event.results[i];
-                const text = res[0].transcript.trim();
-                if (res.isFinal) {
-                    sessionFinal += (sessionFinal ? ' ' : '') + text;
-                } else {
-                    sessionInterim += (sessionInterim ? ' ' : '') + text;
-                }
-            }
-
-            currentCycleFinal = sessionFinal;
-            const activeRun = (sessionFinal + (sessionInterim ? (' ' + sessionInterim) : '')).trim();
-            updateTextareaDisplay(activeRun);
-        };
-
-        speechRecognition.onerror = (event) => {
-            console.warn('Ses hatası:', event.error);
-            if (event.error === 'no-speech') {
-                // Kısa süreli sessizlik; kullanıcı manuel durdurana kadar dinlemeye devam et
-                return;
-            }
-            if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
-                userStoppedManually = true;
-                isListening = false;
-                setListeningUi(false);
-                alert('Mikrofon erişim izni verilmedi veya engellendi.');
-            }
-        };
-
-        speechRecognition.onend = () => {
-            // Mevcut döngüde kesinleşen metni sakla
-            if (currentCycleFinal) {
-                previousCyclesTranscript = (previousCyclesTranscript ? (previousCyclesTranscript + ' ') : '') + currentCycleFinal;
-                currentCycleFinal = '';
-            }
-
-            // Kullanıcı durdur butonuna basmadıysa, mobil tarayıcı sessizlik yüzünden kesse bile devam et
-            if (isListening && !userStoppedManually) {
-                try {
-                    speechRecognition.start();
-                } catch (e) {
-                    setTimeout(() => {
-                        if (isListening && !userStoppedManually) {
-                            try { speechRecognition.start(); } catch(err) {}
-                        }
-                    }, 200);
-                }
-            } else {
-                isListening = false;
-                setListeningUi(false);
-            }
-        };
-    }
-
     function toggleSpeechRecognition() {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         if (!SpeechRecognition) {
@@ -549,47 +503,101 @@
             return;
         }
 
-        if (!speechRecognition) {
-            initSpeech();
-        }
-        if (!speechRecognition) return;
-
         if (isListening) {
-            // Kullanıcı dokunup durdurdu
+            // Kullanıcı durdur butonuna bastı
             userStoppedManually = true;
             isListening = false;
-            try {
-                speechRecognition.stop();
-            } catch (err) {}
+            if (speechRecognition) {
+                try { speechRecognition.stop(); } catch(e) {}
+            }
             if (currentCycleFinal) {
                 previousCyclesTranscript = (previousCyclesTranscript ? (previousCyclesTranscript + ' ') : '') + currentCycleFinal;
                 currentCycleFinal = '';
             }
             updateTextareaDisplay('');
             setListeningUi(false);
-        } else {
-            // Kullanıcı dinlemeyi başlattı
-            userStoppedManually = false;
-            isListening = true;
-            const textarea = document.getElementById('fieldTranscript');
-            baseTranscript = textarea.value.trim();
-            previousCyclesTranscript = '';
-            currentCycleFinal = '';
-            try {
-                speechRecognition.start();
+            return;
+        }
+
+        // Dinlemeyi başlat: DAİMA tertemiz sıfır bir SpeechRecognition oluştur
+        // Böylece eski oturumdan kalan InvalidStateError ve çakışan durma/başlama sesleri (bip-bop) tamamen engellenir!
+        if (speechRecognition) {
+            try { speechRecognition.abort(); } catch(e) {}
+            speechRecognition = null;
+        }
+
+        userStoppedManually = false;
+        const textarea = document.getElementById('fieldTranscript');
+        baseTranscript = textarea.value.trim();
+        previousCyclesTranscript = '';
+        currentCycleFinal = '';
+
+        try {
+            speechRecognition = new SpeechRecognition();
+            speechRecognition.continuous = true;
+            speechRecognition.interimResults = true;
+            speechRecognition.lang = 'tr-TR';
+
+            speechRecognition.onstart = () => {
+                isListening = true;
                 setListeningUi(true);
-            } catch (err) {
-                console.error(err);
-                try {
-                    speechRecognition.stop();
-                    setTimeout(() => {
-                        try {
-                            speechRecognition.start();
-                            setListeningUi(true);
-                        } catch(e) {}
-                    }, 200);
-                } catch(e) {}
-            }
+            };
+
+            speechRecognition.onresult = (event) => {
+                let sessionFinal = '';
+                let sessionInterim = '';
+
+                // Android Chrome event.results dizisini yerinde günceller; baştan sona tek geçişte temizce oku
+                for (let i = 0; i < event.results.length; ++i) {
+                    const res = event.results[i];
+                    const text = res[0].transcript.trim();
+                    if (res.isFinal) {
+                        sessionFinal += (sessionFinal ? ' ' : '') + text;
+                    } else {
+                        sessionInterim += (sessionInterim ? ' ' : '') + text;
+                    }
+                }
+
+                currentCycleFinal = sessionFinal;
+                const activeRun = (sessionFinal + (sessionInterim ? (' ' + sessionInterim) : '')).trim();
+                updateTextareaDisplay(activeRun);
+            };
+
+            speechRecognition.onerror = (event) => {
+                console.warn('Ses tanıma olayı:', event.error);
+                if (event.error === 'no-speech') {
+                    return;
+                }
+                if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+                    userStoppedManually = true;
+                    isListening = false;
+                    setListeningUi(false);
+                    alert('Mikrofon erişim izni verilmedi veya engellendi.');
+                }
+            };
+
+            speechRecognition.onend = () => {
+                if (currentCycleFinal) {
+                    previousCyclesTranscript = (previousCyclesTranscript ? (previousCyclesTranscript + ' ') : '') + currentCycleFinal;
+                    currentCycleFinal = '';
+                }
+
+                isListening = false;
+                setListeningUi(false);
+
+                const ta = document.getElementById('fieldTranscript');
+                if (ta && ta.value.trim()) {
+                    document.getElementById('voiceStatusMsg').innerHTML = 
+                        '<span class="text-emerald-700 font-bold"><i class="fa-solid fa-circle-check mr-1 text-emerald-600"></i> Dinleme tamamlandı ve metne döküldü. Cümle eklemek için tekrar basabilirsiniz.</span>';
+                }
+            };
+
+            speechRecognition.start();
+            setListeningUi(true);
+        } catch (err) {
+            console.error('Mikrofon başlatma hatası:', err);
+            isListening = false;
+            setListeningUi(false);
         }
     }
 
@@ -620,6 +628,7 @@
         previousCyclesTranscript = '';
         currentCycleFinal = '';
         document.getElementById('fieldTranscript').value = '';
+        document.getElementById('voiceStatusMsg').innerHTML = '<i class="fa-solid fa-circle-info text-slate-400 mr-1"></i> <span>Butona basıp konuşun: <em>"Şimdi Tez-Tur Meslek\'te mutfak atölyesindeyim, duvarda fayanslar dökülmüş..."</em></span>';
     }
 
     // Fotoğraf Seçimi (Hem Kamera Hem Galeri)
@@ -697,6 +706,10 @@
     function selectCandidateSchool(id, name, code) {
         document.getElementById('selectSchoolOverride').value = id;
         document.getElementById('resSchoolName').innerText = `${name} (${code || ''})`;
+        const overrideInput = document.getElementById('selectSchoolOverrideInput');
+        if (overrideInput) {
+            overrideInput.value = code ? `${code} - ${name}` : name;
+        }
 
         const chips = document.querySelectorAll('.candidate-chip');
         chips.forEach(chip => {
@@ -712,12 +725,6 @@
         });
     }
 
-    function onManualSchoolOverride(val) {
-        const sel = document.getElementById('selectSchoolOverride');
-        const txt = sel.options[sel.selectedIndex].text;
-        document.getElementById('resSchoolName').innerText = txt;
-    }
-
     function renderAnalysisResult(d) {
         const card = document.getElementById('resultCard');
         card.classList.remove('hidden');
@@ -727,8 +734,16 @@
         if (matched) {
             document.getElementById('resSchoolName').innerText = `${matched.kurum_adi} (${matched.kurum_kodu})`;
             document.getElementById('selectSchoolOverride').value = matched.id;
+            const overrideInput = document.getElementById('selectSchoolOverrideInput');
+            if (overrideInput) {
+                overrideInput.value = `${matched.kurum_kodu} - ${matched.kurum_adi}`;
+            }
         } else {
             document.getElementById('resSchoolName').innerText = d.school_name_detected || 'Okul Belirtilmedi';
+            const overrideInput = document.getElementById('selectSchoolOverrideInput');
+            if (overrideInput && d.school_name_detected) {
+                overrideInput.value = d.school_name_detected;
+            }
         }
 
         // Hızlı Aday Çipleri (Tek Dokunuşla Seçim Rozetleri)

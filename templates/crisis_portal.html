@@ -229,12 +229,26 @@
 
             <form method="POST" action="/kriz-yonetimi/olay-ekle" class="space-y-3 text-xs">
                 <div>
-                    <label class="block font-bold text-slate-700 mb-1">Okul / Kurum Seçimi:</label>
-                    <select id="incidentSchoolSelect" name="school_id" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    <label class="block font-bold text-slate-700 mb-1 flex items-center justify-between">
+                        <span>Okul / Kurum Seçimi:</span>
+                        <span class="text-[10px] text-blue-600 font-semibold lowercase">anında arama</span>
+                    </label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                            <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                        </span>
+                        <input type="text" id="incidentSchoolInput" list="crisisSchoolsDatalist"
+                               placeholder="Kurum kodu veya okul adı yazarak arayın... (Örn: Tez-Tur veya 970151)"
+                               required
+                               class="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition"
+                               oninput="handleCrisisSchoolInput(this.value)">
+                        <input type="hidden" id="incidentSchoolSelect" name="school_id" required>
+                    </div>
+                    <datalist id="crisisSchoolsDatalist">
                         {% for sc in all_schools %}
-                        <option value="{{ sc.id }}">{{ sc.kurum_kodu }} — {{ sc.kurum_adi }}</option>
+                        <option value="{{ sc.kurum_kodu }} - {{ sc.kurum_adi }}"></option>
                         {% endfor %}
-                    </select>
+                    </datalist>
                 </div>
 
                 <div>
@@ -438,6 +452,11 @@
                 if (d.matched_school_id) {
                     const scSelect = document.getElementById('incidentSchoolSelect');
                     if (scSelect) scSelect.value = d.matched_school_id;
+                    const scInp = document.getElementById('incidentSchoolInput');
+                    if (scInp && crisisSchoolsById[d.matched_school_id]) {
+                        const sc = crisisSchoolsById[d.matched_school_id];
+                        scInp.value = `${sc.code} - ${sc.name}`;
+                    }
                 }
                 if (d.cde_seviye) {
                     const cdeSelect = document.getElementById('incidentCdeLevel');
@@ -468,6 +487,40 @@
             btn.disabled = false;
             btn.innerHTML = '<i class="fa-solid fa-bolt text-amber-300"></i> <span>Doldur</span>';
         }
+    }
+    // Okul Arama Haritası ve Otomatik Tamamlama
+    const crisisSchoolsMap = {
+        {% for sc in all_schools %}
+        "{{ sc.kurum_kodu }}": { id: {{ sc.id }}, name: "{{ sc.kurum_adi }}", code: "{{ sc.kurum_kodu }}" },
+        {% endfor %}
+    };
+    const crisisSchoolsById = {
+        {% for sc in all_schools %}
+        {{ sc.id }}: { id: {{ sc.id }}, name: "{{ sc.kurum_adi }}", code: "{{ sc.kurum_kodu }}" },
+        {% endfor %}
+    };
+
+    function handleCrisisSchoolInput(val) {
+        if (!val) {
+            document.getElementById('incidentSchoolSelect').value = '';
+            return;
+        }
+        const match = val.match(/^\s*(\d{6})/);
+        if (match && crisisSchoolsMap[match[1]]) {
+            document.getElementById('incidentSchoolSelect').value = crisisSchoolsMap[match[1]].id;
+        }
+    }
+
+    const crisisForm = document.querySelector('form[action="/kriz-yonetimi/olay-ekle"]');
+    if (crisisForm) {
+        crisisForm.addEventListener('submit', function(e) {
+            const scId = document.getElementById('incidentSchoolSelect').value;
+            if (!scId) {
+                e.preventDefault();
+                alert('Lütfen arama kutusundan geçerli bir okul seçiniz.');
+                document.getElementById('incidentSchoolInput').focus();
+            }
+        });
     }
 </script>
 {% endblock %}
