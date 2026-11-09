@@ -110,7 +110,8 @@
                            autocomplete="off"
                            placeholder="Okul adı veya kurum kodu yazarak arayın... (Örn: Tez-Tur veya 970151)"
                            class="w-full pl-9 pr-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-400 transition"
-                           onfocus="showActiveSchoolDropdown()"
+                           onclick="this.select(); showActiveSchoolDropdown();"
+                           onfocus="this.select(); showActiveSchoolDropdown();"
                            oninput="filterActiveSchoolDropdown(this.value)">
                     <!-- GÖRSEL CANLI AÇILIR LİSTE (DROPDOWN) -->
                     <div id="activeSchoolDropdownList" class="hidden absolute left-0 right-0 top-full mt-1.5 bg-white rounded-2xl shadow-2xl border border-slate-200 z-50 max-h-60 overflow-y-auto divide-y divide-slate-100 text-left">
@@ -261,7 +262,8 @@
                        autocomplete="off"
                        placeholder="Farklı okul adı veya kurum kodu yazarak arayın..."
                        class="w-full pl-8 pr-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400"
-                       onfocus="showOverrideDropdown()"
+                       onclick="this.select(); showOverrideDropdown();"
+                       onfocus="this.select(); showOverrideDropdown();"
                        oninput="filterOverrideDropdown(this.value)">
                 <input type="hidden" id="selectSchoolOverride" value="">
                 <!-- GÖRSEL CANLI AÇILIR LİSTE (DROPDOWN) -->
@@ -427,12 +429,22 @@
 
     function showActiveSchoolDropdown() {
         const inp = document.getElementById('activeSchoolInput');
-        filterActiveSchoolDropdown(inp ? inp.value : '');
+        const raw = inp ? inp.value.trim() : '';
+        if (raw.includes('—') || !raw) {
+            renderActiveSchoolDropdown(allSchoolsList);
+            return;
+        }
+        filterActiveSchoolDropdown(raw);
     }
 
     function filterActiveSchoolDropdown(query) {
         const raw = (query || '').trim();
-        const norm = trNormalize(raw);
+        let cleanQuery = raw;
+        if (raw.includes('—')) {
+            const parts = raw.split('—');
+            cleanQuery = (parts[1] || parts[0]).trim();
+        }
+        const norm = trNormalize(cleanQuery);
         if (!norm) {
             renderActiveSchoolDropdown(allSchoolsList);
             return;
@@ -500,12 +512,22 @@
 
     function showOverrideDropdown() {
         const inp = document.getElementById('selectSchoolOverrideInput');
-        filterOverrideDropdown(inp ? inp.value : '');
+        const raw = inp ? inp.value.trim() : '';
+        if (raw.includes('—') || !raw) {
+            renderOverrideDropdown(allSchoolsList);
+            return;
+        }
+        filterOverrideDropdown(raw);
     }
 
     function filterOverrideDropdown(query) {
         const raw = (query || '').trim();
-        const norm = trNormalize(raw);
+        let cleanQuery = raw;
+        if (raw.includes('—')) {
+            const parts = raw.split('—');
+            cleanQuery = (parts[1] || parts[0]).trim();
+        }
+        const norm = trNormalize(cleanQuery);
         if (!norm) {
             renderOverrideDropdown(allSchoolsList);
             return;

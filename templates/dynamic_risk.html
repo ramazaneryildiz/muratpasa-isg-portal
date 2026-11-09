@@ -52,7 +52,8 @@
                                value="{% if selected_school %}{{ selected_school.kurum_kodu }} — {{ selected_school.kurum_adi }}{% endif %}"
                                placeholder="Kurum kodu veya okul adı yazarak arayın... (Örn: Tez-Tur veya 970151)"
                                class="w-full pl-9 pr-8 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-800 placeholder-slate-400 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition"
-                               onfocus="showSchoolDropdown()"
+                               onclick="this.select(); showSchoolDropdown();"
+                               onfocus="this.select(); showSchoolDropdown();"
                                oninput="filterSchoolDropdown(this.value)"
                                onkeydown="handleSearchKeyDown(event)">
                         <button type="button" id="clearSearchBtn" onclick="clearSchoolSearch()" class="{% if not selected_school %}hidden{% endif %} absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600" title="Temizle">
@@ -455,10 +456,14 @@
     }
 
     function calculateLiveScore() {
-        const method = document.getElementById('degerlendirmeMetodu').value;
-        const o = parseFloat(document.getElementById('paramOlasilik').value || 1);
+        const methodElem = document.getElementById('degerlendirmeMetodu');
+        if (!methodElem) return;
+        const method = methodElem.value;
+        const oElem = document.getElementById('paramOlasilik');
+        if (!oElem) return;
+        const o = parseFloat(oElem.value || 1);
         const f = parseFloat(document.getElementById('paramFrekans')?.value || 1);
-        const s = parseFloat(document.getElementById('paramSiddet').value || 1);
+        const s = parseFloat(document.getElementById('paramSiddet')?.value || 1);
 
         let score = 0;
         let label = '';
@@ -510,11 +515,14 @@
         }
 
         const scoreCard = document.getElementById('liveScoreCard');
-        scoreCard.className = cardClass;
-        document.getElementById('liveLevelLabel').innerText = label;
+        if (scoreCard) scoreCard.className = cardClass;
+        const labelElem = document.getElementById('liveLevelLabel');
+        if (labelElem) labelElem.innerText = label;
         const valElem = document.getElementById('liveScoreVal');
-        valElem.className = valColor;
-        valElem.innerText = score;
+        if (valElem) {
+            valElem.className = valColor;
+            valElem.innerText = score;
+        }
     }
 
     let lastBridgeResult = null;
@@ -649,8 +657,14 @@
         }
     }
 
-    // İlk yüklemede skoru hesapla
-    calculateLiveScore();
+    // İlk yüklemede skoru hesapla (okul seçiliyse)
+    if (document.getElementById('degerlendirmeMetodu')) {
+        try {
+            calculateLiveScore();
+        } catch(e) {
+            console.warn('Hesaplama atlandı:', e);
+        }
+    }
 
     // ==================== CANLI VE GÖRSEL OKUL ARAMA / SEÇİM MOTORU ====================
     const allSchoolsData = [
@@ -732,17 +746,30 @@
 
     function showSchoolDropdown() {
         const inp = document.getElementById('schoolSearchInput');
-        filterSchoolDropdown(inp ? inp.value : '');
+        const raw = inp ? inp.value.trim() : '';
+        // Eğer mevcut seçili okul varsa veya boşsa, kullanıcı dokunduğunda hemen tüm okulları aç
+        if (raw.includes('—') || !raw) {
+            renderDropdownItems(allSchoolsData, '');
+            return;
+        }
+        filterSchoolDropdown(raw);
     }
 
     function filterSchoolDropdown(query) {
         const raw = (query || '').trim();
-        const norm = trNormalize(raw);
         const clearBtn = document.getElementById('clearSearchBtn');
         if (clearBtn) {
             if (raw.length > 0) clearBtn.classList.remove('hidden');
             else clearBtn.classList.add('hidden');
         }
+
+        // Eğer kullanıcı mevcut '970151 — Okul' metnini silmeden yeni bir şey yazdıysa süzgeç
+        let cleanQuery = raw;
+        if (raw.includes('—')) {
+            const parts = raw.split('—');
+            cleanQuery = (parts[1] || parts[0]).trim();
+        }
+        const norm = trNormalize(cleanQuery);
 
         if (!norm) {
             renderDropdownItems(allSchoolsData, '');

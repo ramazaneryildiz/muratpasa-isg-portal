@@ -51,7 +51,8 @@
                            value="{{ selected_school.kurum_kodu }} — {{ selected_school.kurum_adi }}"
                            placeholder="Kurum kodu veya okul adı yazarak arayın... (Örn: Tez-Tur veya 970151)"
                            class="w-full pl-9 pr-8 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-800 placeholder-slate-400 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition"
-                           onfocus="showAdepDropdown()"
+                           onclick="this.select(); showAdepDropdown();"
+                           onfocus="this.select(); showAdepDropdown();"
                            oninput="filterAdepDropdown(this.value)"
                            onkeydown="handleAdepKeyDown(event)">
                     <button type="button" id="clearAdepBtn" onclick="clearAdepSearch()" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600" title="Temizle">
@@ -413,17 +414,28 @@
 
     function showAdepDropdown() {
         const inp = document.getElementById('adepSchoolInput');
-        filterAdepDropdown(inp ? inp.value : '');
+        const raw = inp ? inp.value.trim() : '';
+        if (raw.includes('—') || !raw) {
+            renderAdepDropdownItems(allAdepSchools, '');
+            return;
+        }
+        filterAdepDropdown(raw);
     }
 
     function filterAdepDropdown(query) {
         const raw = (query || '').trim();
-        const norm = trNormalize(raw);
         const clearBtn = document.getElementById('clearAdepBtn');
         if (clearBtn) {
             if (raw.length > 0) clearBtn.classList.remove('hidden');
             else clearBtn.classList.add('hidden');
         }
+
+        let cleanQuery = raw;
+        if (raw.includes('—')) {
+            const parts = raw.split('—');
+            cleanQuery = (parts[1] || parts[0]).trim();
+        }
+        const norm = trNormalize(cleanQuery);
 
         if (!norm) {
             renderAdepDropdownItems(allAdepSchools, '');
