@@ -101,27 +101,26 @@
                 </span>
             </div>
 
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2 relative" id="activeSchoolWrapper">
                 <div class="relative flex-1">
                     <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
                         <i class="fa-solid fa-magnifying-glass text-xs"></i>
                     </span>
-                    <input type="text" id="activeSchoolInput" list="allSchoolsDatalist" 
+                    <input type="text" id="activeSchoolInput" 
+                           autocomplete="off"
                            placeholder="Okul adı veya kurum kodu yazarak arayın... (Örn: Tez-Tur veya 970151)"
                            class="w-full pl-9 pr-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-400 transition"
-                           oninput="handleActiveSchoolInput(this.value)">
+                           onfocus="showActiveSchoolDropdown()"
+                           oninput="filterActiveSchoolDropdown(this.value)">
+                    <!-- GÖRSEL CANLI AÇILIR LİSTE (DROPDOWN) -->
+                    <div id="activeSchoolDropdownList" class="hidden absolute left-0 right-0 top-full mt-1.5 bg-white rounded-2xl shadow-2xl border border-slate-200 z-50 max-h-60 overflow-y-auto divide-y divide-slate-100 text-left">
+                    </div>
                 </div>
                 <button type="button" id="clearLockBtn" onclick="clearSchoolLock()" class="hidden px-3 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold transition flex items-center gap-1 shadow-xs" title="Kilidi Kaldır">
                     <i class="fa-solid fa-lock-open text-[11px]"></i>
                     <span class="text-[11px]">Aç</span>
                 </button>
             </div>
-
-            <datalist id="allSchoolsDatalist">
-                {% for sc in all_schools %}
-                <option value="{{ sc.kurum_kodu }} - {{ sc.kurum_adi }}"></option>
-                {% endfor %}
-            </datalist>
 
             <div id="schoolLockHint" class="hidden text-[11px] text-emerald-800 bg-emerald-50 p-2 rounded-lg border border-emerald-200 leading-snug">
                 <i class="fa-solid fa-circle-check text-emerald-600 mr-1"></i>
@@ -254,15 +253,20 @@
                 <i class="fa-solid fa-circle-check text-emerald-600"></i>
                 <span>Eşleşen Kurum:</span>
             </div>
-            <div class="relative flex-1 max-w-md w-full">
+            <div class="relative flex-1 max-w-md w-full" id="overrideSchoolWrapper">
                 <span class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none text-slate-400">
                     <i class="fa-solid fa-magnifying-glass text-[11px]"></i>
                 </span>
-                <input type="text" id="selectSchoolOverrideInput" list="allSchoolsDatalist" 
+                <input type="text" id="selectSchoolOverrideInput" 
+                       autocomplete="off"
                        placeholder="Farklı okul adı veya kurum kodu yazarak arayın..."
                        class="w-full pl-8 pr-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400"
-                       oninput="handleSchoolOverrideInput(this.value)">
+                       onfocus="showOverrideDropdown()"
+                       oninput="filterOverrideDropdown(this.value)">
                 <input type="hidden" id="selectSchoolOverride" value="">
+                <!-- GÖRSEL CANLI AÇILIR LİSTE (DROPDOWN) -->
+                <div id="overrideDropdownList" class="hidden absolute left-0 right-0 top-full mt-1.5 bg-white rounded-2xl shadow-2xl border border-slate-200 z-50 max-h-56 overflow-y-auto divide-y divide-slate-100 text-left">
+                </div>
             </div>
         </div>
 
@@ -376,28 +380,82 @@
     let lockedSchoolId = null;
     let lockedSchoolName = '';
 
-    const schoolsDataMap = {
+    const allSchoolsList = [
         {% for sc in all_schools %}
-        "{{ sc.kurum_kodu }}": { id: {{ sc.id }}, name: "{{ sc.kurum_adi }}", code: "{{ sc.kurum_kodu }}" },
+        { id: {{ sc.id }}, name: "{{ sc.kurum_adi }}", code: "{{ sc.kurum_kodu }}" },
         {% endfor %}
-    };
+    ];
 
-    // Saha Aktif Okul Kilitleme Yardımcıları (Datalist ve Anında Arama)
-    function handleActiveSchoolInput(val) {
-        if (!val) {
-            clearSchoolLock();
+    function trNormalize(text) {
+        if (!text) return '';
+        return String(text).toLowerCase()
+            .replace(/i̇/g, 'i')
+            .replace(/ı/g, 'i')
+            .replace(/ğ/g, 'g')
+            .replace(/ü/g, 'u')
+            .replace(/ş/g, 's')
+            .replace(/ö/g, 'o')
+            .replace(/ç/g, 'c')
+            .replace(/[^a-z0-9]/g, '');
+    }
+
+    // Saha Aktif Okul Kilitleme Yardımcıları (Canlı Görsel Liste)
+    function renderActiveSchoolDropdown(items) {
+        const list = document.getElementById('activeSchoolDropdownList');
+        if (!list) return;
+        if (items.length === 0) {
+            list.innerHTML = `<div class="p-3 text-center text-xs text-slate-500">Eşleşen okul bulunamadı.</div>`;
+            list.classList.remove('hidden');
             return;
         }
-        const match = val.match(/^\s*(\d{6})/);
-        if (match && schoolsDataMap[match[1]]) {
-            const sc = schoolsDataMap[match[1]];
-            lockedSchoolId = sc.id;
-            lockedSchoolName = sc.name;
-            document.getElementById('schoolLockBadge').classList.remove('hidden');
-            document.getElementById('schoolLockHint').classList.remove('hidden');
-            document.getElementById('clearLockBtn').classList.remove('hidden');
-            document.getElementById('activeSchoolInput').classList.add('border-emerald-500', 'bg-emerald-50/50');
+        let html = '';
+        items.slice(0, 20).forEach(item => {
+            html += `
+                <div onclick="selectAndLockSchool(${item.id}, '${item.code}', '${item.name.replace(/'/g, "\\'")}')" 
+                     class="p-2.5 hover:bg-emerald-50 cursor-pointer flex items-center justify-between text-xs transition active:bg-emerald-100 select-none">
+                    <div class="pr-2 min-w-0">
+                        <div class="font-bold text-slate-900 truncate">${item.name}</div>
+                        <div class="text-[11px] text-slate-500 font-mono mt-0.5">Kod: <span class="font-bold text-emerald-700">${item.code}</span></div>
+                    </div>
+                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">Kilitle</span>
+                </div>
+            `;
+        });
+        list.innerHTML = html;
+        list.classList.remove('hidden');
+    }
+
+    function showActiveSchoolDropdown() {
+        const inp = document.getElementById('activeSchoolInput');
+        filterActiveSchoolDropdown(inp ? inp.value : '');
+    }
+
+    function filterActiveSchoolDropdown(query) {
+        const raw = (query || '').trim();
+        const norm = trNormalize(raw);
+        if (!norm) {
+            renderActiveSchoolDropdown(allSchoolsList);
+            return;
         }
+        const filtered = allSchoolsList.filter(sc => {
+            return trNormalize(sc.name).includes(norm) || trNormalize(sc.code).includes(norm);
+        });
+        renderActiveSchoolDropdown(filtered);
+    }
+
+    function selectAndLockSchool(id, code, name) {
+        lockedSchoolId = id;
+        lockedSchoolName = name;
+        const inp = document.getElementById('activeSchoolInput');
+        if (inp) {
+            inp.value = `${code} — ${name}`;
+            inp.classList.add('border-emerald-500', 'bg-emerald-50/50');
+        }
+        document.getElementById('schoolLockBadge').classList.remove('hidden');
+        document.getElementById('schoolLockHint').classList.remove('hidden');
+        document.getElementById('clearLockBtn').classList.remove('hidden');
+        const list = document.getElementById('activeSchoolDropdownList');
+        if (list) list.classList.add('hidden');
     }
 
     function clearSchoolLock() {
@@ -411,17 +469,74 @@
         document.getElementById('schoolLockBadge').classList.add('hidden');
         document.getElementById('schoolLockHint').classList.add('hidden');
         document.getElementById('clearLockBtn').classList.add('hidden');
+        const list = document.getElementById('activeSchoolDropdownList');
+        if (list) list.classList.add('hidden');
     }
 
-    function handleSchoolOverrideInput(val) {
-        if (!val) return;
-        const match = val.match(/^\s*(\d{6})/);
-        if (match && schoolsDataMap[match[1]]) {
-            const sc = schoolsDataMap[match[1]];
-            document.getElementById('selectSchoolOverride').value = sc.id;
-            document.getElementById('resSchoolName').innerText = `${sc.name} (${sc.code})`;
+    // Manuel Okul Değiştirme (Sonuç Kartı)
+    function renderOverrideDropdown(items) {
+        const list = document.getElementById('overrideDropdownList');
+        if (!list) return;
+        if (items.length === 0) {
+            list.innerHTML = `<div class="p-3 text-center text-xs text-slate-500">Eşleşen okul bulunamadı.</div>`;
+            list.classList.remove('hidden');
+            return;
         }
+        let html = '';
+        items.slice(0, 20).forEach(item => {
+            html += `
+                <div onclick="selectOverrideSchool(${item.id}, '${item.code}', '${item.name.replace(/'/g, "\\'")}')" 
+                     class="p-2.5 hover:bg-slate-100 cursor-pointer flex items-center justify-between text-xs transition active:bg-slate-200 select-none">
+                    <div class="pr-2 min-w-0">
+                        <div class="font-bold text-slate-900 truncate">${item.name}</div>
+                        <div class="text-[11px] text-slate-500 font-mono mt-0.5">Kod: <span class="font-bold text-slate-700">${item.code}</span></div>
+                    </div>
+                </div>
+            `;
+        });
+        list.innerHTML = html;
+        list.classList.remove('hidden');
     }
+
+    function showOverrideDropdown() {
+        const inp = document.getElementById('selectSchoolOverrideInput');
+        filterOverrideDropdown(inp ? inp.value : '');
+    }
+
+    function filterOverrideDropdown(query) {
+        const raw = (query || '').trim();
+        const norm = trNormalize(raw);
+        if (!norm) {
+            renderOverrideDropdown(allSchoolsList);
+            return;
+        }
+        const filtered = allSchoolsList.filter(sc => {
+            return trNormalize(sc.name).includes(norm) || trNormalize(sc.code).includes(norm);
+        });
+        renderOverrideDropdown(filtered);
+    }
+
+    function selectOverrideSchool(id, code, name) {
+        document.getElementById('selectSchoolOverride').value = id;
+        document.getElementById('resSchoolName').innerText = `${name} (${code})`;
+        document.getElementById('selectSchoolOverrideInput').value = `${code} — ${name}`;
+        const list = document.getElementById('overrideDropdownList');
+        if (list) list.classList.add('hidden');
+    }
+
+    // Dışarı tıklandığında açılır listeleri kapat
+    document.addEventListener('click', function(e) {
+        const activeWrapper = document.getElementById('activeSchoolWrapper');
+        if (activeWrapper && !activeWrapper.contains(e.target)) {
+            const list = document.getElementById('activeSchoolDropdownList');
+            if (list) list.classList.add('hidden');
+        }
+        const overrideWrapper = document.getElementById('overrideSchoolWrapper');
+        if (overrideWrapper && !overrideWrapper.contains(e.target)) {
+            const list = document.getElementById('overrideDropdownList');
+            if (list) list.classList.add('hidden');
+        }
+    });
 
     // Mobil URL & QR Yardımcıları
     function copyText(val, elemId) {

@@ -33,35 +33,42 @@
 
     <!-- ==================== OKUL SEÇİM ÇUBUĞU ==================== -->
     <div class="bg-white rounded-2xl p-5 shadow-xs border border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div class="flex items-center gap-3 w-full md:w-2/3">
+        <div class="flex items-center gap-3 w-full md:w-3/4">
             <div class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center text-base flex-shrink-0">
                 <i class="fa-solid fa-school"></i>
             </div>
-            <div class="flex-1 relative">
+            <div class="flex-1 relative" id="schoolSearchWrapper">
                 <label class="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500 mb-1 flex items-center justify-between">
                     <span>Risk Değerlendirmesi Yapılacak Kurum:</span>
-                    <span class="text-[10px] text-blue-600 font-semibold lowercase">anında arama & filtreleme</span>
+                    <span class="text-[10px] text-blue-600 font-semibold lowercase">anında filtreleme & canlı liste</span>
                 </label>
-                <div class="relative">
-                    <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                        <i class="fa-solid fa-magnifying-glass text-xs"></i>
-                    </span>
-                    <input type="text" id="schoolSearchInput" list="schoolsDatalist" 
-                           value="{% if selected_school %}{{ selected_school.kurum_kodu }} - {{ selected_school.kurum_adi }}{% endif %}"
-                           placeholder="Kurum kodu veya okul adı yazarak arayın... (Örn: Tez-Tur veya 970151)"
-                           class="w-full pl-9 pr-8 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-800 placeholder-slate-400 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition"
-                           oninput="handleSchoolSelect(this.value)">
-                    {% if selected_school %}
-                    <button type="button" onclick="clearSchoolInput()" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600" title="Temizle">
-                        <i class="fa-solid fa-xmark text-xs"></i>
+                <div class="flex gap-2">
+                    <div class="relative flex-1">
+                        <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                            <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                        </span>
+                        <input type="text" id="schoolSearchInput" 
+                               autocomplete="off"
+                               value="{% if selected_school %}{{ selected_school.kurum_kodu }} — {{ selected_school.kurum_adi }}{% endif %}"
+                               placeholder="Kurum kodu veya okul adı yazarak arayın... (Örn: Tez-Tur veya 970151)"
+                               class="w-full pl-9 pr-8 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-800 placeholder-slate-400 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition"
+                               onfocus="showSchoolDropdown()"
+                               oninput="filterSchoolDropdown(this.value)"
+                               onkeydown="handleSearchKeyDown(event)">
+                        <button type="button" id="clearSearchBtn" onclick="clearSchoolSearch()" class="{% if not selected_school %}hidden{% endif %} absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600" title="Temizle">
+                            <i class="fa-solid fa-xmark text-xs"></i>
+                        </button>
+                    </div>
+                    <button type="button" id="btnConfirmSchool" onclick="confirmSchoolSelection()" class="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white text-xs font-extrabold rounded-xl transition shadow-xs flex items-center gap-1.5 whitespace-nowrap">
+                        <i class="fa-solid fa-arrow-right text-xs"></i>
+                        <span id="btnConfirmText">Aç</span>
                     </button>
-                    {% endif %}
                 </div>
-                <datalist id="schoolsDatalist">
-                    {% for sc in schools %}
-                    <option value="{{ sc.kurum_kodu }} - {{ sc.kurum_adi }}"></option>
-                    {% endfor %}
-                </datalist>
+
+                <!-- GÖRSEL CANLI AÇILIR LİSTE (DROPDOWN) -->
+                <div id="schoolDropdownList" class="hidden absolute left-0 right-0 top-full mt-1.5 bg-white rounded-2xl shadow-2xl border border-slate-200 z-50 max-h-72 overflow-y-auto divide-y divide-slate-100">
+                    <!-- JS ile doldurulur -->
+                </div>
             </div>
         </div>
 
@@ -645,28 +652,198 @@
     // İlk yüklemede skoru hesapla
     calculateLiveScore();
 
-    // Okul Arama & Otomatik Yönlendirme Haritası
-    const schoolsLookup = {
+    // ==================== CANLI VE GÖRSEL OKUL ARAMA / SEÇİM MOTORU ====================
+    const allSchoolsData = [
         {% for sc in schools %}
-        "{{ sc.kurum_kodu }}": {{ sc.id }},
+        {
+            id: {{ sc.id }},
+            kurum_kodu: "{{ sc.kurum_kodu }}",
+            kurum_adi: "{{ sc.kurum_adi }}",
+            kademe: "{{ sc.kademe or '' }}",
+            tehlike_sinifi: "{{ sc.tehlike_sinifi or 'Az Tehlikeli' }}"
+        },
         {% endfor %}
-    };
+    ];
 
-    function handleSchoolSelect(val) {
-        if (!val) return;
-        const match = val.match(/^\s*(\d{6})/);
-        if (match && schoolsLookup[match[1]]) {
-            window.location.href = '/dinamik-risk-degerlendirme?school_id=' + schoolsLookup[match[1]];
+    let selectedSchoolId = {% if selected_school %}{{ selected_school.id }}{% else %}null{% endif %};
+
+    function trNormalize(text) {
+        if (!text) return '';
+        return String(text).toLowerCase()
+            .replace(/i̇/g, 'i')
+            .replace(/ı/g, 'i')
+            .replace(/ğ/g, 'g')
+            .replace(/ü/g, 'u')
+            .replace(/ş/g, 's')
+            .replace(/ö/g, 'o')
+            .replace(/ç/g, 'c')
+            .replace(/[^a-z0-9]/g, '');
+    }
+
+    function getDangerClass(danger) {
+        const d = (danger || '').toUpperCase();
+        if (d.includes('ÇOK') || d.includes('COK')) return 'bg-rose-100 text-rose-800 border border-rose-200';
+        if (d.includes('TEHLİKELİ') || d.includes('TEHLIKELI')) return 'bg-amber-100 text-amber-800 border border-amber-200';
+        return 'bg-slate-100 text-slate-700 border border-slate-200';
+    }
+
+    function renderDropdownItems(items, query) {
+        const list = document.getElementById('schoolDropdownList');
+        if (!list) return;
+
+        if (items.length === 0) {
+            list.innerHTML = `
+                <div class="p-4 text-center text-xs text-slate-500">
+                    <i class="fa-solid fa-circle-exclamation text-amber-500 mr-1.5"></i>
+                    <span>"<strong>${query || ''}</strong>" ile eşleşen okul bulunamadı.</span>
+                </div>
+            `;
+            list.classList.remove('hidden');
+            return;
+        }
+
+        let html = '';
+        items.slice(0, 25).forEach(item => {
+            const dangerBadge = getDangerClass(item.tehlike_sinifi);
+            html += `
+                <div onclick="selectSchoolItem(${item.id}, '${item.kurum_kodu}', '${item.kurum_adi.replace(/'/g, "\\'")}')" 
+                     class="p-3 hover:bg-blue-50 cursor-pointer flex items-center justify-between text-xs transition active:bg-blue-100 select-none">
+                    <div class="pr-2 min-w-0">
+                        <div class="font-bold text-slate-900 truncate">${item.kurum_adi}</div>
+                        <div class="text-[11px] text-slate-500 font-mono mt-0.5">
+                            Kod: <span class="font-extrabold text-blue-700">${item.kurum_kodu}</span> 
+                            ${item.kademe ? `• ${item.kademe}` : ''}
+                        </div>
+                    </div>
+                    <span class="px-2 py-0.5 rounded text-[10px] font-bold ${dangerBadge} flex-shrink-0">
+                        ${item.tehlike_sinifi}
+                    </span>
+                </div>
+            `;
+        });
+
+        if (items.length > 25) {
+            html += `<div class="p-2 text-center text-[11px] text-slate-400 bg-slate-50">...ve ${items.length - 25} okul daha var. Daraltmak için yazmaya devam edin.</div>`;
+        }
+
+        list.innerHTML = html;
+        list.classList.remove('hidden');
+    }
+
+    function showSchoolDropdown() {
+        const inp = document.getElementById('schoolSearchInput');
+        filterSchoolDropdown(inp ? inp.value : '');
+    }
+
+    function filterSchoolDropdown(query) {
+        const raw = (query || '').trim();
+        const norm = trNormalize(raw);
+        const clearBtn = document.getElementById('clearSearchBtn');
+        if (clearBtn) {
+            if (raw.length > 0) clearBtn.classList.remove('hidden');
+            else clearBtn.classList.add('hidden');
+        }
+
+        if (!norm) {
+            renderDropdownItems(allSchoolsData, '');
+            return;
+        }
+
+        const filtered = allSchoolsData.filter(sc => {
+            const nameNorm = trNormalize(sc.kurum_adi);
+            const codeNorm = trNormalize(sc.kurum_kodu);
+            return nameNorm.includes(norm) || codeNorm.includes(norm);
+        });
+
+        renderDropdownItems(filtered, raw);
+    }
+
+    function selectSchoolItem(id, code, name) {
+        selectedSchoolId = id;
+        const inp = document.getElementById('schoolSearchInput');
+        if (inp) inp.value = `${code} — ${name}`;
+        
+        const list = document.getElementById('schoolDropdownList');
+        if (list) list.classList.add('hidden');
+
+        const clearBtn = document.getElementById('clearSearchBtn');
+        if (clearBtn) clearBtn.classList.remove('hidden');
+
+        // HEMEN SAYFAYI YÜKLE
+        goToSchool(id);
+    }
+
+    function goToSchool(id) {
+        const btn = document.getElementById('btnConfirmSchool');
+        const text = document.getElementById('btnConfirmText');
+        if (btn && text) {
+            btn.disabled = true;
+            text.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> Yükleniyor...';
+        }
+        window.location.href = '/dinamik-risk-degerlendirme?school_id=' + id;
+    }
+
+    function confirmSchoolSelection() {
+        if (selectedSchoolId) {
+            goToSchool(selectedSchoolId);
+            return;
+        }
+
+        const inp = document.getElementById('schoolSearchInput');
+        const raw = inp ? inp.value.trim() : '';
+        if (!raw) {
+            alert('Lütfen arama kutusuna okul adı veya kurum kodu yazınız.');
+            return;
+        }
+
+        const matchCode = raw.match(/^\s*(\d{6})/);
+        if (matchCode) {
+            const found = allSchoolsData.find(s => s.kurum_kodu === matchCode[1]);
+            if (found) {
+                goToSchool(found.id);
+                return;
+            }
+        }
+
+        const norm = trNormalize(raw);
+        const best = allSchoolsData.find(s => trNormalize(s.kurum_adi).includes(norm) || trNormalize(s.kurum_kodu).includes(norm));
+        if (best) {
+            goToSchool(best.id);
+        } else {
+            alert('Yazdığınız kriterde okul bulunamadı. Lütfen listeden bir okul seçiniz.');
         }
     }
 
-    function clearSchoolInput() {
+    function handleSearchKeyDown(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            confirmSchoolSelection();
+        } else if (event.key === 'Escape') {
+            const list = document.getElementById('schoolDropdownList');
+            if (list) list.classList.add('hidden');
+        }
+    }
+
+    function clearSchoolSearch() {
+        selectedSchoolId = null;
         const inp = document.getElementById('schoolSearchInput');
         if (inp) {
             inp.value = '';
             inp.focus();
         }
+        const clearBtn = document.getElementById('clearSearchBtn');
+        if (clearBtn) clearBtn.classList.add('hidden');
+        filterSchoolDropdown('');
     }
+
+    // Dışarı tıklandığında açılır listeyi kapat
+    document.addEventListener('click', function(e) {
+        const wrapper = document.getElementById('schoolSearchWrapper');
+        if (wrapper && !wrapper.contains(e.target)) {
+            const list = document.getElementById('schoolDropdownList');
+            if (list) list.classList.add('hidden');
+        }
+    });
 </script>
 {% endblock %}
 

@@ -190,27 +190,27 @@
         </div>
 
         <form method="POST" action="/okulum-temiz/ekle" class="space-y-3 text-xs">
-            <div>
+            <div class="relative" id="auditSchoolSearchWrapper">
                 <label class="block font-bold text-slate-700 mb-1 flex items-center justify-between">
                     <span>Okul / Kurum:</span>
-                    <span class="text-[10px] text-emerald-600 font-semibold lowercase">anında arama</span>
+                    <span class="text-[10px] text-emerald-600 font-semibold lowercase">anında filtreleme & canlı liste</span>
                 </label>
                 <div class="relative">
                     <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
                         <i class="fa-solid fa-magnifying-glass text-xs"></i>
                     </span>
-                    <input type="text" id="auditSchoolInput" list="auditSchoolsDatalist"
+                    <input type="text" id="auditSchoolInput" 
+                           autocomplete="off"
                            placeholder="Kurum kodu veya okul adı yazarak arayın... (Örn: 970151 veya Tez-Tur)"
                            required
                            class="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition"
-                           oninput="handleAuditSchoolInput(this.value)">
+                           onfocus="showAuditSchoolDropdown()"
+                           oninput="filterAuditSchoolDropdown(this.value)">
                     <input type="hidden" name="school_id" id="auditSchoolId" required>
+                    <!-- GÖRSEL CANLI AÇILIR LİSTE (DROPDOWN) -->
+                    <div id="auditSchoolDropdownList" class="hidden absolute left-0 right-0 top-full mt-1.5 bg-white rounded-2xl shadow-2xl border border-slate-200 z-50 max-h-52 overflow-y-auto divide-y divide-slate-100 text-left">
+                    </div>
                 </div>
-                <datalist id="auditSchoolsDatalist">
-                    {% for sc in all_schools %}
-                    <option value="{{ sc.kurum_kodu }} - {{ sc.kurum_adi }}"></option>
-                    {% endfor %}
-                </datalist>
             </div>
             <div class="grid grid-cols-2 gap-2">
                 <div>
@@ -249,22 +249,83 @@
 
 {% block scripts %}
 <script>
-    const auditSchoolsMap = {
+    const allAuditSchools = [
         {% for sc in all_schools %}
-        "{{ sc.kurum_kodu }}": {{ sc.id }},
+        { id: {{ sc.id }}, name: "{{ sc.kurum_adi }}", code: "{{ sc.kurum_kodu }}" },
         {% endfor %}
-    };
+    ];
 
-    function handleAuditSchoolInput(val) {
-        if (!val) {
-            document.getElementById('auditSchoolId').value = '';
+    function trNormalize(text) {
+        if (!text) return '';
+        return String(text).toLowerCase()
+            .replace(/i̇/g, 'i')
+            .replace(/ı/g, 'i')
+            .replace(/ğ/g, 'g')
+            .replace(/ü/g, 'u')
+            .replace(/ş/g, 's')
+            .replace(/ö/g, 'o')
+            .replace(/ç/g, 'c')
+            .replace(/[^a-z0-9]/g, '');
+    }
+
+    function renderAuditDropdownItems(items) {
+        const list = document.getElementById('auditSchoolDropdownList');
+        if (!list) return;
+
+        if (items.length === 0) {
+            list.innerHTML = `<div class="p-3 text-center text-xs text-slate-500">Eşleşen okul bulunamadı.</div>`;
+            list.classList.remove('hidden');
             return;
         }
-        const match = val.match(/^\s*(\d{6})/);
-        if (match && auditSchoolsMap[match[1]]) {
-            document.getElementById('auditSchoolId').value = auditSchoolsMap[match[1]];
-        }
+
+        let html = '';
+        items.slice(0, 20).forEach(item => {
+            html += `
+                <div onclick="selectAuditSchoolItem(${item.id}, '${item.code}', '${item.name.replace(/'/g, "\\'")}')" 
+                     class="p-2.5 hover:bg-emerald-50 cursor-pointer flex items-center justify-between text-xs transition active:bg-emerald-100 select-none">
+                    <div class="pr-2 min-w-0">
+                        <div class="font-bold text-slate-900 truncate">${item.name}</div>
+                        <div class="text-[11px] text-slate-500 font-mono mt-0.5">Kod: <span class="font-bold text-emerald-700">${item.code}</span></div>
+                    </div>
+                </div>
+            `;
+        });
+        list.innerHTML = html;
+        list.classList.remove('hidden');
     }
+
+    function showAuditSchoolDropdown() {
+        const inp = document.getElementById('auditSchoolInput');
+        filterAuditSchoolDropdown(inp ? inp.value : '');
+    }
+
+    function filterAuditSchoolDropdown(query) {
+        const raw = (query || '').trim();
+        const norm = trNormalize(raw);
+        if (!norm) {
+            renderAuditDropdownItems(allAuditSchools);
+            return;
+        }
+        const filtered = allAuditSchools.filter(sc => {
+            return trNormalize(sc.name).includes(norm) || trNormalize(sc.code).includes(norm);
+        });
+        renderAuditDropdownItems(filtered);
+    }
+
+    function selectAuditSchoolItem(id, code, name) {
+        document.getElementById('auditSchoolId').value = id;
+        document.getElementById('auditSchoolInput').value = `${code} — ${name}`;
+        const list = document.getElementById('auditSchoolDropdownList');
+        if (list) list.classList.add('hidden');
+    }
+
+    document.addEventListener('click', function(e) {
+        const wrapper = document.getElementById('auditSchoolSearchWrapper');
+        if (wrapper && !wrapper.contains(e.target)) {
+            const list = document.getElementById('auditSchoolDropdownList');
+            if (list) list.classList.add('hidden');
+        }
+    });
 
     const auditForm = document.querySelector('form[action="/okulum-temiz/ekle"]');
     if (auditForm) {

@@ -36,36 +36,38 @@
 
     <!-- Okul Seçim Barı -->
     <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div class="flex-1">
+        <div class="flex-1" id="adepSearchWrapper">
             <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5 flex items-center justify-between">
                 <span><i class="fa-solid fa-school text-indigo-600 mr-1.5"></i> Doküman Üretilecek Okulu / Kurumu Seçiniz:</span>
-                <span class="text-[10px] text-indigo-600 font-semibold lowercase">anında arama & filtreleme</span>
+                <span class="text-[10px] text-indigo-600 font-semibold lowercase">anında filtreleme & canlı liste</span>
             </label>
-            <form id="adepSchoolForm" method="GET" action="/adep-yonerge-motoru" class="flex gap-2">
+            <div class="flex gap-2">
                 <div class="relative flex-1">
                     <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                         <i class="fa-solid fa-magnifying-glass text-xs"></i>
                     </span>
-                    <input type="text" id="adepSchoolInput" list="schoolsDatalist"
-                           value="{{ selected_school.kurum_kodu }} - {{ selected_school.kurum_adi }}"
+                    <input type="text" id="adepSchoolInput" 
+                           autocomplete="off"
+                           value="{{ selected_school.kurum_kodu }} — {{ selected_school.kurum_adi }}"
                            placeholder="Kurum kodu veya okul adı yazarak arayın... (Örn: Tez-Tur veya 970151)"
                            class="w-full pl-9 pr-8 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-800 placeholder-slate-400 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition"
-                           oninput="handleAdepSchoolInput(this.value)">
-                    <input type="hidden" name="school_id" id="adepSchoolId" value="{{ selected_school.id }}">
-                    <button type="button" onclick="clearAdepInput()" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600" title="Temizle">
+                           onfocus="showAdepDropdown()"
+                           oninput="filterAdepDropdown(this.value)"
+                           onkeydown="handleAdepKeyDown(event)">
+                    <button type="button" id="clearAdepBtn" onclick="clearAdepSearch()" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600" title="Temizle">
                         <i class="fa-solid fa-xmark text-xs"></i>
                     </button>
                 </div>
-                <datalist id="schoolsDatalist">
-                    {% for sc in all_schools %}
-                    <option value="{{ sc.kurum_kodu }} - {{ sc.kurum_adi }}"></option>
-                    {% endfor %}
-                </datalist>
-                <button type="submit" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl transition flex items-center gap-1.5 shadow-xs">
-                    <i class="fa-solid fa-arrow-rotate-right text-xs"></i>
-                    <span>Yükle</span>
+                <button type="button" id="btnConfirmAdep" onclick="confirmAdepSelection()" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white text-xs font-extrabold rounded-xl transition flex items-center gap-1.5 shadow-xs whitespace-nowrap">
+                    <i class="fa-solid fa-arrow-right text-xs"></i>
+                    <span id="btnConfirmAdepText">Yükle</span>
                 </button>
-            </form>
+            </div>
+
+            <!-- GÖRSEL CANLI AÇILIR LİSTE (DROPDOWN) -->
+            <div id="adepDropdownList" class="hidden absolute left-0 right-0 top-full mt-1.5 bg-white rounded-2xl shadow-2xl border border-slate-200 z-50 max-h-72 overflow-y-auto divide-y divide-slate-100">
+                <!-- JS ile doldurulur -->
+            </div>
         </div>
 
         <div class="flex items-center gap-2 pt-2 md:pt-0">
@@ -332,28 +334,197 @@
 
 {% block scripts %}
 <script>
-    const adepSchoolsMap = {
+    const allAdepSchools = [
         {% for sc in all_schools %}
-        "{{ sc.kurum_kodu }}": {{ sc.id }},
+        {
+            id: {{ sc.id }},
+            kurum_kodu: "{{ sc.kurum_kodu }}",
+            kurum_adi: "{{ sc.kurum_adi }}",
+            kademe: "{{ sc.kademe or sc.kurum_turu or '' }}",
+            tehlike_sinifi: "{{ sc.tehlike_sinifi or 'Az Tehlikeli' }}"
+        },
         {% endfor %}
-    };
+    ];
 
-    function handleAdepSchoolInput(val) {
-        if (!val) return;
-        const match = val.match(/^\s*(\d{6})/);
-        if (match && adepSchoolsMap[match[1]]) {
-            document.getElementById('adepSchoolId').value = adepSchoolsMap[match[1]];
-            document.getElementById('adepSchoolForm').submit();
+    let selectedAdepSchoolId = {{ selected_school.id }};
+
+    function trNormalize(text) {
+        if (!text) return '';
+        return String(text).toLowerCase()
+            .replace(/i̇/g, 'i')
+            .replace(/ı/g, 'i')
+            .replace(/ğ/g, 'g')
+            .replace(/ü/g, 'u')
+            .replace(/ş/g, 's')
+            .replace(/ö/g, 'o')
+            .replace(/ç/g, 'c')
+            .replace(/[^a-z0-9]/g, '');
+    }
+
+    function getDangerBadge(danger) {
+        const d = (danger || '').toUpperCase();
+        if (d.includes('ÇOK') || d.includes('COK')) return 'bg-rose-100 text-rose-800 border border-rose-200';
+        if (d.includes('TEHLİKELİ') || d.includes('TEHLIKELI')) return 'bg-amber-100 text-amber-800 border border-amber-200';
+        return 'bg-slate-100 text-slate-700 border border-slate-200';
+    }
+
+    function renderAdepDropdownItems(items, query) {
+        const list = document.getElementById('adepDropdownList');
+        if (!list) return;
+
+        if (items.length === 0) {
+            list.innerHTML = `
+                <div class="p-4 text-center text-xs text-slate-500">
+                    <i class="fa-solid fa-circle-exclamation text-amber-500 mr-1.5"></i>
+                    <span>"<strong>${query || ''}</strong>" ile eşleşen okul bulunamadı.</span>
+                </div>
+            `;
+            list.classList.remove('hidden');
+            return;
+        }
+
+        let html = '';
+        items.slice(0, 25).forEach(item => {
+            const dangerBadge = getDangerBadge(item.tehlike_sinifi);
+            html += `
+                <div onclick="selectAdepSchoolItem(${item.id}, '${item.kurum_kodu}', '${item.kurum_adi.replace(/'/g, "\\'")}')" 
+                     class="p-3 hover:bg-indigo-50 cursor-pointer flex items-center justify-between text-xs transition active:bg-indigo-100 select-none">
+                    <div class="pr-2 min-w-0">
+                        <div class="font-bold text-slate-900 truncate">${item.kurum_adi}</div>
+                        <div class="text-[11px] text-slate-500 font-mono mt-0.5">
+                            Kod: <span class="font-extrabold text-indigo-700">${item.kurum_kodu}</span> 
+                            ${item.kademe ? `• ${item.kademe}` : ''}
+                        </div>
+                    </div>
+                    <span class="px-2 py-0.5 rounded text-[10px] font-bold ${dangerBadge} flex-shrink-0">
+                        ${item.tehlike_sinifi}
+                    </span>
+                </div>
+            `;
+        });
+
+        if (items.length > 25) {
+            html += `<div class="p-2 text-center text-[11px] text-slate-400 bg-slate-50">...ve ${items.length - 25} okul daha var. Daraltmak için yazmaya devam edin.</div>`;
+        }
+
+        list.innerHTML = html;
+        list.classList.remove('hidden');
+    }
+
+    function showAdepDropdown() {
+        const inp = document.getElementById('adepSchoolInput');
+        filterAdepDropdown(inp ? inp.value : '');
+    }
+
+    function filterAdepDropdown(query) {
+        const raw = (query || '').trim();
+        const norm = trNormalize(raw);
+        const clearBtn = document.getElementById('clearAdepBtn');
+        if (clearBtn) {
+            if (raw.length > 0) clearBtn.classList.remove('hidden');
+            else clearBtn.classList.add('hidden');
+        }
+
+        if (!norm) {
+            renderAdepDropdownItems(allAdepSchools, '');
+            return;
+        }
+
+        const filtered = allAdepSchools.filter(sc => {
+            const nameNorm = trNormalize(sc.kurum_adi);
+            const codeNorm = trNormalize(sc.kurum_kodu);
+            return nameNorm.includes(norm) || codeNorm.includes(norm);
+        });
+
+        renderAdepDropdownItems(filtered, raw);
+    }
+
+    function selectAdepSchoolItem(id, code, name) {
+        selectedAdepSchoolId = id;
+        const inp = document.getElementById('adepSchoolInput');
+        if (inp) inp.value = `${code} — ${name}`;
+        
+        const list = document.getElementById('adepDropdownList');
+        if (list) list.classList.add('hidden');
+
+        const clearBtn = document.getElementById('clearAdepBtn');
+        if (clearBtn) clearBtn.classList.remove('hidden');
+
+        // HEMEN YÜKLE
+        goToAdepSchool(id);
+    }
+
+    function goToAdepSchool(id) {
+        const btn = document.getElementById('btnConfirmAdep');
+        const text = document.getElementById('btnConfirmAdepText');
+        if (btn && text) {
+            btn.disabled = true;
+            text.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> Yükleniyor...';
+        }
+        window.location.href = '/adep-yonerge-motoru?school_id=' + id;
+    }
+
+    function confirmAdepSelection() {
+        if (selectedAdepSchoolId) {
+            goToAdepSchool(selectedAdepSchoolId);
+            return;
+        }
+
+        const inp = document.getElementById('adepSchoolInput');
+        const raw = inp ? inp.value.trim() : '';
+        if (!raw) {
+            alert('Lütfen arama kutusuna okul adı veya kurum kodu yazınız.');
+            return;
+        }
+
+        const matchCode = raw.match(/^\s*(\d{6})/);
+        if (matchCode) {
+            const found = allAdepSchools.find(s => s.kurum_kodu === matchCode[1]);
+            if (found) {
+                goToAdepSchool(found.id);
+                return;
+            }
+        }
+
+        const norm = trNormalize(raw);
+        const best = allAdepSchools.find(s => trNormalize(s.kurum_adi).includes(norm) || trNormalize(s.kurum_kodu).includes(norm));
+        if (best) {
+            goToAdepSchool(best.id);
+        } else {
+            alert('Yazdığınız kriterde okul bulunamadı. Lütfen listeden bir okul seçiniz.');
         }
     }
 
-    function clearAdepInput() {
+    function handleAdepKeyDown(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            confirmAdepSelection();
+        } else if (event.key === 'Escape') {
+            const list = document.getElementById('adepDropdownList');
+            if (list) list.classList.add('hidden');
+        }
+    }
+
+    function clearAdepSearch() {
+        selectedAdepSchoolId = null;
         const inp = document.getElementById('adepSchoolInput');
         if (inp) {
             inp.value = '';
             inp.focus();
         }
+        const clearBtn = document.getElementById('clearAdepBtn');
+        if (clearBtn) clearBtn.classList.add('hidden');
+        filterAdepDropdown('');
     }
+
+    // Dışarı tıklandığında açılır listeyi kapat
+    document.addEventListener('click', function(e) {
+        const wrapper = document.getElementById('adepSearchWrapper');
+        if (wrapper && !wrapper.contains(e.target)) {
+            const list = document.getElementById('adepDropdownList');
+            if (list) list.classList.add('hidden');
+        }
+    });
 </script>
 {% endblock %}
 
