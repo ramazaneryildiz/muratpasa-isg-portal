@@ -311,10 +311,12 @@
 <script>
     let speechRecognition = null;
     let isListening = false;
+    let userStoppedManually = false;
+    let baseTranscript = '';            // Konuşma başlamadan önce kutuda olan metin
+    let previousCyclesTranscript = '';  // Önceki sessizlik/yeniden başlatma döngülerinde kesinleşen metin
+    let currentCycleFinal = '';         // Mevcut döngüde isFinal olan metin
     let selectedImageFile = null;
     let lastAnalysisResult = null;
-    let userStoppedManually = false;
-    let finalTranscript = '';
 
     // Mobil URL & QR Yardımcıları
     function copyText(val, elemId) {
@@ -343,7 +345,49 @@
         }
     }
 
-    // Web Speech API Kurulumu (Türkçe Destekli & Kesintisiz Dinleme)
+    // Tekrarlanan ardışık kelime ve cümle kalıplarını temizleyen zeki filtre
+    function deduplicateConsecutivePhrases(text) {
+        if (!text) return '';
+        let words = text.replace(/\s+/g, ' ').trim().split(' ');
+        let changed = true;
+        while (changed) {
+            changed = false;
+            const maxW = Math.min(15, Math.floor(words.length / 2));
+            for (let w = maxW; w >= 2; w--) {
+                for (let i = 0; i <= words.length - 2 * w; i++) {
+                    const c1 = words.slice(i, i + w).join(' ').toLowerCase();
+                    const c2 = words.slice(i + w, i + 2 * w).join(' ').toLowerCase();
+                    if (c1 === c2) {
+                        words.splice(i + w, w);
+                        changed = true;
+                        break;
+                    }
+                }
+                if (changed) break;
+            }
+        }
+        // Tekrarlanan ardışık tek kelimeleri temizle (örn: "şu şu anda" -> "şu anda")
+        const cleaned = [];
+        for (let i = 0; i < words.length; i++) {
+            if (i === 0 || words[i].toLowerCase() !== words[i - 1].toLowerCase()) {
+                cleaned.push(words[i]);
+            }
+        }
+        return cleaned.join(' ');
+    }
+
+    function updateTextareaDisplay(activeRun) {
+        const parts = [];
+        if (baseTranscript) parts.push(baseTranscript);
+        if (previousCyclesTranscript) parts.push(previousCyclesTranscript);
+        if (activeRun) parts.push(activeRun);
+
+        let merged = parts.join(' ').trim();
+        merged = deduplicateConsecutivePhrases(merged);
+        document.getElementById('fieldTranscript').value = merged;
+    }
+
+    // Web Speech API Kurulumu (Türkçe Destekli & Kesintisiz, Tekrarsız Dinleme)
     function initSpeech() {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         if (!SpeechRecognition) {
@@ -363,26 +407,29 @@
         };
 
         speechRecognition.onresult = (event) => {
-            let interimTranscript = '';
-            for (let i = event.resultIndex; i < event.results.length; ++i) {
-                const transcript = event.results[i][0].transcript;
-                if (event.results[i].isFinal) {
-                    finalTranscript += transcript + ' ';
+            let sessionFinal = '';
+            let sessionInterim = '';
+
+            // Android Chrome event.results dizisini yerinde günceller; baştan sona tek geçişte temizce oku
+            for (let i = 0; i < event.results.length; ++i) {
+                const res = event.results[i];
+                const text = res[0].transcript.trim();
+                if (res.isFinal) {
+                    sessionFinal += (sessionFinal ? ' ' : '') + text;
                 } else {
-                    interimTranscript += transcript;
+                    sessionInterim += (sessionInterim ? ' ' : '') + text;
                 }
             }
-            const textarea = document.getElementById('fieldTranscript');
-            const fullText = (finalTranscript + interimTranscript).trim();
-            if (fullText) {
-                textarea.value = fullText;
-            }
+
+            currentCycleFinal = sessionFinal;
+            const activeRun = (sessionFinal + (sessionInterim ? (' ' + sessionInterim) : '')).trim();
+            updateTextareaDisplay(activeRun);
         };
 
         speechRecognition.onerror = (event) => {
             console.warn('Ses hatası:', event.error);
             if (event.error === 'no-speech') {
-                // Kısa süreli sessizlik; kullanıcı manuel durdurana kadar devam et
+                // Kısa süreli sessizlik; kullanıcı manuel durdurana kadar dinlemeye devam et
                 return;
             }
             if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
@@ -394,6 +441,12 @@
         };
 
         speechRecognition.onend = () => {
+            // Mevcut döngüde kesinleşen metni sakla
+            if (currentCycleFinal) {
+                previousCyclesTranscript = (previousCyclesTranscript ? (previousCyclesTranscript + ' ') : '') + currentCycleFinal;
+                currentCycleFinal = '';
+            }
+
             // Kullanıcı durdur butonuna basmadıysa, mobil tarayıcı sessizlik yüzünden kesse bile devam et
             if (isListening && !userStoppedManually) {
                 try {
@@ -403,9 +456,10 @@
                         if (isListening && !userStoppedManually) {
                             try { speechRecognition.start(); } catch(err) {}
                         }
-                    }, 250);
+                    }, 200);
                 }
             } else {
+                isListening = false;
                 setListeningUi(false);
             }
         };
@@ -433,14 +487,20 @@
             try {
                 speechRecognition.stop();
             } catch (err) {}
+            if (currentCycleFinal) {
+                previousCyclesTranscript = (previousCyclesTranscript ? (previousCyclesTranscript + ' ') : '') + currentCycleFinal;
+                currentCycleFinal = '';
+            }
+            updateTextareaDisplay('');
             setListeningUi(false);
         } else {
             // Kullanıcı dinlemeyi başlattı
             userStoppedManually = false;
             isListening = true;
             const textarea = document.getElementById('fieldTranscript');
-            // Kutuda önceden yazılmış metin varsa koru ve sonuna ekle
-            finalTranscript = textarea.value.trim() ? textarea.value.trim() + ' ' : '';
+            baseTranscript = textarea.value.trim();
+            previousCyclesTranscript = '';
+            currentCycleFinal = '';
             try {
                 speechRecognition.start();
                 setListeningUi(true);
@@ -482,7 +542,9 @@
     }
 
     function clearTranscript() {
-        finalTranscript = '';
+        baseTranscript = '';
+        previousCyclesTranscript = '';
+        currentCycleFinal = '';
         document.getElementById('fieldTranscript').value = '';
     }
 
@@ -700,7 +762,9 @@
             }
             setListeningUi(false);
         }
-        finalTranscript = '';
+        baseTranscript = '';
+        previousCyclesTranscript = '';
+        currentCycleFinal = '';
         document.getElementById('fieldTranscript').value = '';
         removePhoto();
         document.getElementById('resultCard').classList.add('hidden');

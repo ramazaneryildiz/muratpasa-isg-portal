@@ -433,6 +433,22 @@ def process_field_voice_and_vision_hazard(
     matched_school = None
     if schools_cache:
         t_lower = voice_transcript.lower().replace("-", " ")
+        # Sık rastlanan Türkçe ses tanıma / telaffuz varyasyonları
+        phonetic_fixes = {
+            "test tur": "tez tur",
+            "testur": "tez tur",
+            "teztur": "tez tur",
+            "falez": "falez turizm",
+            "serkan colkesen": "serkan çölkesen",
+            "cölkesen": "çölkesen",
+            "colkesen": "çölkesen",
+            "baro": "antalya barosu",
+            "metin nuran": "metin nuran çakallıklı"
+        }
+        for bad_p, good_p in phonetic_fixes.items():
+            if bad_p in t_lower:
+                t_lower = t_lower.replace(bad_p, good_p)
+
         tokens = [w for w in t_lower.split() if len(w) > 2]
         best_score = 0
         for s in schools_cache:
@@ -441,8 +457,8 @@ def process_field_voice_and_vision_hazard(
             for token in tokens:
                 if token in name_lower:
                     score += len(token) * 2
-                if token in ["teztur", "tez"] and "tez tur" in name_lower:
-                    score += 25
+                if token in ["tez", "teztur"] and "tez tur" in name_lower:
+                    score += 35
             if score > best_score and score >= 6:
                 best_score = score
                 matched_school = s
