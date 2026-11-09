@@ -125,28 +125,43 @@
             <textarea id="fieldTranscript" rows="3" placeholder="Mikrofona basarak konuşun veya doğrudan buraya yazınız. Örn: 'Gazi Anadolu Lisesi kazan dairesinde emniyet ventili su akıtıyor, basınç göstergesi arızalı...'" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs text-slate-800 focus:bg-white focus:border-slate-400 focus:outline-none transition leading-relaxed"></textarea>
         </div>
 
-        <!-- Fotoğraf / Kamera Girişi -->
+        <!-- Fotoğraf / Kamera & Galeri Girişi -->
         <div class="space-y-2">
             <label class="block text-xs font-bold text-slate-700">
                 Olay Yeri Fotoğrafı (İsteğe Bağlı):
             </label>
             
-            <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-                <label class="cursor-pointer inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold border border-slate-200 transition shadow-xs">
-                    <i class="fa-solid fa-camera text-slate-500"></i>
-                    <span>Fotoğraf Çek / Galeriden Seç</span>
+            <div class="flex flex-wrap items-center gap-2.5">
+                <!-- 1. Doğrudan Kamera ile Çek (capture="environment") -->
+                <label class="cursor-pointer inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition shadow-xs active:scale-95">
+                    <i class="fa-solid fa-camera text-slate-300"></i>
+                    <span>Fotoğraf Çek (Kamera)</span>
                     <input type="file" id="cameraInput" accept="image/*" capture="environment" onchange="handleImageSelected(this)" class="hidden">
                 </label>
 
-                <div id="photoPreviewContainer" class="hidden flex items-center gap-2 p-1.5 bg-slate-50 border border-slate-200 rounded-xl">
-                    <img id="photoPreviewImg" src="" alt="Önizleme" class="w-12 h-12 rounded-lg object-cover border border-slate-300">
-                    <div class="text-[11px] pr-2">
-                        <div id="photoFileName" class="font-bold text-slate-800 truncate max-w-xs">foto.jpg</div>
-                        <button type="button" onclick="removePhoto()" class="text-rose-600 hover:text-rose-800 font-semibold text-[10px]">
-                            Kaldır
-                        </button>
+                <!-- 2. Galeriden / Dosyalardan Seç (capture parametresiz -> Galeri açılır) -->
+                <label class="cursor-pointer inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold border border-slate-300 transition shadow-xs active:scale-95">
+                    <i class="fa-solid fa-images text-slate-600"></i>
+                    <span>Galeriden Seç</span>
+                    <input type="file" id="galleryInput" accept="image/*" onchange="handleImageSelected(this)" class="hidden">
+                </label>
+            </div>
+
+            <!-- Önizleme Kartı -->
+            <div id="photoPreviewContainer" class="hidden flex items-center justify-between p-2.5 bg-slate-50 border border-slate-200 rounded-xl max-w-md mt-2">
+                <div class="flex items-center gap-3">
+                    <img id="photoPreviewImg" src="" alt="Önizleme" class="w-14 h-14 rounded-lg object-cover border border-slate-300 shadow-2xs">
+                    <div class="text-[11px] space-y-0.5">
+                        <div id="photoFileName" class="font-bold text-slate-900 truncate max-w-[180px] sm:max-w-xs">foto.jpg</div>
+                        <div class="text-[10px] text-emerald-700 font-semibold flex items-center gap-1">
+                            <i class="fa-solid fa-circle-check"></i> Fotoğraf eklendi
+                        </div>
                     </div>
                 </div>
+                <button type="button" onclick="removePhoto()" class="px-2.5 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs border border-rose-200 transition flex items-center gap-1">
+                    <i class="fa-solid fa-trash-can text-[11px]"></i>
+                    <span>Kaldır</span>
+                </button>
             </div>
         </div>
 
@@ -298,6 +313,8 @@
     let isListening = false;
     let selectedImageFile = null;
     let lastAnalysisResult = null;
+    let userStoppedManually = false;
+    let finalTranscript = '';
 
     // Mobil URL & QR Yardımcıları
     function copyText(val, elemId) {
@@ -326,7 +343,7 @@
         }
     }
 
-    // Web Speech API Kurulumu (Türkçe Destekli & Mobil Klavye Dikte Dostu)
+    // Web Speech API Kurulumu (Türkçe Destekli & Kesintisiz Dinleme)
     function initSpeech() {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         if (!SpeechRecognition) {
@@ -336,42 +353,67 @@
         }
 
         speechRecognition = new SpeechRecognition();
-        speechRecognition.continuous = false;
+        speechRecognition.continuous = true;
         speechRecognition.interimResults = true;
         speechRecognition.lang = 'tr-TR';
 
         speechRecognition.onstart = () => {
             isListening = true;
-            document.getElementById('liveListeningIndicator').classList.remove('hidden');
-            document.getElementById('voiceIcon').className = 'fa-solid fa-waveform-lines text-2xl text-rose-400 animate-bounce';
-            document.getElementById('voiceBtnText').innerText = 'Dinliyor';
+            setListeningUi(true);
         };
 
         speechRecognition.onresult = (event) => {
-            let transcript = '';
-            for (let i = event.resultIndex; i < event.results.length; i++) {
-                transcript += event.results[i][0].transcript;
+            let interimTranscript = '';
+            for (let i = event.resultIndex; i < event.results.length; ++i) {
+                const transcript = event.results[i][0].transcript;
+                if (event.results[i].isFinal) {
+                    finalTranscript += transcript + ' ';
+                } else {
+                    interimTranscript += transcript;
+                }
             }
             const textarea = document.getElementById('fieldTranscript');
-            if (transcript.trim()) {
-                textarea.value = transcript;
+            const fullText = (finalTranscript + interimTranscript).trim();
+            if (fullText) {
+                textarea.value = fullText;
             }
         };
 
         speechRecognition.onerror = (event) => {
             console.warn('Ses hatası:', event.error);
-            stopListening();
+            if (event.error === 'no-speech') {
+                // Kısa süreli sessizlik; kullanıcı manuel durdurana kadar devam et
+                return;
+            }
+            if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+                userStoppedManually = true;
+                isListening = false;
+                setListeningUi(false);
+                alert('Mikrofon erişim izni verilmedi veya engellendi.');
+            }
         };
 
         speechRecognition.onend = () => {
-            stopListening();
+            // Kullanıcı durdur butonuna basmadıysa, mobil tarayıcı sessizlik yüzünden kesse bile devam et
+            if (isListening && !userStoppedManually) {
+                try {
+                    speechRecognition.start();
+                } catch (e) {
+                    setTimeout(() => {
+                        if (isListening && !userStoppedManually) {
+                            try { speechRecognition.start(); } catch(err) {}
+                        }
+                    }, 250);
+                }
+            } else {
+                setListeningUi(false);
+            }
         };
     }
 
     function toggleSpeechRecognition() {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         if (!SpeechRecognition) {
-            // Web Speech API desteklenmiyorsa veya HTTP kısıtlaması varsa metin kutusuna odaklan
             const textarea = document.getElementById('fieldTranscript');
             textarea.focus();
             document.getElementById('voiceStatusMsg').innerHTML = 
@@ -385,29 +427,66 @@
         if (!speechRecognition) return;
 
         if (isListening) {
-            speechRecognition.stop();
-            stopListening();
+            // Kullanıcı dokunup durdurdu
+            userStoppedManually = true;
+            isListening = false;
+            try {
+                speechRecognition.stop();
+            } catch (err) {}
+            setListeningUi(false);
         } else {
+            // Kullanıcı dinlemeyi başlattı
+            userStoppedManually = false;
+            isListening = true;
+            const textarea = document.getElementById('fieldTranscript');
+            // Kutuda önceden yazılmış metin varsa koru ve sonuna ekle
+            finalTranscript = textarea.value.trim() ? textarea.value.trim() + ' ' : '';
             try {
                 speechRecognition.start();
+                setListeningUi(true);
             } catch (err) {
                 console.error(err);
+                try {
+                    speechRecognition.stop();
+                    setTimeout(() => {
+                        try {
+                            speechRecognition.start();
+                            setListeningUi(true);
+                        } catch(e) {}
+                    }, 200);
+                } catch(e) {}
             }
         }
     }
 
-    function stopListening() {
-        isListening = false;
-        document.getElementById('liveListeningIndicator').classList.add('hidden');
-        document.getElementById('voiceIcon').className = 'fa-solid fa-microphone text-2xl group-hover:scale-110 transition-transform';
-        document.getElementById('voiceBtnText').innerText = 'Konuş';
+    function setListeningUi(active) {
+        const btn = document.getElementById('voiceRecordBtn');
+        const icon = document.getElementById('voiceIcon');
+        const text = document.getElementById('voiceBtnText');
+        const ind = document.getElementById('liveListeningIndicator');
+        const msg = document.getElementById('voiceStatusMsg');
+
+        if (active) {
+            btn.className = 'w-20 h-20 rounded-full bg-rose-600 hover:bg-rose-700 text-white flex flex-col items-center justify-center shadow-lg ring-4 ring-rose-200 transition-all duration-200 active:scale-95 group focus:outline-none animate-pulse';
+            icon.className = 'fa-solid fa-stop text-2xl';
+            text.innerText = 'Durdur';
+            ind.classList.remove('hidden');
+            msg.innerHTML = '<span class="text-rose-700 font-bold"><i class="fa-solid fa-circle-dot mr-1 animate-ping"></i> Kesintisiz dinleme devrede. Bitirmek için kırmızı <strong>Durdur</strong> butonuna dokunun.</span>';
+        } else {
+            btn.className = 'w-20 h-20 rounded-full bg-slate-900 hover:bg-slate-800 text-white flex flex-col items-center justify-center shadow-md transition-all duration-200 hover:scale-105 active:scale-95 group focus:outline-none';
+            icon.className = 'fa-solid fa-microphone text-2xl group-hover:scale-110 transition-transform';
+            text.innerText = 'Konuş';
+            ind.classList.add('hidden');
+            msg.innerHTML = '<i class="fa-solid fa-circle-info text-slate-400 mr-1"></i> <span>Butona basıp konuşun: <em>"Şimdi Tez-Tur Meslek\'te mutfak atölyesindeyim, duvarda fayanslar dökülmüş..."</em></span>';
+        }
     }
 
     function clearTranscript() {
+        finalTranscript = '';
         document.getElementById('fieldTranscript').value = '';
     }
 
-    // Fotoğraf Seçimi
+    // Fotoğraf Seçimi (Hem Kamera Hem Galeri)
     function handleImageSelected(input) {
         if (input.files && input.files[0]) {
             selectedImageFile = input.files[0];
@@ -423,7 +502,10 @@
 
     function removePhoto() {
         selectedImageFile = null;
-        document.getElementById('cameraInput').value = '';
+        const cInp = document.getElementById('cameraInput');
+        if (cInp) cInp.value = '';
+        const gInp = document.getElementById('galleryInput');
+        if (gInp) gInp.value = '';
         document.getElementById('photoPreviewContainer').classList.add('hidden');
     }
 
@@ -610,6 +692,15 @@
     }
 
     function resetInspectionForm() {
+        if (isListening) {
+            userStoppedManually = true;
+            isListening = false;
+            if (speechRecognition) {
+                try { speechRecognition.stop(); } catch(e) {}
+            }
+            setListeningUi(false);
+        }
+        finalTranscript = '';
         document.getElementById('fieldTranscript').value = '';
         removePhoto();
         document.getElementById('resultCard').classList.add('hidden');
