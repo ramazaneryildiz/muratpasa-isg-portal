@@ -16,5 +16,6 @@ static/uploads/okullar/*
 !static/uploads/okullar/.gitkeep
 static/uploads/arsiv/*
 !static/uploads/arsiv/.gitkeep
+static/uploads/saha_photos/*
 cloudflared.exe
 tunnel_url.txt

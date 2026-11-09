@@ -89,6 +89,37 @@
             </span>
         </div>
 
+        <!-- ==================== AKTİF DENETİM OKULU (SAHA KİLİDİ) ==================== -->
+        <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                    <i class="fa-solid fa-location-dot text-rose-500"></i>
+                    <span>Şu An Denetlenen Okul:</span>
+                </span>
+                <span id="schoolLockBadge" class="hidden text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
+                    <i class="fa-solid fa-lock mr-0.5"></i> Kilitli Mod
+                </span>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <select id="activeSchoolSelect" onchange="handleActiveSchoolChange(this.value)" class="flex-1 bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400 transition">
+                    <option value="">⚡ Otomatik (Sesli İfadeden Okulu Algıla)</option>
+                    {% for sc in all_schools %}
+                    <option value="{{ sc.id }}">{{ sc.kurum_adi }} ({{ sc.kurum_kodu }})</option>
+                    {% endfor %}
+                </select>
+                <button type="button" id="clearLockBtn" onclick="clearSchoolLock()" class="hidden px-3 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold transition flex items-center gap-1 shadow-xs" title="Kilidi Kaldır">
+                    <i class="fa-solid fa-lock-open text-[11px]"></i>
+                    <span class="text-[11px]">Aç</span>
+                </button>
+            </div>
+
+            <div id="schoolLockHint" class="hidden text-[11px] text-emerald-800 bg-emerald-50 p-2 rounded-lg border border-emerald-200 leading-snug">
+                <i class="fa-solid fa-circle-check text-emerald-600 mr-1"></i>
+                <strong>Okul Kilitlendi:</strong> Sahada dolaşırken okul adı söylemenize gerek yoktur. Doğrudan <em>"Mutfak atölyesinde fayanslar dökülmüş"</em> veya <em>"Kazan dairesi emniyet ventili su damlatıyor"</em> demeniz yeterlidir!
+            </div>
+        </div>
+
         <!-- Mikrofon & Ses Kayıt Butonu -->
         <div class="bg-slate-50 rounded-2xl p-5 border border-slate-200 text-center space-y-3">
             <div class="flex items-center justify-center">
@@ -214,11 +245,22 @@
                 <i class="fa-solid fa-circle-check text-emerald-600"></i>
                 <span>Eşleşen Kurum:</span>
             </div>
-            <select id="selectSchoolOverride" class="bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs font-bold text-slate-800 focus:outline-none flex-1 max-w-md">
+            <select id="selectSchoolOverride" onchange="onManualSchoolOverride(this.value)" class="bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs font-bold text-slate-800 focus:outline-none flex-1 max-w-md">
                 {% for sc in all_schools %}
                 <option value="{{ sc.id }}">{{ sc.kurum_kodu }} — {{ sc.kurum_adi }}</option>
                 {% endfor %}
             </select>
+        </div>
+
+        <!-- Hızlı Aday Çipleri (Tek Dokunuşla Okul Değiştirme) -->
+        <div id="candidateChipsContainer" class="hidden p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+            <div class="text-[11px] font-bold text-slate-600 flex items-center gap-1.5">
+                <i class="fa-solid fa-wand-magic-sparkles text-slate-500"></i>
+                <span>En Yakın Aday Okullar (Tek Dokunuşla Seçin):</span>
+            </div>
+            <div id="candidateChipsList" class="flex flex-wrap items-center gap-2 pt-0.5">
+                <!-- JavaScript tarafından dinamik oluşturulur -->
+            </div>
         </div>
 
         <!-- Tehlike & Olası Senaryo -->
@@ -317,6 +359,38 @@
     let currentCycleFinal = '';         // Mevcut döngüde isFinal olan metin
     let selectedImageFile = null;
     let lastAnalysisResult = null;
+    let lockedSchoolId = null;
+    let lockedSchoolName = '';
+
+    // Saha Aktif Okul Kilitleme Yardımcıları
+    function handleActiveSchoolChange(val) {
+        const lockBadge = document.getElementById('schoolLockBadge');
+        const lockHint = document.getElementById('schoolLockHint');
+        const clearBtn = document.getElementById('clearLockBtn');
+        const select = document.getElementById('activeSchoolSelect');
+
+        if (val) {
+            lockedSchoolId = parseInt(val);
+            lockedSchoolName = select.options[select.selectedIndex].text;
+            lockBadge.classList.remove('hidden');
+            lockHint.classList.remove('hidden');
+            clearBtn.classList.remove('hidden');
+            select.classList.add('border-emerald-500', 'bg-emerald-50/50');
+        } else {
+            clearSchoolLock();
+        }
+    }
+
+    function clearSchoolLock() {
+        lockedSchoolId = null;
+        lockedSchoolName = '';
+        const select = document.getElementById('activeSchoolSelect');
+        select.value = '';
+        select.classList.remove('border-emerald-500', 'bg-emerald-50/50');
+        document.getElementById('schoolLockBadge').classList.add('hidden');
+        document.getElementById('schoolLockHint').classList.add('hidden');
+        document.getElementById('clearLockBtn').classList.add('hidden');
+    }
 
     // Mobil URL & QR Yardımcıları
     function copyText(val, elemId) {
@@ -593,6 +667,9 @@
         if (selectedImageFile) {
             formData.append('photo', selectedImageFile);
         }
+        if (lockedSchoolId) {
+            formData.append('locked_school_id', lockedSchoolId);
+        }
 
         try {
             const resp = await fetch('/api/ai/field-voice-inspect', {
@@ -617,6 +694,30 @@
         }
     }
 
+    function selectCandidateSchool(id, name, code) {
+        document.getElementById('selectSchoolOverride').value = id;
+        document.getElementById('resSchoolName').innerText = `${name} (${code || ''})`;
+
+        const chips = document.querySelectorAll('.candidate-chip');
+        chips.forEach(chip => {
+            if (chip.innerText.includes(name)) {
+                chip.className = 'candidate-chip px-3 py-1.5 rounded-xl bg-slate-900 text-white font-bold text-xs shadow-xs flex items-center gap-1.5 transition active:scale-95';
+                const icon = chip.querySelector('i');
+                if (icon) icon.className = 'fa-solid fa-circle-check text-emerald-400';
+            } else {
+                chip.className = 'candidate-chip px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-semibold text-xs border border-slate-300 shadow-2xs flex items-center gap-1.5 transition active:scale-95';
+                const icon = chip.querySelector('i');
+                if (icon) icon.className = 'fa-solid fa-school text-slate-400';
+            }
+        });
+    }
+
+    function onManualSchoolOverride(val) {
+        const sel = document.getElementById('selectSchoolOverride');
+        const txt = sel.options[sel.selectedIndex].text;
+        document.getElementById('resSchoolName').innerText = txt;
+    }
+
     function renderAnalysisResult(d) {
         const card = document.getElementById('resultCard');
         card.classList.remove('hidden');
@@ -628,6 +729,34 @@
             document.getElementById('selectSchoolOverride').value = matched.id;
         } else {
             document.getElementById('resSchoolName').innerText = d.school_name_detected || 'Okul Belirtilmedi';
+        }
+
+        // Hızlı Aday Çipleri (Tek Dokunuşla Seçim Rozetleri)
+        const chipsContainer = document.getElementById('candidateChipsContainer');
+        const chipsList = document.getElementById('candidateChipsList');
+        chipsList.innerHTML = '';
+
+        if (d.candidate_schools && d.candidate_schools.length > 0) {
+            chipsContainer.classList.remove('hidden');
+            const currentSelectedId = matched ? matched.id : parseInt(document.getElementById('selectSchoolOverride').value);
+
+            d.candidate_schools.forEach(cand => {
+                const isSelected = (cand.id === currentSelectedId);
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = isSelected
+                    ? 'candidate-chip px-3 py-1.5 rounded-xl bg-slate-900 text-white font-bold text-xs shadow-xs flex items-center gap-1.5 transition active:scale-95'
+                    : 'candidate-chip px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-semibold text-xs border border-slate-300 shadow-2xs flex items-center gap-1.5 transition active:scale-95';
+
+                btn.innerHTML = `
+                    <i class="fa-solid ${isSelected ? 'fa-circle-check text-emerald-400' : 'fa-school text-slate-400'}"></i>
+                    <span>${cand.kurum_adi}</span>
+                `;
+                btn.onclick = () => selectCandidateSchool(cand.id, cand.kurum_adi, cand.kurum_kodu);
+                chipsList.appendChild(btn);
+            });
+        } else {
+            chipsContainer.classList.add('hidden');
         }
 
         // Birim / Atölye

@@ -3457,7 +3457,8 @@ def saha_asistani_page(request: Request):
 async def api_field_voice_inspect(
     request: Request,
     transcript: str = Form(...),
-    photo: Optional[UploadFile] = File(None)
+    photo: Optional[UploadFile] = File(None),
+    locked_school_id: Optional[int] = Form(None)
 ):
     """Sözlü saha tespiti ve olay yeri fotoğrafını Gemini Multimodal ile analiz eder."""
     user = get_current_user(request)
@@ -3490,7 +3491,8 @@ async def api_field_voice_inspect(
         voice_transcript=transcript,
         image_bytes=image_bytes,
         image_mime=image_mime,
-        schools_cache=schools_cache
+        schools_cache=schools_cache,
+        locked_school_id=locked_school_id
     )
 
     if result.get("success"):

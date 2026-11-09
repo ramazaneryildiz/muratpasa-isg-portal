@@ -414,12 +414,14 @@ def process_field_voice_and_vision_hazard(
     voice_transcript: str,
     image_bytes: bytes = None,
     image_mime: str = "image/jpeg",
-    schools_cache: list = None
+    schools_cache: list = None,
+    locked_school_id: int = None
 ) -> dict:
     """
     Sahada sesli not bırakan ve (varsa) fotoğraf çeken İSG uzmanının tespitini
     Gemini Multimodal yapay zekası ile analiz eder:
-    - 268 okul arasından ilgili okulu tespit eder,
+    - 268 okul arasından ilgili okulu tespit eder veya kilitli okulu baz alır,
+    - En yakın aday okulları (candidate_schools) üretir,
     - Bölüm / Atölyeyi belirler,
     - Tehlike kaynağını ve olası risk senaryosunu oluşturur,
     - Fine-Kinney matris parametrelerini (O, F, Ş, Skor) hesaplar,
@@ -427,41 +429,83 @@ def process_field_voice_and_vision_hazard(
     - Yasal termin ve sorumluları belirler.
     """
     import base64
+    import difflib
     from datetime import datetime, timedelta
 
-    # Okul ön eşleştirme (Python fuzzy token matcher)
     matched_school = None
-    if schools_cache:
-        t_lower = voice_transcript.lower().replace("-", " ")
-        # Sık rastlanan Türkçe ses tanıma / telaffuz varyasyonları
-        phonetic_fixes = {
-            "test tur": "tez tur",
-            "testur": "tez tur",
-            "teztur": "tez tur",
-            "falez": "falez turizm",
-            "serkan colkesen": "serkan çölkesen",
-            "cölkesen": "çölkesen",
-            "colkesen": "çölkesen",
-            "baro": "antalya barosu",
-            "metin nuran": "metin nuran çakallıklı"
-        }
-        for bad_p, good_p in phonetic_fixes.items():
-            if bad_p in t_lower:
-                t_lower = t_lower.replace(bad_p, good_p)
+    candidate_schools = []
 
-        tokens = [w for w in t_lower.split() if len(w) > 2]
-        best_score = 0
+    # 1. Uzman sayfada önceden okulu kilitlediyse doğrudan onu kullan
+    if locked_school_id and schools_cache:
+        try:
+            l_id = int(locked_school_id)
+            for s in schools_cache:
+                if s.get("id") == l_id:
+                    matched_school = s
+                    candidate_schools = [{
+                        "id": s["id"],
+                        "kurum_kodu": s["kurum_kodu"],
+                        "kurum_adi": s["kurum_adi"],
+                        "score": 100.0
+                    }]
+                    break
+        except (ValueError, TypeError):
+            pass
+
+    # 2. Kilitli okul yoksa gelişmiş fonetik & Levenshtein tabanlı okul sıralama motoru
+    if not matched_school and schools_cache:
+        UNIT_KEYWORDS = {'mutfak', 'atölye', 'atölyesi', 'atölyesindeki', 'laboratuvar', 'laboratuvarı', 'kazan', 'dairesi', 'yangın', 'dolabı', 'merdiveni', 'elektrik', 'panosu', 'koridor', 'bahçe', 'çatı', 'tuvalet', 'lavabo', 'bodrum', 'yemekhane', 'kantin', 'pansiyon', 'duvarda', 'fayans', 'fayanslar', 'dökülmüş', 'kırık', 'arızalı', 'kapı', 'pencere'}
+        STOP_WORDS = {'ve', 'ile', 'ortaokulu', 'ilkokulu', 'lisesi', 'lisesindeyim', 'anadolu', 'mesleki', 'meslek', 'teknik', 'okulu', 'kurumu', 'merkezi', 'anaokulu', 'özel', 'şu', 'anda', 'buradayım', 'şimdi', 'okulundayım', 'okulunda'}
+        PHONETIC_REPLACEMENTS = {
+            'test tur': 'tez tur',
+            'testur': 'tez tur',
+            'teztur': 'tez tur',
+            'falez': 'falez turizm',
+            'serkan colkesen': 'serkan çölkesen',
+            'cölkesen': 'çölkesen',
+            'colkesen': 'çölkesen',
+            'baro': 'antalya barosu',
+            'metin nuran': 'metin nuran çakallıklı'
+        }
+
+        t_clean = voice_transcript.lower().replace("-", " ")
+        for bad_p, good_p in PHONETIC_REPLACEMENTS.items():
+            if bad_p in t_clean:
+                t_clean = t_clean.replace(bad_p, good_p)
+
+        words = [w for w in t_clean.split() if w not in UNIT_KEYWORDS and w not in STOP_WORDS and len(w) > 2]
+        brand_phrase = ' '.join(words)
+
+        scored = []
         for s in schools_cache:
-            name_lower = s.get("kurum_adi", "").lower().replace("-", " ")
-            score = 0
-            for token in tokens:
-                if token in name_lower:
-                    score += len(token) * 2
-                if token in ["tez", "teztur"] and "tez tur" in name_lower:
-                    score += 35
-            if score > best_score and score >= 6:
-                best_score = score
-                matched_school = s
+            name_clean = s.get("kurum_adi", "").lower().replace("-", " ")
+            name_words = [w for w in name_clean.split() if w not in STOP_WORDS and len(w) > 2]
+            name_distinct = ' '.join(name_words)
+
+            sim_phrase = difflib.SequenceMatcher(None, brand_phrase, name_distinct).ratio() if (brand_phrase and name_distinct) else 0.0
+
+            token_score = 0.0
+            for w in words:
+                for nw in name_words:
+                    r = difflib.SequenceMatcher(None, w, nw).ratio()
+                    if r >= 0.8:
+                        token_score += 30.0 * r
+                    elif r >= 0.6:
+                        token_score += 10.0 * r
+
+            total = (sim_phrase * 50.0) + token_score
+            scored.append((s, total))
+
+        scored.sort(key=lambda x: x[1], reverse=True)
+        top_candidates = [item for item in scored[:4] if item[1] >= 18.0]
+        if top_candidates:
+            matched_school = top_candidates[0][0]
+            candidate_schools = [{
+                "id": s["id"],
+                "kurum_kodu": s["kurum_kodu"],
+                "kurum_adi": s["kurum_adi"],
+                "score": round(sc, 1)
+            } for s, sc in top_candidates]
 
     prompt = f"""
 Sen Antalya Muratpaşa İlçe Millî Eğitim Müdürlüğü A Sınıfı Baş İSG Denetçisi ve MEBBİS İSG Modülü uzmanısın.
@@ -546,6 +590,8 @@ YANITINI SADECE AŞAĞIDAKİ JSON ŞEMASINDA DÖNDÜR:
             }
         else:
             data["matched_school"] = None
+
+        data["candidate_schools"] = candidate_schools
 
         return {"success": True, "data": data}
     except Exception as e:
