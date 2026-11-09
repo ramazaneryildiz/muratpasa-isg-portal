@@ -3399,11 +3399,25 @@ def get_local_server_ip() -> str:
         s.close()
     return ip
 
+def get_public_tunnel_url() -> Optional[str]:
+    tunnel_file = os.path.join(BASE_DIR, "tunnel_url.txt")
+    if os.path.exists(tunnel_file):
+        try:
+            with open(tunnel_file, "r", encoding="utf-8") as f:
+                url = f.read().strip()
+                if url.startswith("https://"):
+                    return url
+        except Exception:
+            pass
+    return None
+
 @app.get("/api/qr-code")
 def api_qr_code(url: Optional[str] = None):
     import qrcode
     import qrcode.image.svg
-    target_url = url or f"http://{get_local_server_ip()}:8000/saha-asistani"
+    public_base = get_public_tunnel_url()
+    default_url = f"{public_base}/saha-asistani" if public_base else f"http://{get_local_server_ip()}:8000/saha-asistani"
+    target_url = url or default_url
     factory = qrcode.image.svg.SvgPathImage
     img = qrcode.make(target_url, image_factory=factory, box_size=8, border=2)
     stream = io.BytesIO()
@@ -3424,13 +3438,18 @@ def saha_asistani_page(request: Request):
     conn.close()
 
     local_ip = get_local_server_ip()
-    mobile_url = f"http://{local_ip}:8000/saha-asistani"
+    local_url = f"http://{local_ip}:8000/saha-asistani"
+    public_base = get_public_tunnel_url()
+    public_url = f"{public_base}/saha-asistani" if public_base else None
+    mobile_url = public_url if public_url else local_url
 
     return templates.TemplateResponse(request=request, name="saha_asistani.html", context={
         "user": user,
         "active_page": "saha_asistani",
         "all_schools": all_schools,
         "local_ip": local_ip,
+        "local_url": local_url,
+        "public_url": public_url,
         "mobile_url": mobile_url
     })
 

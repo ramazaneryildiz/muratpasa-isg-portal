@@ -38,33 +38,39 @@
     <div id="mobileQrCard" class="rounded-2xl bg-slate-50 border border-slate-200 p-4 sm:p-5 shadow-xs transition-all">
         <div class="flex flex-col md:flex-row items-center gap-5">
             <div class="bg-white p-2.5 rounded-xl border border-slate-200 shadow-xs shrink-0 flex flex-col items-center">
-                <img src="/api/qr-code" alt="Saha Asistanı Mobil QR" class="w-32 h-32 object-contain">
+                <img src="/api/qr-code{% if public_url %}?url={{ public_url }}{% endif %}" alt="Saha Asistanı Mobil QR" class="w-32 h-32 object-contain">
                 <span class="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-wider">Telefon Kamerasıyla Oku</span>
             </div>
             
-            <div class="flex-1 space-y-2 text-center md:text-left">
+            <div class="flex-1 space-y-2.5 text-center md:text-left">
+                {% if public_url %}
                 <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-bold">
-                    <i class="fa-solid fa-wifi text-emerald-600"></i>
-                    <span>Aynı Wi-Fi Ağından Bağlanın</span>
+                    <i class="fa-solid fa-lock text-emerald-600"></i>
+                    <span>Güvenli İnternet / Farklı Wi-Fi & Mobil Veri (HTTPS)</span>
                 </div>
                 <h3 class="text-sm font-extrabold text-slate-900">
-                    Cep Telefonunuzdan Erişmek İçin
+                    Telefonunuz Başka Bir Ağda veya Mobil Veride İse:
                 </h3>
                 <p class="text-xs text-slate-600 leading-relaxed">
-                    Telefonda <code class="bg-slate-200 text-slate-800 px-1.5 py-0.5 rounded font-mono text-[11px]">localhost</code> çalışmaz çünkü telefon kendi içine bağlanmaya çalışır. Bilgisayarınızın yerel Wi-Fi IP adresi üzerinden bağlanmalısınız:
+                    Telefonunuz bilgisayarla aynı Wi-Fi ağında olmasa bile aşağıdaki güvenli bağlantıyla bağlanabilir. Bu bağlantıda SSL sertifikası olduğu için <strong>sayfadaki mikrofon tuşu da doğrudan çalışır</strong>:
                 </p>
                 <div class="flex flex-wrap items-center gap-2 justify-center md:justify-start pt-1">
-                    <div class="px-3 py-1.5 rounded-lg bg-white border border-slate-300 font-mono text-xs font-bold text-slate-800 select-all shadow-2xs" id="mobileUrlDisplay">
-                        {{ mobile_url }}
+                    <div class="px-3 py-1.5 rounded-lg bg-white border border-slate-300 font-mono text-xs font-bold text-slate-800 select-all shadow-2xs break-all" id="mobileUrlDisplay">
+                        {{ public_url }}
                     </div>
-                    <button type="button" onclick="copyMobileUrl()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold flex items-center gap-1 transition">
+                    <button type="button" onclick="copyText('{{ public_url }}', 'copyCloudUrlText')" class="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold flex items-center gap-1 transition shadow-xs">
                         <i class="fa-regular fa-copy"></i>
-                        <span id="copyUrlText">Adresi Kopyala</span>
+                        <span id="copyCloudUrlText">Adresi Kopyala</span>
                     </button>
                 </div>
-                <div class="text-[11px] text-slate-500 pt-0.5">
-                    <i class="fa-solid fa-lightbulb text-amber-500 mr-1"></i>
-                    <strong>İpucu:</strong> Ekrandaki QR kodu cep telefonunuzun kamerasına göstererek tek dokunuşla hemen açabilirsiniz.
+                {% endif %}
+
+                <div class="pt-2 border-t border-slate-200/80 flex flex-col sm:flex-row items-center gap-2 text-[11px] text-slate-500">
+                    <span class="font-bold text-slate-700"><i class="fa-solid fa-wifi mr-1 text-slate-500"></i> Aynı Wi-Fi Ağındaysanız:</span>
+                    <code class="bg-white px-2 py-0.5 rounded border border-slate-200 font-mono text-slate-800 font-bold select-all">{{ local_url }}</code>
+                    <button type="button" onclick="copyText('{{ local_url }}', 'copyLocalUrlText')" class="text-slate-600 hover:text-slate-900 font-semibold underline text-[11px]">
+                        <span id="copyLocalUrlText">Kopyala</span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -294,13 +300,20 @@
     let lastAnalysisResult = null;
 
     // Mobil URL & QR Yardımcıları
+    function copyText(val, elemId) {
+        navigator.clipboard.writeText(val).then(() => {
+            const btn = document.getElementById(elemId);
+            if (btn) {
+                const orig = btn.innerText;
+                btn.innerText = 'Kopyalandı!';
+                setTimeout(() => { btn.innerText = orig; }, 2000);
+            }
+        });
+    }
+
     function copyMobileUrl() {
         const url = "{{ mobile_url }}";
-        navigator.clipboard.writeText(url).then(() => {
-            const btn = document.getElementById('copyUrlText');
-            btn.innerText = 'Kopyalandı!';
-            setTimeout(() => { btn.innerText = 'Adresi Kopyala'; }, 2000);
-        });
+        copyText(url, 'copyUrlText');
     }
 
     function toggleQrModal() {
