@@ -41,11 +41,8 @@ def main():
             static_domain = "https://sway-reimburse-icky.ngrok-free.dev"
             tunnel_process = subprocess.Popen(
                 [ngrok_bin, "http", "8000", "--url", static_domain],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT,
-                text=True,
-                encoding="utf-8",
-                errors="replace"
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL
             )
             tunnel_url = static_domain
             with open(tunnel_file, "w", encoding="utf-8") as f:

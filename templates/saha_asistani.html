@@ -3,78 +3,7 @@
 {% block title %}Saha Sesli & Görsel AI Asistanı — Muratpaşa İlçe MEM{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto space-y-6">
-
-    <!-- ==================== ÜST BAŞLIK (CALM EXECUTIVE) ==================== -->
-    <div class="rounded-2xl bg-white p-5 sm:p-6 border border-slate-200 shadow-xs">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div class="space-y-1.5">
-                <div class="inline-flex items-center gap-2 px-3 py-0.5 rounded-full bg-slate-100 border border-slate-200 text-slate-700 text-xs font-semibold">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                    <span>Mobil Saha Denetim Kılavuzu • Gemini Multimodal</span>
-                </div>
-                <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2.5">
-                    <i class="fa-solid fa-microphone-lines text-slate-700"></i>
-                    <span>Saha Sesli & Görsel AI Asistanı</span>
-                </h1>
-                <p class="text-xs text-slate-500 max-w-2xl leading-relaxed">
-                    Sahada klavyeyle yazı yazmadan; mikrofona konuşup fotoğraf çekerek okul, atölye, Fine-Kinney risk skoru ve resmî MEBBİS DÖF kaydını saniyeler içinde oluşturun.
-                </p>
-            </div>
-            <div class="flex items-center gap-2">
-                <button type="button" onclick="toggleQrModal()" class="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-xs">
-                    <i class="fa-solid fa-qrcode text-slate-300"></i>
-                    <span>Telefonda Aç (QR Kod)</span>
-                </button>
-                <a href="/dinamik-risk-degerlendirme" class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold border border-slate-200 transition flex items-center gap-1.5 shadow-xs">
-                    <i class="fa-solid fa-table-list text-slate-500"></i>
-                    <span>Masaüstü Risk Matrisi</span>
-                </a>
-            </div>
-        </div>
-    </div>
-
-    <!-- ==================== MOBİL ERİŞİM & QR KOD KARTI ==================== -->
-    <div id="mobileQrCard" class="rounded-2xl bg-slate-50 border border-slate-200 p-4 sm:p-5 shadow-xs transition-all">
-        <div class="flex flex-col md:flex-row items-center gap-5">
-            <div class="bg-white p-2.5 rounded-xl border border-slate-200 shadow-xs shrink-0 flex flex-col items-center">
-                <img src="/api/qr-code{% if public_url %}?url={{ public_url }}{% endif %}" alt="Saha Asistanı Mobil QR" class="w-32 h-32 object-contain">
-                <span class="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-wider">Telefon Kamerasıyla Oku</span>
-            </div>
-            
-            <div class="flex-1 space-y-2.5 text-center md:text-left">
-                {% if public_url %}
-                <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-bold">
-                    <i class="fa-solid fa-lock text-emerald-600"></i>
-                    <span>Güvenli İnternet / Farklı Wi-Fi & Mobil Veri (HTTPS)</span>
-                </div>
-                <h3 class="text-sm font-extrabold text-slate-900">
-                    Telefonunuz Başka Bir Ağda veya Mobil Veride İse:
-                </h3>
-                <p class="text-xs text-slate-600 leading-relaxed">
-                    Telefonunuz bilgisayarla aynı Wi-Fi ağında olmasa bile aşağıdaki güvenli bağlantıyla bağlanabilir. Bu bağlantıda SSL sertifikası olduğu için <strong>sayfadaki mikrofon tuşu da doğrudan çalışır</strong>:
-                </p>
-                <div class="flex flex-wrap items-center gap-2 justify-center md:justify-start pt-1">
-                    <div class="px-3 py-1.5 rounded-lg bg-white border border-slate-300 font-mono text-xs font-bold text-slate-800 select-all shadow-2xs break-all" id="mobileUrlDisplay">
-                        {{ public_url }}
-                    </div>
-                    <button type="button" onclick="copyText('{{ public_url }}', 'copyCloudUrlText')" class="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold flex items-center gap-1 transition shadow-xs">
-                        <i class="fa-regular fa-copy"></i>
-                        <span id="copyCloudUrlText">Adresi Kopyala</span>
-                    </button>
-                </div>
-                {% endif %}
-
-                <div class="pt-2 border-t border-slate-200/80 flex flex-col sm:flex-row items-center gap-2 text-[11px] text-slate-500">
-                    <span class="font-bold text-slate-700"><i class="fa-solid fa-wifi mr-1 text-slate-500"></i> Aynı Wi-Fi Ağındaysanız:</span>
-                    <code class="bg-white px-2 py-0.5 rounded border border-slate-200 font-mono text-slate-800 font-bold select-all">{{ local_url }}</code>
-                    <button type="button" onclick="copyText('{{ local_url }}', 'copyLocalUrlText')" class="text-slate-600 hover:text-slate-900 font-semibold underline text-[11px]">
-                        <span id="copyLocalUrlText">Kopyala</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
+<div class="max-w-4xl mx-auto space-y-4">
 
     <!-- ==================== ÇEVRİMDIŞI DÖF KUYRUĞU / ÇEKMEME MODU ==================== -->
     <div id="offlineSyncBanner" class="hidden rounded-2xl bg-amber-50 border border-amber-300 p-4 shadow-xs text-amber-900 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -102,18 +31,8 @@
         </div>
     </div>
 
-    <!-- ==================== SAHA GİRİŞ FORMU: SESLİ VE FOTOĞRAFLI ==================== -->
-    <div class="bg-white rounded-2xl p-5 sm:p-7 border border-slate-200 shadow-xs space-y-5">
-        
-        <div class="border-b border-slate-100 pb-3 flex items-center justify-between">
-            <div>
-                <h2 class="text-sm font-extrabold text-slate-900">Sözlü Tespit ve Olay Yeri Fotoğrafı</h2>
-                <p class="text-xs text-slate-500 mt-0.5">Mikrofonla konuşun veya kameradan fotoğraf ekleyin</p>
-            </div>
-            <span class="text-[11px] font-mono text-slate-400 bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-200">
-                <i class="fa-solid fa-mobile-screen mr-1"></i> Mobil Uyumlu
-            </span>
-        </div>
+    <!-- ==================== SAHA GİRİŞ FORMU ==================== -->
+    <div class="bg-white rounded-2xl p-4 sm:p-6 border border-slate-200 shadow-xs space-y-4">
 
         <!-- ==================== AKTİF DENETİM OKULU (SAHA KİLİDİ) ==================== -->
         <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
@@ -627,21 +546,6 @@
                 setTimeout(() => { btn.innerText = orig; }, 2000);
             }
         });
-    }
-
-    function copyMobileUrl() {
-        const url = "{{ mobile_url }}";
-        copyText(url, 'copyUrlText');
-    }
-
-    function toggleQrModal() {
-        const card = document.getElementById('mobileQrCard');
-        if (card.classList.contains('hidden')) {
-            card.classList.remove('hidden');
-            card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        } else {
-            card.classList.add('hidden');
-        }
     }
 
     // Tekrarlanan ardışık kelime ve cümle kalıplarını temizleyen zeki filtre
