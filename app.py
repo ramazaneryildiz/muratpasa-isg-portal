@@ -34,6 +34,19 @@ DB_PATH = os.environ.get("DB_PATH", os.path.join(BASE_DIR, "isg_muratpasa.db"))
 app = FastAPI(title="Muratpaşa İlçe MEM İSG Bilgi Yönetim Sistemi")
 templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
 
+from mebbis_parser import parse_mebbis_xls, parse_mebbis_xlsx, import_mebbis_parsed_data, auto_import_local_reports
+from dof_report_generator import generate_mevcut_durum_docx, generate_dof_docx
+
+def clean_phone_filter(val):
+    if not val:
+        return ""
+    import re
+    digits = re.sub(r'\D', '', str(val))
+    if digits.startswith('0'):
+        digits = digits[1:]
+    return digits
+templates.env.filters["clean_phone"] = clean_phone_filter
+
 @app.middleware("http")
 async def add_ngrok_header(request: Request, call_next):
     response = await call_next(request)
@@ -3592,6 +3605,389 @@ async def api_field_save_dof(request: Request):
         "risk_id": new_risk_id,
         "school_id": school_id
     }
+
+# ==============================================================================
+# MEBBİS İSG RİSK VE SAHA YAŞAYAN DÖNGÜSÜ (BASELINE & DÖF YÖNETİMİ)
+# ==============================================================================
+
+@app.get("/mebbis-aktarim", response_class=HTMLResponse)
+def mebbis_import_page(request: Request):
+    user_row = get_current_user(request)
+    if not user_row:
+        return RedirectResponse("/login", status_code=303)
+    user = dict(user_row)
+
+    conn = get_db()
+    c = conn.cursor()
+
+    if user.get("role") == "koordinator":
+        c.execute("""
+            SELECT s.*,
+                   COUNT(r.id) as mebbis_count,
+                   SUM(CASE WHEN r.saha_durumu IN ('TEYIT_BEKLIYOR', '', NULL) THEN 1 ELSE 0 END) as teyit_bekleyen,
+                   SUM(CASE WHEN r.saha_durumu = 'DEVAM_EDIYOR' THEN 1 ELSE 0 END) as devam_eden,
+                   SUM(CASE WHEN r.saha_durumu = 'GIDERILDI' THEN 1 ELSE 0 END) as giderilen,
+                   SUM(CASE WHEN r.kaynak = 'SAHA_TESPITI' OR r.saha_durumu = 'YENI_TESPIT' THEN 1 ELSE 0 END) as yeni_tespit
+            FROM schools s
+            LEFT JOIN risk_assessments r ON s.id = r.school_id
+            WHERE s.is_active_school = 1 AND (s.sorumlu_uzman_id = ? OR s.kurum_adi LIKE '%Mesleki%' OR s.kurum_turu LIKE '%Mesleki%')
+            GROUP BY s.id
+            ORDER BY s.kurum_adi ASC
+        """, (user["id"],))
+    else:
+        c.execute("""
+            SELECT s.*,
+                   COUNT(r.id) as mebbis_count,
+                   SUM(CASE WHEN r.saha_durumu IN ('TEYIT_BEKLIYOR', '', NULL) THEN 1 ELSE 0 END) as teyit_bekleyen,
+                   SUM(CASE WHEN r.saha_durumu = 'DEVAM_EDIYOR' THEN 1 ELSE 0 END) as devam_eden,
+                   SUM(CASE WHEN r.saha_durumu = 'GIDERILDI' THEN 1 ELSE 0 END) as giderilen,
+                   SUM(CASE WHEN r.kaynak = 'SAHA_TESPITI' OR r.saha_durumu = 'YENI_TESPIT' THEN 1 ELSE 0 END) as yeni_tespit
+            FROM schools s
+            LEFT JOIN risk_assessments r ON s.id = r.school_id
+            WHERE s.is_active_school = 1 AND s.sorumlu_uzman_id = ?
+            GROUP BY s.id
+            ORDER BY s.kurum_adi ASC
+        """, (user["id"],))
+
+    assigned_schools = [dict(row) for row in c.fetchall()]
+
+    c.execute("SELECT COUNT(*) FROM risk_assessments")
+    total_items = c.fetchone()[0]
+
+    c.execute("SELECT COUNT(*) FROM risk_assessments WHERE saha_durumu = 'DEVAM_EDIYOR'")
+    total_devam_eden = c.fetchone()[0]
+
+    c.execute("SELECT COUNT(*) FROM risk_assessments WHERE saha_durumu = 'GIDERILDI'")
+    total_giderilen = c.fetchone()[0]
+
+    c.execute("SELECT id, kurum_kodu, kurum_adi FROM schools WHERE is_active_school = 1 ORDER BY kurum_adi ASC")
+    all_schools = [dict(row) for row in c.fetchall()]
+
+    conn.close()
+
+    local_folder_exists = os.path.exists(r"C:\iş_güvenliği\risk_raporları")
+
+    return templates.TemplateResponse(request=request, name="mebbis_aktarim.html", context={
+        "user": user,
+        "active_page": "mebbis_aktarim",
+        "assigned_schools": assigned_schools,
+        "total_items": total_items,
+        "total_devam_eden": total_devam_eden,
+        "total_giderilen": total_giderilen,
+        "all_schools": all_schools,
+        "local_folder_exists": local_folder_exists
+    })
+
+
+@app.post("/api/mebbis/upload")
+async def api_mebbis_upload(request: Request, file: UploadFile = File(...), school_id: Optional[str] = Form(None)):
+    user_row = get_current_user(request)
+    if not user_row:
+        raise HTTPException(status_code=401, detail="Oturum açmanız gerekiyor.")
+    user = dict(user_row)
+
+    if not file.filename.lower().endswith(('.xls', '.xlsx')):
+        return {"success": False, "error": "Yalnızca MEBBİS .xls veya .xlsx dosyaları kabul edilir."}
+
+    content = await file.read()
+    temp_dir = os.path.join(BASE_DIR, "data", "temp_uploads")
+    os.makedirs(temp_dir, exist_ok=True)
+    temp_path = os.path.join(temp_dir, f"mebbis_{int(time.time())}_{file.filename}")
+
+    with open(temp_path, "wb") as f:
+        f.write(content)
+
+    try:
+        if file.filename.lower().endswith('.xls'):
+            parsed = parse_mebbis_xls(temp_path)
+        else:
+            parsed = parse_mebbis_xlsx(temp_path)
+
+        explicit_id = int(school_id) if school_id and school_id.strip() else None
+
+        conn = get_db()
+        result = import_mebbis_parsed_data(conn, parsed, explicit_school_id=explicit_id, user_name=user.get("full_name", "İGU"))
+        conn.close()
+
+        if result.get("success"):
+            return {
+                "success": True,
+                "message": f"{result['school_name']} için {result['total_parsed']} risk maddesi içe aktarıldı ({result['new_inserted']} yeni eklendi, {result['updated']} güncellendi).",
+                "stats": result
+            }
+        else:
+            return {"success": False, "error": result.get("error", "Bilinmeyen hata")}
+    except Exception as e:
+        return {"success": False, "error": f"Ayrıştırma hatası: {str(e)}"}
+    finally:
+        if os.path.exists(temp_path):
+            try:
+                os.remove(temp_path)
+            except Exception:
+                pass
+
+
+@app.post("/api/mebbis/import-local-samples")
+def api_import_local_samples(request: Request):
+    user_row = get_current_user(request)
+    if not user_row:
+        raise HTTPException(status_code=401, detail="Oturum açmanız gerekiyor.")
+    user = dict(user_row)
+
+    results = auto_import_local_reports()
+    success_count = sum(1 for r in results if r.get("success"))
+    return {
+        "success": True,
+        "imported_count": success_count,
+        "results": results
+    }
+
+
+@app.get("/okul/{school_id}/mevcut-durum", response_class=HTMLResponse)
+def school_mevcut_durum_page(request: Request, school_id: int):
+    user_row = get_current_user(request)
+    if not user_row:
+        return RedirectResponse("/login", status_code=303)
+    user = dict(user_row)
+
+    conn = get_db()
+    c = conn.cursor()
+
+    c.execute("SELECT * FROM schools WHERE id = ?", (school_id,))
+    school_row = c.fetchone()
+    if not school_row:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Okul bulunamadı.")
+    school = dict(school_row)
+
+    c.execute("""
+        SELECT * FROM risk_assessments
+        WHERE school_id = ?
+        ORDER BY
+            CASE
+                WHEN saha_durumu = 'DEVAM_EDIYOR' THEN 1
+                WHEN saha_durumu = 'YENI_TESPIT' THEN 2
+                WHEN saha_durumu IN ('TEYIT_BEKLIYOR', '', NULL) THEN 3
+                ELSE 4
+            END,
+            COALESCE(risk_skoru, risk_puani, 0) DESC,
+            id ASC
+    """, (school_id,))
+    risks = [dict(r) for r in c.fetchall()]
+
+    c.execute("""
+        SELECT DISTINCT kontrol_edilen_birim
+        FROM risk_assessments
+        WHERE school_id = ? AND kontrol_edilen_birim IS NOT NULL AND TRIM(kontrol_edilen_birim) != ''
+        ORDER BY kontrol_edilen_birim ASC
+    """, (school_id,))
+    units = [r[0] for r in c.fetchall()]
+
+    metrics = {
+        "toplam": len(risks),
+        "teyit_bekleyen": sum(1 for r in risks if r.get("saha_durumu") in ("TEYIT_BEKLIYOR", "", None)),
+        "devam_eden": sum(1 for r in risks if r.get("saha_durumu") == "DEVAM_EDIYOR"),
+        "giderilen": sum(1 for r in risks if r.get("saha_durumu") == "GIDERILDI"),
+        "yeni_tespit": sum(1 for r in risks if r.get("kaynak") == "SAHA_TESPITI" or r.get("saha_durumu") == "YENI_TESPIT"),
+        "cok_yuksek": sum(1 for r in risks if r.get("risk_seviyesi") == "ÇOK YÜKSEK"),
+        "yuksek": sum(1 for r in risks if r.get("risk_seviyesi") == "YÜKSEK"),
+    }
+
+    conn.close()
+
+    return templates.TemplateResponse(request=request, name="okul_mevcut_durum.html", context={
+        "user": user,
+        "active_page": "mebbis_aktarim",
+        "school": school,
+        "risks": risks,
+        "units": units,
+        "metrics": metrics
+    })
+
+
+@app.post("/api/risk/{risk_id}/update-status")
+async def api_update_risk_status(request: Request, risk_id: int):
+    user_row = get_current_user(request)
+    if not user_row:
+        raise HTTPException(status_code=401, detail="Oturum açmanız gerekiyor.")
+    user = dict(user_row)
+
+    body = await request.json()
+    new_status = body.get("saha_durumu")
+    saha_notu = body.get("saha_notu")
+    saha_fotograf_yolu = body.get("saha_fotograf_yolu")
+
+    conn = get_db()
+    c = conn.cursor()
+
+    today_str = datetime.now().strftime("%d.%m.%Y")
+
+    updates = []
+    params = []
+
+    if new_status:
+        updates.append("saha_durumu = ?")
+        params.append(new_status)
+        updates.append("son_denetim_tarihi = ?")
+        params.append(today_str)
+        if new_status == "GIDERILDI":
+            updates.append("dof_durumu = 'Kapatıldı'")
+            updates.append("dof_kapanis_tarihi = ?")
+            params.append(today_str)
+        elif new_status == "DEVAM_EDIYOR":
+            updates.append("dof_durumu = 'Devam Ediyor'")
+
+    if saha_notu is not None:
+        updates.append("saha_notu = ?")
+        params.append(saha_notu)
+
+    if saha_fotograf_yolu is not None:
+        updates.append("saha_fotograf_yolu = ?")
+        params.append(saha_fotograf_yolu)
+
+    if updates:
+        params.append(risk_id)
+        c.execute(f"UPDATE risk_assessments SET {', '.join(updates)} WHERE id = ?", params)
+        conn.commit()
+
+    conn.close()
+    return {"success": True, "risk_id": risk_id, "updated": updates}
+
+
+@app.post("/api/risk/field-new")
+async def api_create_field_risk(request: Request):
+    user_row = get_current_user(request)
+    if not user_row:
+        raise HTTPException(status_code=401, detail="Oturum açmanız gerekiyor.")
+    user = dict(user_row)
+
+    body = await request.json()
+    school_id = body.get("school_id")
+    if not school_id:
+        return {"success": False, "error": "Okul ID zorunludur."}
+
+    conn = get_db()
+    c = conn.cursor()
+
+    c.execute("SELECT COUNT(*) FROM risk_assessments WHERE school_id = ? AND kaynak = 'SAHA_TESPITI'", (school_id,))
+    cnt = c.fetchone()[0] + 1
+    dof_no = f"DÖF-{cnt:02d}"
+
+    level = body.get("risk_seviyesi", "YÜKSEK")
+    score_map = {"ÇOK YÜKSEK": 20, "YÜKSEK": 15, "ORTA": 10, "DÜŞÜK": 5}
+    score = score_map.get(level, 15)
+
+    today_str = datetime.now().strftime("%d.%m.%Y")
+
+    c.execute("""
+        INSERT INTO risk_assessments (
+            school_id, barkod_no, kontrol_edilen_birim, bolum_unite,
+            tehlike, tehlike_unsurlari, riskler,
+            risk_puani, risk_skoru, risk_seviyesi,
+            alinan_onlemler, alinmasi_gereken_dof_onlem, dayanak_mevzuat,
+            termin_tarihi, sorumlular, dof_durumu, kaynak, saha_durumu,
+            dof_no, dof_acilis_tarihi, son_denetim_tarihi, denetleyen_uzman
+        ) VALUES (
+            ?, ?, ?, ?,
+            ?, ?, ?,
+            ?, ?, ?,
+            ?, ?, ?,
+            ?, ?, 'Açık', 'SAHA_TESPITI', 'YENI_TESPIT',
+            ?, ?, ?, ?
+        )
+    """, (
+        school_id, dof_no, body.get("kontrol_edilen_birim"), body.get("kontrol_edilen_birim"),
+        body.get("tehlike"), body.get("tehlike_unsurlari", ""), body.get("riskler", "Kaza, Yaralanma, Maddi Hasar"),
+        score, score, level,
+        body.get("alinmasi_gereken_dof_onlem"), body.get("alinmasi_gereken_dof_onlem"),
+        body.get("dayanak_mevzuat", "6331 s. Kanun ve İlgili Mevzuat"),
+        body.get("termin_tarihi", "15 Gün"), body.get("sorumlular", "Okul İdaresi"),
+        dof_no, today_str, today_str, user.get("full_name", "İGU")
+    ))
+    new_id = c.lastrowid
+    conn.commit()
+    conn.close()
+
+    return {"success": True, "id": new_id, "dof_no": dof_no}
+
+
+@app.get("/okul/{school_id}/mevcut-durum-raporu/indir")
+def download_mevcut_durum_report(request: Request, school_id: int):
+    user_row = get_current_user(request)
+    if not user_row:
+        return RedirectResponse("/login", status_code=303)
+    user = dict(user_row)
+
+    conn = get_db()
+    c = conn.cursor()
+    c.execute("SELECT * FROM schools WHERE id = ?", (school_id,))
+    s_row = c.fetchone()
+    if not s_row:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Okul bulunamadı.")
+    school = dict(s_row)
+
+    c.execute("""
+        SELECT * FROM risk_assessments
+        WHERE school_id = ?
+        ORDER BY
+            CASE
+                WHEN saha_durumu = 'DEVAM_EDIYOR' THEN 1
+                WHEN saha_durumu = 'YENI_TESPIT' THEN 2
+                WHEN saha_durumu IN ('TEYIT_BEKLIYOR', '', NULL) THEN 3
+                ELSE 4
+            END,
+            COALESCE(risk_skoru, risk_puani, 0) DESC,
+            id ASC
+    """, (school_id,))
+    risks = [dict(r) for r in c.fetchall()]
+    conn.close()
+
+    bio = generate_mevcut_durum_docx(school, risks, user_name=user.get("full_name", "Ramazan ERYILDIZ"))
+    filename = f"{school['kurum_adi'].replace(' ', '_')}_Mevcut_Durum_Risk_Analizi.docx"
+
+    return StreamingResponse(
+        bio,
+        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        headers={"Content-Disposition": f"attachment; filename*=UTF-8''{requests.utils.quote(filename)}"}
+    )
+
+
+@app.get("/okul/{school_id}/dof-raporu/indir")
+def download_dof_report(request: Request, school_id: int):
+    user_row = get_current_user(request)
+    if not user_row:
+        return RedirectResponse("/login", status_code=303)
+    user = dict(user_row)
+
+    conn = get_db()
+    c = conn.cursor()
+    c.execute("SELECT * FROM schools WHERE id = ?", (school_id,))
+    s_row = c.fetchone()
+    if not s_row:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Okul bulunamadı.")
+    school = dict(s_row)
+
+    c.execute("""
+        SELECT * FROM risk_assessments
+        WHERE school_id = ? AND (
+            saha_durumu IN ('DEVAM_EDIYOR', 'YENI_TESPIT') OR
+            (saha_durumu != 'GIDERILDI' AND dof_durumu != 'Kapatıldı')
+        )
+        ORDER BY COALESCE(risk_skoru, risk_puani, 0) DESC, id ASC
+    """, (school_id,))
+    active_risks = [dict(r) for r in c.fetchall()]
+    conn.close()
+
+    bio = generate_dof_docx(school, active_risks, user_name=user.get("full_name", "Ramazan ERYILDIZ"))
+    filename = f"{school['kurum_adi'].replace(' ', '_')}_Saha_Denetim_DOF_Raporu.docx"
+
+    return StreamingResponse(
+        bio,
+        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        headers={"Content-Disposition": f"attachment; filename*=UTF-8''{requests.utils.quote(filename)}"}
+    )
 
 if __name__ == "__main__":
     import uvicorn

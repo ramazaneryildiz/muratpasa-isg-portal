@@ -68,9 +68,16 @@
                 </button>
             </div>
 
-            <div id="schoolLockHint" class="hidden text-[11px] text-emerald-800 bg-emerald-50 p-2 rounded-lg border border-emerald-200 leading-snug">
-                <i class="fa-solid fa-circle-check text-emerald-600 mr-1"></i>
-                <strong>Okul Kilitlendi:</strong> Sahada dolaşırken okul adı söylemenize gerek yoktur. Doğrudan <em>"Mutfak atölyesinde fayanslar dökülmüş"</em> veya <em>"Kazan dairesi emniyet ventili su damlatıyor"</em> demeniz yeterlidir!
+            <div id="schoolLockHint" class="hidden text-[11px] text-emerald-800 bg-emerald-50 p-2.5 rounded-lg border border-emerald-200 leading-snug flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                    <i class="fa-solid fa-circle-check text-emerald-600 mr-1"></i>
+                    <strong>Okul Kilitlendi:</strong> Sahada dolaşırken doğrudan <em>"Kazan dairesi emniyet ventili su damlatıyor"</em> demeniz yeterlidir!
+                </div>
+                <a id="btnGoToMevcutDurum" href="#" target="_blank" class="shrink-0 px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-md shadow-2xs transition flex items-center gap-1.5 text-[11px]">
+                    <i class="fa-solid fa-clipboard-check"></i>
+                    <span>Mevcut MEBBİS Tabanını Gör / Teyit Et</span>
+                    <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
+                </a>
             </div>
         </div>
 
@@ -438,6 +445,10 @@
         }
         document.getElementById('schoolLockBadge').classList.remove('hidden');
         document.getElementById('schoolLockHint').classList.remove('hidden');
+        const btnMevcut = document.getElementById('btnGoToMevcutDurum');
+        if (btnMevcut) {
+            btnMevcut.href = `/okul/${id}/mevcut-durum`;
+        }
         document.getElementById('clearLockBtn').classList.remove('hidden');
         const list = document.getElementById('activeSchoolDropdownList');
         if (list) list.classList.add('hidden');

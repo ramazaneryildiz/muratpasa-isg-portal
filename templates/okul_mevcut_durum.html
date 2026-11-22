@@ -1,0 +1,457 @@
+{% extends "base.html" %}
+
+{% block title %}{{ school.kurum_adi }} - Mevcut Durum & Saha Teyit | Muratpaşa İSG{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Üst Başlık & Okul İletişim Çubuğu -->
+    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <div class="space-y-1">
+            <div class="flex items-center gap-2 flex-wrap">
+                <a href="/mebbis-aktarim" class="text-xs text-blue-600 hover:text-blue-800 font-semibold flex items-center gap-1">
+                    <i class="fa-solid fa-arrow-left"></i> MEBBİS Raporlarına Dön
+                </a>
+                <span class="text-slate-300">|</span>
+                <span class="text-xs font-mono font-bold px-2 py-0.5 bg-slate-100 text-slate-700 rounded border border-slate-200">{{ school.kurum_kodu }}</span>
+                <span class="text-xs px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 font-semibold border border-amber-200">{{ school.tehlike_sinifi or 'Tehlikeli' }}</span>
+                <span class="text-xs px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800 font-semibold border border-blue-200">Saha İnceleme Modu</span>
+            </div>
+            <h1 class="text-xl md:text-2xl font-bold text-slate-900">{{ school.kurum_adi }}</h1>
+            <div class="flex items-center gap-4 text-xs text-slate-600 flex-wrap pt-1">
+                <span><strong>Müdür:</strong> {{ school.mudur_ad_soyad or '-' }} ({{ school.mudur_tel or '-' }})</span>
+                <span><strong>İSG Vekili:</strong> {{ school.isveren_vekili_ad_soyad or '-' }} ({{ school.isveren_vekili_tel or '-' }})</span>
+                <span><strong>Denetleyen İGU:</strong> {{ user.full_name }}</span>
+            </div>
+        </div>
+
+        <!-- Hızlı Eylem Butonları & Rapor İndirmeleri -->
+        <div class="flex items-center gap-2 flex-wrap">
+            {% if school.mudur_tel %}
+            <a href="https://wa.me/90{{ school.mudur_tel|clean_phone }}" target="_blank" class="px-3 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-bold rounded-lg transition flex items-center gap-1.5" title="Müdüre WhatsApp">
+                <i class="fa-brands fa-whatsapp text-emerald-600"></i>
+                <span class="hidden sm:inline">Müdür WhatsApp</span>
+            </a>
+            {% endif %}
+            <button onclick="document.getElementById('modalNewFinding').classList.remove('hidden')" class="px-3.5 py-2 bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold rounded-lg shadow-xs transition flex items-center gap-1.5">
+                <i class="fa-solid fa-plus-circle"></i>
+                <span>Sahada Yeni Tespit</span>
+            </button>
+            <a href="/okul/{{ school.id }}/mevcut-durum-raporu/indir" class="px-3 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-lg shadow-xs transition flex items-center gap-1.5" title="Mevcut Durum Dosyası">
+                <i class="fa-solid fa-file-word text-blue-400"></i>
+                <span>Mevcut Durum (.docx)</span>
+            </a>
+            <a href="/okul/{{ school.id }}/dof-raporu/indir" class="px-3 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-lg shadow-xs transition flex items-center gap-1.5" title="Resmî DÖF Tebliğ Formu">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                <span>Saha DÖF Raporu (.docx)</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Metrik Kartları -->
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs cursor-pointer hover:border-slate-400 transition" onclick="filterByStatus('ALL')">
+            <div class="text-[11px] font-semibold text-slate-500 uppercase">Toplam Madde</div>
+            <div class="text-xl font-bold text-slate-900 mt-1" id="statTotal">{{ metrics.toplam }}</div>
+            <div class="text-[10px] text-slate-400 mt-0.5">Kayıtlı envanter</div>
+        </div>
+        <div class="bg-amber-50/70 p-3.5 rounded-xl border border-amber-200 shadow-2xs cursor-pointer hover:bg-amber-100/70 transition" onclick="filterByStatus('TEYIT_BEKLIYOR')">
+            <div class="text-[11px] font-semibold text-amber-800 uppercase">Teyit Bekliyor</div>
+            <div class="text-xl font-bold text-amber-700 mt-1" id="statPending">{{ metrics.teyit_bekleyen }}</div>
+            <div class="text-[10px] text-amber-600 mt-0.5">Gözden geçirilecek</div>
+        </div>
+        <div class="bg-rose-50/70 p-3.5 rounded-xl border border-rose-200 shadow-2xs cursor-pointer hover:bg-rose-100/70 transition" onclick="filterByStatus('DEVAM_EDIYOR')">
+            <div class="text-[11px] font-semibold text-rose-800 uppercase">Devam Eden Risk</div>
+            <div class="text-xl font-bold text-rose-700 mt-1" id="statActive">{{ metrics.devam_eden }}</div>
+            <div class="text-[10px] text-rose-600 mt-0.5">DÖF kapsamı</div>
+        </div>
+        <div class="bg-emerald-50/70 p-3.5 rounded-xl border border-emerald-200 shadow-2xs cursor-pointer hover:bg-emerald-100/70 transition" onclick="filterByStatus('GIDERILDI')">
+            <div class="text-[11px] font-semibold text-emerald-800 uppercase">Giderildi (Kapalı)</div>
+            <div class="text-xl font-bold text-emerald-700 mt-1" id="statRemediated">{{ metrics.giderilen }}</div>
+            <div class="text-[10px] text-emerald-600 mt-0.5">Önlem alınmış</div>
+        </div>
+        <div class="bg-purple-50/70 p-3.5 rounded-xl border border-purple-200 shadow-2xs cursor-pointer hover:bg-purple-100/70 transition" onclick="filterByStatus('YENI_TESPIT')">
+            <div class="text-[11px] font-semibold text-purple-800 uppercase">Yeni Saha Tespiti</div>
+            <div class="text-xl font-bold text-purple-700 mt-1" id="statNew">{{ metrics.yeni_tespit }}</div>
+            <div class="text-[10px] text-purple-600 mt-0.5">MEBBİS dışı eklenen</div>
+        </div>
+        <div class="bg-red-900/10 p-3.5 rounded-xl border border-red-300 shadow-2xs cursor-pointer hover:bg-red-900/20 transition" onclick="filterByLevel('ÇOK YÜKSEK')">
+            <div class="text-[11px] font-semibold text-red-900 uppercase">Çok Yüksek Risk</div>
+            <div class="text-xl font-bold text-red-800 mt-1">{{ metrics.cok_yuksek }}</div>
+            <div class="text-[10px] text-red-700 mt-0.5">Öncelikli müdahale</div>
+        </div>
+    </div>
+
+    <!-- Filtreler & Birim Seçimi -->
+    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-3">
+        <!-- Durum Sekmeleri -->
+        <div class="flex items-center gap-1.5 flex-wrap text-xs font-semibold">
+            <button onclick="filterByStatus('ALL')" class="filter-btn active px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-800 text-white" data-filter="ALL">Tümü ({{ metrics.toplam }})</button>
+            <button onclick="filterByStatus('TEYIT_BEKLIYOR')" class="filter-btn px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100" data-filter="TEYIT_BEKLIYOR">Teyit Bekliyor ({{ metrics.teyit_bekleyen }})</button>
+            <button onclick="filterByStatus('DEVAM_EDIYOR')" class="filter-btn px-3 py-1.5 rounded-lg border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100" data-filter="DEVAM_EDIYOR">Devam Edenler ({{ metrics.devam_eden }})</button>
+            <button onclick="filterByStatus('GIDERILDI')" class="filter-btn px-3 py-1.5 rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100" data-filter="GIDERILDI">Giderilenler ({{ metrics.giderilen }})</button>
+            <button onclick="filterByStatus('YENI_TESPIT')" class="filter-btn px-3 py-1.5 rounded-lg border border-purple-200 bg-purple-50 text-purple-700 hover:bg-purple-100" data-filter="YENI_TESPIT">Yeni Tespit ({{ metrics.yeni_tespit }})</button>
+        </div>
+
+        <!-- Birim Dropdown & Arama -->
+        <div class="flex items-center gap-2">
+            <select id="unitFilter" onchange="applyFilters()" class="text-xs border border-slate-300 rounded-lg p-2 bg-slate-50 focus:outline-hidden">
+                <option value="">-- Tüm Birimler / Mahaller ({{ units|length }}) --</option>
+                {% for u in units %}
+                <option value="{{ u }}">{{ u }}</option>
+                {% endfor %}
+            </select>
+            <input type="text" id="searchInput" oninput="applyFilters()" placeholder="Risk veya tehlike ara..." class="text-xs border border-slate-300 rounded-lg p-2 w-40 md:w-52 focus:outline-hidden">
+        </div>
+    </div>
+
+    <!-- Risk Kartları Listesi -->
+    <div class="space-y-3" id="riskCardsContainer">
+        {% for r in risks %}
+        <div class="risk-card bg-white rounded-xl border border-slate-200 p-4 shadow-xs transition hover:border-slate-300"
+             data-id="{{ r.id }}"
+             data-status="{{ r.saha_durumu or 'TEYIT_BEKLIYOR' }}"
+             data-unit="{{ r.kontrol_edilen_birim or '' }}"
+             data-level="{{ r.risk_seviyesi or '' }}"
+             data-text="{{ r.tehlike }} {{ r.tehlike_unsurlari }} {{ r.riskler }} {{ r.kontrol_edilen_birim }}">
+            
+            <div class="flex flex-col lg:flex-row lg:items-start justify-between gap-3">
+                <div class="space-y-1.5 flex-1">
+                    <!-- Üst Rozetler -->
+                    <div class="flex items-center gap-2 flex-wrap text-xs">
+                        <span class="font-mono font-bold px-2 py-0.5 bg-slate-100 text-slate-700 rounded border border-slate-200">{{ r.barkod_no or 'YENİ-KAYIT' }}</span>
+                        <span class="px-2 py-0.5 bg-blue-50 text-blue-800 font-semibold rounded border border-blue-200">
+                            <i class="fa-solid fa-location-dot text-blue-600"></i> {{ r.kontrol_edilen_birim or 'Genel' }}
+                        </span>
+                        
+                        <!-- Puan Rozeti -->
+                        {% if r.risk_seviyesi == 'ÇOK YÜKSEK' %}
+                        <span class="px-2 py-0.5 bg-red-100 text-red-800 font-bold rounded border border-red-200">Puan: {{ r.risk_puani or r.risk_skoru }} (ÇOK YÜKSEK)</span>
+                        {% elif r.risk_seviyesi == 'YÜKSEK' %}
+                        <span class="px-2 py-0.5 bg-amber-100 text-amber-800 font-bold rounded border border-amber-200">Puan: {{ r.risk_puani or r.risk_skoru }} (YÜKSEK)</span>
+                        {% else %}
+                        <span class="px-2 py-0.5 bg-slate-100 text-slate-700 font-medium rounded border border-slate-200">Puan: {{ r.risk_puani or r.risk_skoru }}</span>
+                        {% endif %}
+
+                        <!-- Kaynak Rozeti -->
+                        {% if r.kaynak == 'SAHA_TESPITI' or r.saha_durumu == 'YENI_TESPIT' %}
+                        <span class="px-2 py-0.5 bg-purple-100 text-purple-800 font-bold rounded border border-purple-200">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Sahada Yeni Tespit
+                        </span>
+                        {% else %}
+                        <span class="px-1.5 py-0.5 text-slate-400 text-[10px]">MEBBİS Tabanı</span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Tehlike ve Risk Tanımı -->
+                    <div class="pt-1">
+                        <h4 class="text-sm font-bold text-slate-900">
+                            {{ r.tehlike }}
+                            {% if r.tehlike_unsurlari %}
+                            <span class="text-xs font-normal text-slate-500">({{ r.tehlike_unsurlari }})</span>
+                            {% endif %}
+                        </h4>
+                        {% if r.riskler %}
+                        <p class="text-xs text-slate-600 mt-0.5"><strong class="text-slate-700">Olası Riskler:</strong> {{ r.riskler }}</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Alınan / Alınması Gereken Önlemler -->
+                    <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-100 text-xs space-y-1">
+                        <div><strong class="text-slate-700">DÖF / İstenen Önlem:</strong> {{ r.alinmasi_gereken_dof_onlem or r.alinan_onlemler or 'Belirtilmedi' }}</div>
+                        <div class="flex items-center gap-4 text-slate-500 text-[11px] flex-wrap pt-0.5">
+                            <span><strong>Mevzuat:</strong> {{ r.dayanak_mevzuat or '6331 s. Kanun' }}</span>
+                            <span><strong>Sorumlu:</strong> {{ r.sorumlular or 'Okul İdaresi' }}</span>
+                            <span><strong>Termin:</strong> {{ r.termin_tarihi or '-' }}</span>
+                        </div>
+                    </div>
+
+                    {% if r.saha_notu %}
+                    <div class="bg-amber-50/70 p-2 rounded border border-amber-200 text-xs text-amber-900 flex items-center gap-1.5">
+                        <i class="fa-solid fa-note-sticky text-amber-600"></i>
+                        <span><strong>Saha Notu:</strong> {{ r.saha_notu }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Sağ Taraf: Hızlı Teyit Butonları -->
+                <div class="flex flex-col sm:flex-row lg:flex-col items-end gap-2 shrink-0 pt-2 lg:pt-0">
+                    <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">Saha Teyit Durumu</div>
+                    
+                    <div class="grid grid-cols-2 gap-1.5 w-full sm:w-auto">
+                        <button onclick="updateRiskStatus({{ r.id }}, 'GIDERILDI')"
+                                class="btn-status px-2.5 py-1.5 text-xs font-bold rounded-lg border transition flex items-center justify-center gap-1 {% if r.saha_durumu == 'GIDERILDI' %}bg-emerald-600 text-white border-emerald-600 shadow-xs{% else %}bg-white text-slate-600 border-slate-200 hover:bg-emerald-50 hover:text-emerald-700{% endif %}">
+                            <i class="fa-solid fa-check"></i>
+                            <span>Giderildi</span>
+                        </button>
+
+                        <button onclick="updateRiskStatus({{ r.id }}, 'DEVAM_EDIYOR')"
+                                class="btn-status px-2.5 py-1.5 text-xs font-bold rounded-lg border transition flex items-center justify-center gap-1 {% if r.saha_durumu == 'DEVAM_EDIYOR' %}bg-rose-600 text-white border-rose-600 shadow-xs{% else %}bg-white text-slate-600 border-slate-200 hover:bg-rose-50 hover:text-rose-700{% endif %}">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                            <span>Devam Ediyor</span>
+                        </button>
+
+                        <button onclick="updateRiskStatus({{ r.id }}, 'KISMEN_GIDERILDI')"
+                                class="btn-status px-2.5 py-1.5 text-xs font-medium rounded-lg border transition flex items-center justify-center gap-1 {% if r.saha_durumu == 'KISMEN_GIDERILDI' %}bg-amber-500 text-white border-amber-500 shadow-xs{% else %}bg-white text-slate-600 border-slate-200 hover:bg-amber-50 hover:text-amber-700{% endif %}">
+                            <i class="fa-solid fa-circle-half-stroke"></i>
+                            <span>Kısmen</span>
+                        </button>
+
+                        <button onclick="updateRiskStatus({{ r.id }}, 'TEYIT_BEKLIYOR')"
+                                class="btn-status px-2.5 py-1.5 text-xs font-medium rounded-lg border transition flex items-center justify-center gap-1 {% if r.saha_durumu == 'TEYIT_BEKLIYOR' or not r.saha_durumu %}bg-slate-700 text-white border-slate-700 shadow-xs{% else %}bg-white text-slate-500 border-slate-200 hover:bg-slate-100{% endif %}">
+                            <i class="fa-solid fa-clock"></i>
+                            <span>Bekliyor</span>
+                        </button>
+                    </div>
+
+                    <button onclick="openNoteModal({{ r.id }}, '{{ r.saha_notu|escape or '' }}')" class="text-xs text-blue-600 hover:text-blue-800 font-semibold mt-1 flex items-center gap-1">
+                        <i class="fa-solid fa-pen-to-square"></i> Not Ekle / Düzenle
+                    </button>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Sahada Yeni Tespit Ekleme Modalı -->
+<div id="modalNewFinding" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+            <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                <i class="fa-solid fa-plus-circle text-purple-600"></i>
+                <span>Sahada Yeni Risk Tespiti Ekle</span>
+            </h3>
+            <button onclick="document.getElementById('modalNewFinding').classList.add('hidden')" class="text-slate-400 hover:text-slate-600 text-lg">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <p class="text-xs text-slate-500">
+            MEBBİS raporunda yer almayan, saha denetiminizde yeni karşılaştığınız uygunsuzluğu kaydedin. Otomatik olarak DÖF listesine dahil edilecektir.
+        </p>
+
+        <form id="formNewFinding" onsubmit="handleNewFinding(event)" class="space-y-3">
+            <input type="hidden" name="school_id" value="{{ school.id }}">
+
+            <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Kontrol Edilen Birim / Mahal:</label>
+                <input type="text" name="kontrol_edilen_birim" required placeholder="Örn: Metal Atölyesi, Kazan Dairesi, 2. Kat Koridor" class="w-full text-xs border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-purple-500 focus:outline-hidden">
+            </div>
+
+            <div>
+                <div class="flex items-center justify-between mb-1">
+                    <label class="block text-xs font-semibold text-slate-700">Tehlike ve Tespit Tanımı:</label>
+                    <button type="button" onclick="startSpeech('newFindingHazard')" class="text-xs text-purple-700 font-bold hover:text-purple-900 flex items-center gap-1">
+                        <i class="fa-solid fa-microphone"></i> <span>Sesle Söyle</span>
+                    </button>
+                </div>
+                <textarea id="newFindingHazard" name="tehlike" rows="2" required placeholder="Örn: Yeni alınan torna tezgahının acil durdurma butonu çalışmıyor." class="w-full text-xs border border-slate-300 rounded-lg p-2 focus:ring-2 focus:ring-purple-500 focus:outline-hidden"></textarea>
+            </div>
+
+            <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Alınması Gereken DÖF Tedbiri:</label>
+                <textarea name="alinmasi_gereken_dof_onlem" rows="2" placeholder="Örn: Acil stop butonu yenilenmeli ve test edilmeden devreye alınmamalıdır." class="w-full text-xs border border-slate-300 rounded-lg p-2 focus:ring-2 focus:ring-purple-500 focus:outline-hidden"></textarea>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Risk Seviyesi / Puan:</label>
+                    <select name="risk_seviyesi" class="w-full text-xs border border-slate-300 rounded-lg p-2 bg-slate-50 focus:outline-hidden">
+                        <option value="ÇOK YÜKSEK">Çok Yüksek Risk (20-25)</option>
+                        <option value="YÜKSEK" selected>Yüksek Risk (15-16)</option>
+                        <option value="ORTA">Orta Risk (8-12)</option>
+                        <option value="DÜŞÜK">Düşük Risk (1-6)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Kesin Termin:</label>
+                    <input type="text" name="termin_tarihi" value="15 Gün" placeholder="Örn: 15 Gün veya 15/12/2026" class="w-full text-xs border border-slate-300 rounded-lg p-2 focus:outline-hidden">
+                </div>
+            </div>
+
+            <div class="flex items-center justify-end gap-2 pt-2">
+                <button type="button" onclick="document.getElementById('modalNewFinding').classList.add('hidden')" class="px-4 py-2 text-slate-600 text-xs font-semibold hover:bg-slate-100 rounded-lg transition">İptal</button>
+                <button type="submit" id="btnSaveNewFinding" class="px-5 py-2 bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold rounded-lg shadow-xs transition flex items-center gap-2">
+                    <i class="fa-solid fa-check"></i>
+                    <span>Yeni Tespiti Kaydet</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Saha Notu Ekleme Modalı -->
+<div id="modalNote" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-5 shadow-2xl border border-slate-200 space-y-3">
+        <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+            <i class="fa-solid fa-pen-to-square text-blue-600"></i>
+            <span>Saha Notu Düzenle</span>
+        </h3>
+        <input type="hidden" id="noteRiskId">
+        <textarea id="noteContent" rows="3" placeholder="Saha gözlemi, yetkilinin açıklaması veya ek not yazın..." class="w-full text-xs border border-slate-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 focus:outline-hidden"></textarea>
+        <div class="flex items-center justify-end gap-2 pt-1">
+            <button onclick="document.getElementById('modalNote').classList.add('hidden')" class="px-3 py-1.5 text-slate-600 text-xs font-semibold hover:bg-slate-100 rounded-lg">İptal</button>
+            <button onclick="saveNote()" class="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg shadow-xs">Kaydet</button>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentStatusFilter = 'ALL';
+
+function filterByStatus(status) {
+    currentStatusFilter = status;
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        if (btn.getAttribute('data-filter') === status) {
+            btn.className = "filter-btn active px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-800 text-white";
+        } else {
+            btn.className = "filter-btn px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100";
+        }
+    });
+    applyFilters();
+}
+
+function filterByLevel(level) {
+    document.getElementById('searchInput').value = level;
+    applyFilters();
+}
+
+function applyFilters() {
+    const unit = document.getElementById('unitFilter').value.toLowerCase();
+    const search = document.getElementById('searchInput').value.toLowerCase();
+    const cards = document.querySelectorAll('.risk-card');
+
+    cards.forEach(card => {
+        const cardStatus = card.getAttribute('data-status');
+        const cardUnit = card.getAttribute('data-unit').toLowerCase();
+        const cardText = card.getAttribute('data-text').toLowerCase();
+
+        let matchStatus = (currentStatusFilter === 'ALL') || (cardStatus === currentStatusFilter);
+        let matchUnit = !unit || cardUnit.includes(unit);
+        let matchSearch = !search || cardText.includes(search);
+
+        if (matchStatus && matchUnit && matchSearch) {
+            card.classList.remove('hidden');
+        } else {
+            card.classList.add('hidden');
+        }
+    });
+}
+
+async function updateRiskStatus(riskId, newStatus) {
+    try {
+        const resp = await fetch(`/api/risk/${riskId}/update-status`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ saha_durumu: newStatus })
+        });
+        const res = await resp.json();
+        if (res.success) {
+            // Kartın attribute'ünü güncelle
+            const card = document.querySelector(`.risk-card[data-id="${riskId}"]`);
+            if (card) {
+                card.setAttribute('data-status', newStatus);
+                // Buton stillerini anında güncelle
+                const buttons = card.querySelectorAll('.btn-status');
+                buttons.forEach(b => {
+                    b.className = "btn-status px-2.5 py-1.5 text-xs font-bold rounded-lg border transition flex items-center justify-center gap-1 bg-white text-slate-600 border-slate-200";
+                });
+                // Aktif butona renk ver
+                if (newStatus === 'GIDERILDI') {
+                    buttons[0].className = "btn-status px-2.5 py-1.5 text-xs font-bold rounded-lg border transition flex items-center justify-center gap-1 bg-emerald-600 text-white border-emerald-600 shadow-xs";
+                } else if (newStatus === 'DEVAM_EDIYOR') {
+                    buttons[1].className = "btn-status px-2.5 py-1.5 text-xs font-bold rounded-lg border transition flex items-center justify-center gap-1 bg-rose-600 text-white border-rose-600 shadow-xs";
+                } else if (newStatus === 'KISMEN_GIDERILDI') {
+                    buttons[2].className = "btn-status px-2.5 py-1.5 text-xs font-bold rounded-lg border transition flex items-center justify-center gap-1 bg-amber-500 text-white border-amber-500 shadow-xs";
+                } else {
+                    buttons[3].className = "btn-status px-2.5 py-1.5 text-xs font-bold rounded-lg border transition flex items-center justify-center gap-1 bg-slate-700 text-white border-slate-700 shadow-xs";
+                }
+            }
+        }
+    } catch (e) {
+        alert("Durum güncellenemedi: " + e.message);
+    }
+}
+
+function openNoteModal(riskId, currentNote) {
+    document.getElementById('noteRiskId').value = riskId;
+    document.getElementById('noteContent').value = currentNote || '';
+    document.getElementById('modalNote').classList.remove('hidden');
+}
+
+async function saveNote() {
+    const riskId = document.getElementById('noteRiskId').value;
+    const note = document.getElementById('noteContent').value;
+    try {
+        const resp = await fetch(`/api/risk/${riskId}/update-status`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ saha_notu: note })
+        });
+        const res = await resp.json();
+        if (res.success) {
+            document.getElementById('modalNote').classList.add('hidden');
+            window.location.reload();
+        }
+    } catch (e) {
+        alert("Not kaydedilemedi: " + e.message);
+    }
+}
+
+async function handleNewFinding(e) {
+    e.preventDefault();
+    const form = document.getElementById('formNewFinding');
+    const formData = new FormData(form);
+    const payload = Object.fromEntries(formData.entries());
+
+    const btn = document.getElementById('btnSaveNewFinding');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Kaydediliyor...';
+
+    try {
+        const resp = await fetch('/api/risk/field-new', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const res = await resp.json();
+        if (res.success) {
+            alert("Yeni saha tespiti başarıyla kaydedildi ve DÖF listesine eklendi!");
+            window.location.reload();
+        } else {
+            alert("Hata: " + res.error);
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-check"></i> Yeni Tespiti Kaydet';
+        }
+    } catch (err) {
+        alert("Hata: " + err.message);
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-check"></i> Yeni Tespiti Kaydet';
+    }
+}
+
+function startSpeech(targetId) {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+        alert("Tarayıcınız ses tanımayı desteklemiyor.");
+        return;
+    }
+    const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRec();
+    recognition.lang = 'tr-TR';
+    recognition.interimResults = false;
+
+    recognition.onstart = () => {
+        document.getElementById(targetId).placeholder = "Dinleniyor... Lütfen konuşun.";
+    };
+    recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        const cur = document.getElementById(targetId).value;
+        document.getElementById(targetId).value = cur ? cur + ' ' + transcript : transcript;
+    };
+    recognition.onerror = () => {
+        document.getElementById(targetId).placeholder = "";
+    };
+    recognition.start();
+}
+</script>
+{% endblock %}
