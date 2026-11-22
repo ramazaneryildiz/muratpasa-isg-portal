@@ -18,4 +18,5 @@ static/uploads/arsiv/*
 !static/uploads/arsiv/.gitkeep
 static/uploads/saha_photos/*
 cloudflared.exe
+ngrok.exe
 tunnel_url.txt

@@ -27,15 +27,36 @@ def main():
     print("=" * 68)
     
     local_ip = get_local_ip()
+    ngrok_bin = os.path.join(BASE_DIR, "ngrok.exe")
     cloudflared_bin = os.path.join(BASE_DIR, "cloudflared.exe")
     tunnel_file = os.path.join(BASE_DIR, "tunnel_url.txt")
     
-    # 1. Cloudflare Tünelini Başlat (Mobil SSL Erişimi İçin)
+    # 1. Kalıcı Tüneli Başlat (Öncelikli: Ngrok Sabit Domain)
     tunnel_process = None
     tunnel_url = None
     
-    if os.path.exists(cloudflared_bin):
-        print("\n[*] Mobil cihazlar için güvenli SSL tüneli kuruluyor...")
+    if os.path.exists(ngrok_bin):
+        print("\n[*] Kalıcı SSL Tüneli kuruluyor (sway-reimburse-icky.ngrok-free.dev)...")
+        try:
+            static_domain = "https://sway-reimburse-icky.ngrok-free.dev"
+            tunnel_process = subprocess.Popen(
+                [ngrok_bin, "http", "8000", "--url", static_domain],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                encoding="utf-8",
+                errors="replace"
+            )
+            tunnel_url = static_domain
+            with open(tunnel_file, "w", encoding="utf-8") as f:
+                f.write(tunnel_url)
+            print(f"[OK] Kalıcı adres aktif: {tunnel_url}")
+        except Exception as e:
+            print(f"[!] Ngrok başlatılamadı: {e}")
+    
+    # Yedek Tünel: Ngrok yoksa Cloudflare Hızlı Tüneli
+    if not tunnel_url and os.path.exists(cloudflared_bin):
+        print("\n[*] Geçici Cloudflare SSL tüneli kuruluyor...")
         try:
             tunnel_process = subprocess.Popen(
                 [cloudflared_bin, "tunnel", "--url", "http://127.0.0.1:8000"],
@@ -59,7 +80,7 @@ def main():
                         f.write(tunnel_url)
                     break
         except Exception as e:
-            print(f"[!] Tünel başlatılamadı: {e}")
+            print(f"[!] Cloudflare tünel başlatılamadı: {e}")
 
     # 2. Terminal Bilgilendirme Ekranı
     print("\n" + "=" * 68)

@@ -16,6 +16,7 @@ for /f "tokens=5" %%a in ('netstat -aon ^| findstr :8000 ^| findstr LISTENING 2^
     taskkill /F /PID %%a >nul 2>&1
 )
 taskkill /F /IM cloudflared.exe >nul 2>&1
+taskkill /F /IM ngrok.exe >nul 2>&1
 
 :: Portali calistir
 "%PYTHON_EXE%" "%~dp0run_portal.py"
