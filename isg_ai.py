@@ -446,6 +446,10 @@ def process_field_voice_and_vision_hazard(
                         "id": s["id"],
                         "kurum_kodu": s["kurum_kodu"],
                         "kurum_adi": s["kurum_adi"],
+                        "mudur_ad_soyad": s.get("mudur_ad_soyad") or "",
+                        "mudur_tel": s.get("mudur_tel") or "",
+                        "isveren_vekili_ad_soyad": s.get("isveren_vekili_ad_soyad") or "",
+                        "isveren_vekili_tel": s.get("isveren_vekili_tel") or "",
                         "score": 100.0
                     }]
                     break
@@ -504,6 +508,10 @@ def process_field_voice_and_vision_hazard(
                 "id": s["id"],
                 "kurum_kodu": s["kurum_kodu"],
                 "kurum_adi": s["kurum_adi"],
+                "mudur_ad_soyad": s.get("mudur_ad_soyad") or "",
+                "mudur_tel": s.get("mudur_tel") or "",
+                "isveren_vekili_ad_soyad": s.get("isveren_vekili_ad_soyad") or "",
+                "isveren_vekili_tel": s.get("isveren_vekili_tel") or "",
                 "score": round(sc, 1)
             } for s, sc in top_candidates]
 
@@ -586,7 +594,11 @@ YANITINI SADECE AŞAĞIDAKİ JSON ŞEMASINDA DÖNDÜR:
             data["matched_school"] = {
                 "id": matched_school.get("id"),
                 "kurum_kodu": matched_school.get("kurum_kodu"),
-                "kurum_adi": matched_school.get("kurum_adi")
+                "kurum_adi": matched_school.get("kurum_adi"),
+                "mudur_ad_soyad": matched_school.get("mudur_ad_soyad") or "",
+                "mudur_tel": matched_school.get("mudur_tel") or "",
+                "isveren_vekili_ad_soyad": matched_school.get("isveren_vekili_ad_soyad") or "",
+                "isveren_vekili_tel": matched_school.get("isveren_vekili_tel") or ""
             }
         else:
             data["matched_school"] = None
@@ -596,34 +608,189 @@ YANITINI SADECE AŞAĞIDAKİ JSON ŞEMASINDA DÖNDÜR:
         return {"success": True, "data": data}
     except Exception as e:
         logger.error(f"Saha Sesli & Görsel AI hatası: {e}")
-        # Akıllı yedek (Fallback)
+        # Alan odaklı akıllı kural tabanlı motor (Intelligent Domain-Specific Fallback)
+        t_low = (voice_transcript or "").lower()
+        
+        # 1. Kazan Dairesi / Kalorifer / Basınç / Emniyet Ventili
+        if any(k in t_low for k in ["kazan", "kalorifer", "ventil", "basınç", "brülör", "genleşme", "hidrofor", "baca"]):
+            heuristics = {
+                "unit_or_workshop": "Kazan Dairesi & Isı Merkezi",
+                "bolum_unite_kategori": "KAZAN_DAIRESI",
+                "tehlike_kaynagi": "Basınçlı kap / emniyet ventili ve tesisat sızıntısı",
+                "risk_senaryosu": "Aşırı basınç artışı, patlama riski, buhar/sıcak su yanıkları ve gaz zehirlenmesi.",
+                "fine_kinney": {
+                    "olasilik": 6.0,
+                    "frekans": 6.0,
+                    "siddet": 15.0,
+                    "skor": 540.0,
+                    "seviye": "Esaslı / Çok Yüksek Risk (DÖF & İvedi Müdahale)",
+                    "seviye_kod": "COK_YUKSEK"
+                },
+                "mebbis_kutuphane_kodu": "İSG-KZN-01",
+                "mebbis_dof_aciklama_metni": "Kazan dairesi emniyet ventili ve basınç göstergeleri kalibre edilmeli, periyodik muayene etiketleri yenilenmeli, otomatik gaz kesme selenoid vanaları ve sızdırmazlık testleri tamamlanmalıdır.",
+                "dayanak_mevzuat": "Basınçlı Ekipmanlar Yönetmeliği & Binaların Yangından Korunması Hakkında Yönetmelik Madde 54",
+                "termin_gun": 7,
+                "sorumlular": "Okul Yönetimi & Kazan Sorumlusu",
+                "odenek_talep_kapsaminda_mi": True
+            }
+        # 2. Elektrik Panosu / Kaçak Akım / Açık Kablo / Şalter
+        elif any(k in t_low for k in ["elektrik", "pano", "panosu", "şalter", "kaçak akım", "sigorta", "kablo", "priz", "trafo"]):
+            heuristics = {
+                "unit_or_workshop": "Elektrik Dağıtım Panosu & Tali Panolar",
+                "bolum_unite_kategori": "ELEKTRIK_TRAFO",
+                "tehlike_kaynagi": "Açık elektrik iletkenleri / Kaçak akım rölesi ve pano kilit eksikliği",
+                "risk_senaryosu": "Elektrik çarpması, ark patlaması ve yangın riski.",
+                "fine_kinney": {
+                    "olasilik": 6.0,
+                    "frekans": 10.0,
+                    "siddet": 15.0,
+                    "skor": 900.0,
+                    "seviye": "Tolerans Edilemez Risk / Acil Tedbir (>= 400)",
+                    "seviye_kod": "TOLERANS_EDILEMEZ"
+                },
+                "mebbis_kutuphane_kodu": "İSG-ELK-02",
+                "mebbis_dof_aciklama_metni": "Elektrik panolarında 30 mA hayat koruma kaçak akım röleleri test edilmeli, açıkta kalan iletkenler kablo kanalı içerisine alınmalı, panolar kilitli tutulmalı ve yalıtkan paspas serilmelidir.",
+                "dayanak_mevzuat": "Elektrik İç Tesisleri Yönetmeliği & İşyeri Bina ve Eklentilerinde Alınacak Sağlık ve Güvenlik Önlemleri Yönetmeliği",
+                "termin_gun": 7,
+                "sorumlular": "Okul Yönetimi & Elektrik Teknisyeni",
+                "odenek_talep_kapsaminda_mi": True
+            }
+        # 3. Yangın Güvenliği / Tüp / Hortum / Yangın Dolabı / Kaçış Yolu
+        elif any(k in t_low for k in ["yangın", "tüp", "söndürme", "hortum", "dolap", "panik bar", "tahliye"]):
+            heuristics = {
+                "unit_or_workshop": "Yangın Güvenlik Alanları & Kaçış Hatları",
+                "bolum_unite_kategori": "YANGIN_YOLU",
+                "tehlike_kaynagi": "Yangın söndürme donanımı / Kaçış kapısı ve dolap erişim engeli",
+                "risk_senaryosu": "Yangın anında müdahale gecikmesi, duman zehirlenmesi ve tahliye izdihamı.",
+                "fine_kinney": {
+                    "olasilik": 3.0,
+                    "frekans": 6.0,
+                    "siddet": 15.0,
+                    "skor": 270.0,
+                    "seviye": "Yüksek Risk / İvedi DÖF (200 - 400)",
+                    "seviye_kod": "YUKSEK"
+                },
+                "mebbis_kutuphane_kodu": "İSG-YNG-03",
+                "mebbis_dof_aciklama_metni": "Yangın söndürme tüplerinin hidrostatik test ve dolum kontrolleri tamamlanmalı, dolap önleri açık bulundurulmalı ve kaçış kapılarına panik bar takılmalıdır.",
+                "dayanak_mevzuat": "Binaların Yangından Korunması Hakkında Yönetmelik Madde 99",
+                "termin_gun": 15,
+                "sorumlular": "Okul Yönetimi & Yangınla Mücadele Ekibi",
+                "odenek_talep_kapsaminda_mi": False
+            }
+        # 4. Mutfak / Yemekhane / Fayans / Kaymaz Zemin
+        elif any(k in t_low for k in ["mutfak", "yemekhane", "fayans", "dökülmüş", "dökülen", "kırık", "davlumbaz", "aşçı"]):
+            heuristics = {
+                "unit_or_workshop": "Mutfak ve Beslenme Atölyesi",
+                "bolum_unite_kategori": "ATOLYE_LABORATUVAR",
+                "tehlike_kaynagi": "Duvarda dökülen/kırık fayanslar ve hijyenik olmayan yüzey",
+                "risk_senaryosu": "Kesilme, parçalanma, gıda kontaminasyonu ve personelin kayıp düşmesi.",
+                "fine_kinney": {
+                    "olasilik": 6.0,
+                    "frekans": 6.0,
+                    "siddet": 3.0,
+                    "skor": 108.0,
+                    "seviye": "Önemli Risk / DÖF Başlatılmalı (70 - 200)",
+                    "seviye_kod": "YUKSEK_ONEMLI"
+                },
+                "mebbis_kutuphane_kodu": "İSG-MUT-04",
+                "mebbis_dof_aciklama_metni": "Mutfak atölyesi duvarlarındaki kırık ve dökük fayanslar yenilenmeli, hijyenik ve kolay temizlenebilir antibakteriyel kaplama uygulanmalı, zemin kaydırmaz paspaslarla desteklenmelidir.",
+                "dayanak_mevzuat": "Okul Kantin ve Yemekhanelerine Dair Hijyen Kuralları & 6331 s. Kanun",
+                "termin_gun": 15,
+                "sorumlular": "Okul Yönetimi & Mutfak Atölye Şefi",
+                "odenek_talep_kapsaminda_mi": True
+            }
+        # 5. Merdiven / Korkuluk / Zemin / Kayma-Düşme / Pencere
+        elif any(k in t_low for k in ["merdiven", "korkuluk", "basamak", "kaymaz", "pencere", "küpeşte"]):
+            heuristics = {
+                "unit_or_workshop": "Merdivenler ve Kat Sirkülasyon Alanları",
+                "bolum_unite_kategori": "BINA_GENEL",
+                "tehlike_kaynagi": "Merdiven korkuluk yüksekliği yetersizliği / Kaymaz bant ve pencere emniyet kilidi eksikliği",
+                "risk_senaryosu": "Öğrenci ve personelin yüksekten veya basamaktan düşmesi, kırık ve travma riski.",
+                "fine_kinney": {
+                    "olasilik": 6.0,
+                    "frekans": 6.0,
+                    "siddet": 3.0,
+                    "skor": 108.0,
+                    "seviye": "Önemli Risk / DÖF Başlatılmalı (70 - 200)",
+                    "seviye_kod": "YUKSEK_ONEMLI"
+                },
+                "mebbis_kutuphane_kodu": "İSG-BINA-02",
+                "mebbis_dof_aciklama_metni": "Merdiven korkulukları en az 110 cm yüksekliğe tamamlanmalı veya güvenlik filesi takılmalı, basamak uçlarına fosforlu kaymaz emniyet bantları çekilmeli, pencerelere 10-15 cm açılma emniyet kilidi takılmalıdır.",
+                "dayanak_mevzuat": "İşyeri Bina ve Eklentilerinde Alınacak Sağlık ve Güvenlik Önlemlerine İlişkin Yönetmelik EK-1",
+                "termin_gun": 15,
+                "sorumlular": "Okul Yönetimi & İSG Kurulu",
+                "odenek_talep_kapsaminda_mi": False
+            }
+        # 6. Kimya / Biyoloji Laboratuvarı / Çeker Ocak / Asit
+        elif any(k in t_low for k in ["kimya", "laboratuvar", "çeker ocak", "asit", "deney"]):
+            heuristics = {
+                "unit_or_workshop": "Kimya / Fen Laboratuvarı",
+                "bolum_unite_kategori": "ATOLYE_LABORATUVAR",
+                "tehlike_kaynagi": "Kimyasal depolama ve çeker ocak havalandırma yetersizliği",
+                "risk_senaryosu": "Kimyasal buhar inhalasyonu, asit sıçraması ve reaksiyon yangını riski.",
+                "fine_kinney": {
+                    "olasilik": 3.0,
+                    "frekans": 6.0,
+                    "siddet": 7.0,
+                    "skor": 126.0,
+                    "seviye": "Önemli Risk / DÖF Başlatılmalı (70 - 200)",
+                    "seviye_kod": "YUKSEK_ONEMLI"
+                },
+                "mebbis_kutuphane_kodu": "İSG-LAB-01",
+                "mebbis_dof_aciklama_metni": "Kimyasal maddeler kilitli çelik dolaplarda alfabetik ve uyumsuzluk matrisine göre saklanmalı, MSDS güvenlik bilgi formları asılmalı, acil göz duşu ve çeker ocak aktif çalışır durumda tutulmalıdır.",
+                "dayanak_mevzuat": "Kimyasal Maddelerle Çalışmalarda Sağlık ve Güvenlik Önlemleri Hakkında Yönetmelik",
+                "termin_gun": 15,
+                "sorumlular": "Okul Yönetimi & Laboratuvar Sorumlusu",
+                "odenek_talep_kapsaminda_mi": False
+            }
+        else:
+            heuristics = {
+                "unit_or_workshop": "Saha Tespit Birimi",
+                "bolum_unite_kategori": "BINA_GENEL",
+                "tehlike_kaynagi": voice_transcript[:80] if voice_transcript else "Saha Uygunsuzluğu",
+                "risk_senaryosu": f"Sözlü saha tespiti: {voice_transcript}",
+                "fine_kinney": {
+                    "olasilik": 6.0,
+                    "frekans": 6.0,
+                    "siddet": 3.0,
+                    "skor": 108.0,
+                    "seviye": "Önemli Risk / DÖF Başlatılmalı (70 - 200)",
+                    "seviye_kod": "YUKSEK_ONEMLI"
+                },
+                "mebbis_kutuphane_kodu": "İSG-SAHA-01",
+                "mebbis_dof_aciklama_metni": f"Sahada tespit edilen uygunsuzluk ({voice_transcript}) giderilmeli ve 6331 s. Kanun kapsamında koruyucu önlemler alınmalıdır.",
+                "dayanak_mevzuat": "6331 sayılı İş Sağlığı ve Güvenliği Kanunu Madde 4, 10 ve 16",
+                "termin_gun": 15,
+                "sorumlular": "Okul Yönetimi / İSG Kurulu",
+                "odenek_talep_kapsaminda_mi": False
+            }
+
+        days = heuristics.get("termin_gun", 15)
         fallback_data = {
             "school_name_detected": matched_school.get("kurum_adi") if matched_school else "Belirtilmedi",
-            "unit_or_workshop": "Saha Tespit Birimi",
-            "bolum_unite_kategori": "ATOLYE_LABORATUVAR",
-            "tehlike_kaynagi": voice_transcript[:80],
-            "risk_senaryosu": f"Sözlü saha tespiti: {voice_transcript}",
-            "fine_kinney": {
-                "olasilik": 6.0,
-                "frekans": 6.0,
-                "siddet": 3.0,
-                "skor": 108.0,
-                "seviye": "Önemli Risk / DÖF Başlatılmalı (70 - 200)",
-                "seviye_kod": "YUKSEK_ONEMLI"
-            },
-            "mebbis_kutuphane_kodu": "İSG-SAHA-01",
-            "mebbis_dof_aciklama_metni": f"Sahada tespit edilen uygunsuzluk ({voice_transcript}) giderilmeli ve koruyucu önlemler alınmalıdır.",
-            "dayanak_mevzuat": "6331 sayılı İş Sağlığı ve Güvenliği Kanunu Madde 4, 10 ve 16",
-            "termin_gun": 15,
-            "termin_tarihi": default_termin,
-            "sorumlular": "Okul Yönetimi / İSG Kurulu",
-            "odenek_talep_kapsaminda_mi": False,
-            "gorsel_analiz_notu": "Sesli beyan üzerinden kural tabanlı analiz yapıldı.",
+            "unit_or_workshop": heuristics["unit_or_workshop"],
+            "bolum_unite_kategori": heuristics["bolum_unite_kategori"],
+            "tehlike_kaynagi": heuristics["tehlike_kaynagi"],
+            "risk_senaryosu": heuristics["risk_senaryosu"],
+            "fine_kinney": heuristics["fine_kinney"],
+            "mebbis_kutuphane_kodu": heuristics["mebbis_kutuphane_kodu"],
+            "mebbis_dof_aciklama_metni": heuristics["mebbis_dof_aciklama_metni"],
+            "dayanak_mevzuat": heuristics["dayanak_mevzuat"],
+            "termin_gun": days,
+            "termin_tarihi": (today + timedelta(days=days)).strftime("%Y-%m-%d"),
+            "sorumlular": heuristics["sorumlular"],
+            "odenek_talep_kapsaminda_mi": heuristics["odenek_talep_kapsaminda_mi"],
+            "gorsel_analiz_notu": "Sesli beyan üzerinden kural tabanlı uzman analizi yapıldı.",
             "matched_school": {
                 "id": matched_school.get("id"),
                 "kurum_kodu": matched_school.get("kurum_kodu"),
-                "kurum_adi": matched_school.get("kurum_adi")
-            } if matched_school else None
+                "kurum_adi": matched_school.get("kurum_adi"),
+                "mudur_ad_soyad": matched_school.get("mudur_ad_soyad") or "",
+                "mudur_tel": matched_school.get("mudur_tel") or "",
+                "isveren_vekili_ad_soyad": matched_school.get("isveren_vekili_ad_soyad") or "",
+                "isveren_vekili_tel": matched_school.get("isveren_vekili_tel") or ""
+            } if matched_school else None,
+            "candidate_schools": candidate_schools
         }
         return {"success": True, "data": fallback_data, "fallback": True}
 

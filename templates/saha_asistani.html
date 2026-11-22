@@ -76,6 +76,32 @@
         </div>
     </div>
 
+    <!-- ==================== ÇEVRİMDIŞI DÖF KUYRUĞU / ÇEKMEME MODU ==================== -->
+    <div id="offlineSyncBanner" class="hidden rounded-2xl bg-amber-50 border border-amber-300 p-4 shadow-xs text-amber-900 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-amber-200 text-amber-800 flex items-center justify-center shrink-0 text-lg">
+                <i class="fa-solid fa-cloud-arrow-up"></i>
+            </div>
+            <div>
+                <div class="text-xs font-bold text-amber-900">
+                    Çevrimdışı Mod: Bodrum Katta Kaydedilen Saha Tespiti Var
+                </div>
+                <div class="text-[11px] text-amber-800">
+                    Cihaz hafızasında internet yokken kaydedilen <strong id="offlineItemCount" class="font-mono">1</strong> tespit bulunuyor.
+                </div>
+            </div>
+        </div>
+        <div class="flex items-center gap-2">
+            <button type="button" onclick="syncOfflineQueue()" class="px-4 py-2 rounded-xl bg-amber-800 hover:bg-amber-900 text-white font-bold text-xs shadow-xs transition flex items-center gap-1.5 active:scale-95">
+                <i class="fa-solid fa-rotate text-amber-300"></i>
+                <span id="syncOfflineBtnText">Şimdi Eşitle</span>
+            </button>
+            <button type="button" onclick="clearOfflineQueue()" class="px-3 py-2 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-900 text-xs font-semibold border border-amber-300 transition" title="Kuyruğu Temizle">
+                Sil
+            </button>
+        </div>
+    </div>
+
     <!-- ==================== SAHA GİRİŞ FORMU: SESLİ VE FOTOĞRAFLI ==================== -->
     <div class="bg-white rounded-2xl p-5 sm:p-7 border border-slate-200 shadow-xs space-y-5">
         
@@ -196,6 +222,9 @@
                         <div class="text-[10px] text-emerald-700 font-semibold flex items-center gap-1">
                             <i class="fa-solid fa-circle-check"></i> Fotoğraf eklendi
                         </div>
+                        <div id="photoCompressionBadge" class="hidden text-[10px] text-emerald-800 font-semibold bg-emerald-100/80 px-2 py-0.5 rounded border border-emerald-200">
+                            <i class="fa-solid fa-bolt text-emerald-600 mr-1"></i><span id="photoCompressionText">Sıkıştırıldı</span>
+                        </div>
                     </div>
                 </div>
                 <button type="button" onclick="removePhoto()" class="px-2.5 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs border border-rose-200 transition flex items-center gap-1">
@@ -280,6 +309,22 @@
             </div>
             <div id="candidateChipsList" class="flex flex-wrap items-center gap-2 pt-0.5">
                 <!-- JavaScript tarafından dinamik oluşturulur -->
+            </div>
+        </div>
+
+        <!-- ==================== OKUL İDARESİ & İŞVEREN VEKİLİ İLETİŞİM KARTI ==================== -->
+        <div id="schoolContactCard" class="hidden p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
+            <div class="flex items-center justify-between border-b border-slate-200/80 pb-2">
+                <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                    <i class="fa-solid fa-phone-volume text-slate-500"></i>
+                    <span>Okul Yönetimi & İSG İletişim Masası (6331 s. Kanun İşveren)</span>
+                </span>
+                <span class="text-[10px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full border border-emerald-200">
+                    <i class="fa-solid fa-circle-check text-emerald-600 mr-0.5"></i> Resmî Kayıtlı
+                </span>
+            </div>
+            <div id="schoolContactList" class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                <!-- JS tarafından doldurulur -->
             </div>
         </div>
 
@@ -378,13 +423,22 @@
     let previousCyclesTranscript = '';  // Önceki sessizlik/yeniden başlatma döngülerinde kesinleşen metin
     let currentCycleFinal = '';         // Mevcut döngüde isFinal olan metin
     let selectedImageFile = null;
+    let selectedImageDataUrl = null;
     let lastAnalysisResult = null;
     let lockedSchoolId = null;
     let lockedSchoolName = '';
 
     const allSchoolsList = [
         {% for sc in all_schools %}
-        { id: {{ sc.id }}, name: "{{ sc.kurum_adi }}", code: "{{ sc.kurum_kodu }}" },
+        { 
+            id: {{ sc.id }}, 
+            name: "{{ sc.kurum_adi }}", 
+            code: "{{ sc.kurum_kodu }}",
+            mudur: "{{ sc.mudur_ad_soyad or '' }}",
+            mudur_tel: "{{ sc.mudur_tel or '' }}",
+            vekil: "{{ sc.isveren_vekili_ad_soyad or '' }}",
+            vekil_tel: "{{ sc.isveren_vekili_tel or '' }}"
+        },
         {% endfor %}
     ];
 
@@ -544,6 +598,9 @@
         document.getElementById('selectSchoolOverrideInput').value = `${code} — ${name}`;
         const list = document.getElementById('overrideDropdownList');
         if (list) list.classList.add('hidden');
+        
+        const found = allSchoolsList.find(s => s.id === id);
+        if (found) renderSchoolContact(found);
     }
 
     // Dışarı tıklandığında açılır listeleri kapat
@@ -768,28 +825,191 @@
         document.getElementById('voiceStatusMsg').innerHTML = '<i class="fa-solid fa-circle-info text-slate-400 mr-1"></i> <span>Butona basıp konuşun: <em>"Şimdi Tez-Tur Meslek\'te mutfak atölyesindeyim, duvarda fayanslar dökülmüş..."</em></span>';
     }
 
-    // Fotoğraf Seçimi (Hem Kamera Hem Galeri)
-    function handleImageSelected(input) {
-        if (input.files && input.files[0]) {
-            selectedImageFile = input.files[0];
+    // ==================== MOBİL FOTOĞRAF KANVAS SIKIŞTIRMA ====================
+    function formatBytes(bytes) {
+        if (!bytes || bytes === 0) return '0 B';
+        const k = 1024;
+        const sizes = ['B', 'KB', 'MB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+    }
+
+    async function compressImageFile(file, maxDimension = 1600, quality = 0.82) {
+        return new Promise((resolve) => {
+            if (!file || !file.type.startsWith('image/')) {
+                resolve({ file: file, origSize: file ? file.size : 0, compSize: file ? file.size : 0, dataUrl: null, compressed: false });
+                return;
+            }
             const reader = new FileReader();
             reader.onload = (e) => {
-                document.getElementById('photoPreviewImg').src = e.target.result;
-                document.getElementById('photoFileName').innerText = selectedImageFile.name;
-                document.getElementById('photoPreviewContainer').classList.remove('hidden');
+                const img = new Image();
+                img.onload = () => {
+                    let w = img.width;
+                    let h = img.height;
+                    const origSize = file.size;
+
+                    if (w > maxDimension || h > maxDimension) {
+                        if (w > h) {
+                            h = Math.round((h * maxDimension) / w);
+                            w = maxDimension;
+                        } else {
+                            w = Math.round((w * maxDimension) / h);
+                            h = maxDimension;
+                        }
+                    }
+
+                    const canvas = document.createElement('canvas');
+                    canvas.width = w;
+                    canvas.height = h;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, w, h);
+
+                    canvas.toBlob((blob) => {
+                        if (!blob || blob.size >= origSize) {
+                            resolve({ file: file, origSize: origSize, compSize: origSize, dataUrl: e.target.result, compressed: false });
+                        } else {
+                            const compressedFile = new File([blob], file.name.replace(/\.[^.]+$/, '.jpg'), { type: 'image/jpeg' });
+                            const compDataUrl = canvas.toDataURL('image/jpeg', quality);
+                            resolve({ file: compressedFile, origSize: origSize, compSize: blob.size, dataUrl: compDataUrl, compressed: true });
+                        }
+                    }, 'image/jpeg', quality);
+                };
+                img.onerror = () => resolve({ file: file, origSize: file.size, compSize: file.size, dataUrl: e.target.result, compressed: false });
+                img.src = e.target.result;
             };
-            reader.readAsDataURL(selectedImageFile);
+            reader.onerror = () => resolve({ file: file, origSize: file.size, compSize: file.size, dataUrl: null, compressed: false });
+            reader.readAsDataURL(file);
+        });
+    }
+
+    // Fotoğraf Seçimi (Hem Kamera Hem Galeri)
+    async function handleImageSelected(input) {
+        if (input.files && input.files[0]) {
+            const rawFile = input.files[0];
+            const badge = document.getElementById('photoCompressionBadge');
+            const compText = document.getElementById('photoCompressionText');
+            
+            const res = await compressImageFile(rawFile, 1600, 0.82);
+            selectedImageFile = res.file;
+            selectedImageDataUrl = res.dataUrl;
+
+            document.getElementById('photoPreviewImg').src = res.dataUrl || '';
+            document.getElementById('photoFileName').innerText = selectedImageFile.name;
+            document.getElementById('photoPreviewContainer').classList.remove('hidden');
+
+            if (res.compressed && badge && compText) {
+                compText.innerText = `${formatBytes(res.origSize)} → ${formatBytes(res.compSize)} (Hızlı Mobil Yükleme)`;
+                badge.classList.remove('hidden');
+            } else if (badge) {
+                badge.classList.add('hidden');
+            }
         }
     }
 
     function removePhoto() {
         selectedImageFile = null;
+        selectedImageDataUrl = null;
         const cInp = document.getElementById('cameraInput');
         if (cInp) cInp.value = '';
         const gInp = document.getElementById('galleryInput');
         if (gInp) gInp.value = '';
         document.getElementById('photoPreviewContainer').classList.add('hidden');
     }
+
+    // ==================== ÇEVRİMDIŞI KUYRUK (BODRUM KAT / ÇEKMEME MODU) ====================
+    const OFFLINE_STORAGE_KEY = 'isg_muratpasa_offline_queue_v1';
+
+    function getOfflineQueue() {
+        try {
+            return JSON.parse(localStorage.getItem(OFFLINE_STORAGE_KEY) || '[]');
+        } catch(e) {
+            return [];
+        }
+    }
+
+    function saveToOfflineQueue(transcript, imageDataUrl, imageName, schoolId, schoolName) {
+        const queue = getOfflineQueue();
+        const item = {
+            id: Date.now(),
+            transcript: transcript,
+            image_data: imageDataUrl || null,
+            image_name: imageName || null,
+            locked_school_id: schoolId,
+            locked_school_name: schoolName,
+            created_at: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })
+        };
+        queue.push(item);
+        localStorage.setItem(OFFLINE_STORAGE_KEY, JSON.stringify(queue));
+        renderOfflineBanner();
+    }
+
+    function renderOfflineBanner() {
+        const queue = getOfflineQueue();
+        const banner = document.getElementById('offlineSyncBanner');
+        const countSpan = document.getElementById('offlineItemCount');
+        if (!banner) return;
+
+        if (queue.length > 0) {
+            banner.classList.remove('hidden');
+            if (countSpan) countSpan.innerText = `${queue.length} adet`;
+        } else {
+            banner.classList.add('hidden');
+        }
+    }
+
+    function clearOfflineQueue() {
+        if (confirm('Çevrimdışı kaydedilen bekleyen tespitler silinsin mi?')) {
+            localStorage.removeItem(OFFLINE_STORAGE_KEY);
+            renderOfflineBanner();
+        }
+    }
+
+    async function syncOfflineQueue() {
+        const queue = getOfflineQueue();
+        if (queue.length === 0) return;
+
+        const btnText = document.getElementById('syncOfflineBtnText');
+        if (btnText) btnText.innerText = 'Eşitleniyor...';
+
+        const item = queue[0];
+        document.getElementById('fieldTranscript').value = item.transcript;
+        if (item.locked_school_id) {
+            selectAndLockSchool(item.locked_school_id, '', item.locked_school_name || '');
+        }
+
+        if (item.image_data) {
+            try {
+                const arr = item.image_data.split(',');
+                const mimeMatch = arr[0].match(/:(.*?);/);
+                const mime = mimeMatch ? mimeMatch[1] : 'image/jpeg';
+                const bstr = atob(arr[1]);
+                let n = bstr.length;
+                const u8arr = new Uint8Array(n);
+                while (n--) {
+                    u8arr[n] = bstr.charCodeAt(n);
+                }
+                selectedImageFile = new File([u8arr], item.image_name || 'saha_foto.jpg', { type: mime });
+                selectedImageDataUrl = item.image_data;
+                document.getElementById('photoPreviewImg').src = item.image_data;
+                document.getElementById('photoFileName').innerText = selectedImageFile.name;
+                document.getElementById('photoPreviewContainer').classList.remove('hidden');
+            } catch(imgErr) {
+                console.warn('Görsel geri yükleme hatası:', imgErr);
+            }
+        }
+
+        queue.shift();
+        localStorage.setItem(OFFLINE_STORAGE_KEY, JSON.stringify(queue));
+        renderOfflineBanner();
+        if (btnText) btnText.innerText = 'Şimdi Eşitle';
+
+        // Anında analiz et
+        runAiFieldInspection();
+    }
+
+    window.addEventListener('online', () => {
+        renderOfflineBanner();
+    });
 
     // AI ile Analiz Et
     async function runAiFieldInspection() {
@@ -829,10 +1049,13 @@
                 lastAnalysisResult.photo_url = res.photo_url || null;
                 renderAnalysisResult(res.data);
             } else {
-                alert('Analiz başarısız: ' + (res.error || 'Bilinmeyen hata'));
+                alert('Analiz uyarısı: ' + (res.error || 'Bilinmeyen yanıt'));
             }
         } catch (e) {
-            alert('Bağlantı hatası: ' + e.message);
+            console.warn('Bağlantı kesintisi / Ağ hatası:', e);
+            // Bodrum kat çekmeme modu: Otomatik çevrimdışı kuyruğa kaydet!
+            saveToOfflineQueue(text, selectedImageDataUrl, selectedImageFile ? selectedImageFile.name : null, lockedSchoolId, lockedSchoolName);
+            alert('⚠️ İnternet Bağlantısı Kesintisi:\n\nKazan dairesi / sığınak gibi kapalı alanlarda telefon çekmediği için bu saha tespitiniz cihazınızda güvenle saklandı.\n\nİnternet çeken bir alana çıktığınızda üst kısımdaki "Şimdi Eşitle" butonuna dokunarak tespiti anında DÖF\'e dönüştürebilirsiniz.');
         } finally {
             btn.disabled = false;
             btnText.innerText = 'Yapay Zeka ile Analiz Et & DÖF Çıkar';
@@ -860,6 +1083,9 @@
                 if (icon) icon.className = 'fa-solid fa-school text-slate-400';
             }
         });
+
+        const found = allSchoolsList.find(s => s.id === id);
+        if (found) renderSchoolContact(found);
     }
 
     function renderAnalysisResult(d) {
@@ -950,8 +1176,91 @@
             vBox.classList.add('hidden');
         }
 
+        // Okul İdaresi İletişim Masasını Doldur (İşveren & İşveren Vekili)
+        const targetSc = matched || allSchoolsList.find(s => s.id === (matched?.id || parseInt(document.getElementById('selectSchoolOverride').value)));
+        if (targetSc) {
+            renderSchoolContact(targetSc);
+        }
+
         // Aşağıya yumuşak kaydır
         card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function renderSchoolContact(sc) {
+        const card = document.getElementById('schoolContactCard');
+        const list = document.getElementById('schoolContactList');
+        if (!card || !list) return;
+
+        if (!sc || (!sc.mudur_ad_soyad && !sc.mudur && !sc.vekil && !sc.isveren_vekili_ad_soyad)) {
+            card.classList.add('hidden');
+            return;
+        }
+
+        const mudur = sc.mudur_ad_soyad || sc.mudur || 'Belirtilmedi';
+        const mudurTel = (sc.mudur_tel || '').trim();
+        const vekil = sc.isveren_vekili_ad_soyad || sc.vekil || 'Belirtilmedi';
+        const vekilTel = (sc.isveren_vekili_tel || '').trim();
+        const schoolName = sc.kurum_adi || sc.name || 'Okul';
+
+        const tehlike = document.getElementById('resHazardSource')?.innerText || 'Saha Uygunsuzluğu';
+        const unit = document.getElementById('resWorkshopBadge')?.innerText || 'Okul Sahası';
+        const rawMebbis = document.getElementById('resMebbisText')?.value || '';
+        const waText = encodeURIComponent(`Sayın Müdürüm, ${schoolName} binamızda gerçekleştirilen İSG saha denetiminde ${unit} alanında risk tespit edilmiştir:\n\n*Tehlike:* ${tehlike}\n*DÖF Önlemi:* ${rawMebbis.slice(0, 150)}...\n\nSistem üzerinden MEBBİS İSG modülüne DÖF kaydı işlenmiştir. Bilgilerinize arz ederiz.`);
+
+        let html = '';
+
+        // Okul Müdürü
+        html += `
+            <div class="p-3 bg-white rounded-xl border border-slate-200 shadow-2xs space-y-2">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <div class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">İşveren (Okul Müdürü)</div>
+                        <div class="font-bold text-slate-900">${mudur}</div>
+                    </div>
+                    <span class="w-7 h-7 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center text-xs">
+                        <i class="fa-solid fa-user-tie"></i>
+                    </span>
+                </div>
+                ${mudurTel ? `
+                <div class="flex items-center gap-1.5 pt-1">
+                    <a href="tel:${mudurTel}" class="flex-1 py-1.5 px-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-bold text-[11px] text-center transition flex items-center justify-center gap-1 shadow-xs">
+                        <i class="fa-solid fa-phone text-[10px]"></i> <span>Ara (${mudurTel})</span>
+                    </a>
+                    <a href="https://wa.me/90${mudurTel.replace(/^0/, '')}?text=${waText}" target="_blank" class="py-1.5 px-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] text-center transition flex items-center justify-center gap-1 shadow-xs" title="WhatsApp ile Acil Bildir">
+                        <i class="fa-brands fa-whatsapp text-xs"></i> <span>WhatsApp</span>
+                    </a>
+                </div>
+                ` : '<div class="text-[11px] text-slate-400 italic">Telefon kayıtlı değil</div>'}
+            </div>
+        `;
+
+        // İşveren Vekili
+        html += `
+            <div class="p-3 bg-white rounded-xl border border-slate-200 shadow-2xs space-y-2">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <div class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">İşveren Vekili (İSG Müd. Yrd.)</div>
+                        <div class="font-bold text-slate-900">${vekil}</div>
+                    </div>
+                    <span class="w-7 h-7 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center text-xs">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </span>
+                </div>
+                ${vekilTel ? `
+                <div class="flex items-center gap-1.5 pt-1">
+                    <a href="tel:${vekilTel}" class="flex-1 py-1.5 px-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-[11px] text-center border border-slate-300 transition flex items-center justify-center gap-1 shadow-xs">
+                        <i class="fa-solid fa-phone text-[10px]"></i> <span>Ara (${vekilTel})</span>
+                    </a>
+                    <a href="https://wa.me/90${vekilTel.replace(/^0/, '')}?text=${waText}" target="_blank" class="py-1.5 px-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] text-center transition flex items-center justify-center gap-1 shadow-xs" title="WhatsApp ile Acil Bildir">
+                        <i class="fa-brands fa-whatsapp text-xs"></i> <span>WhatsApp</span>
+                    </a>
+                </div>
+                ` : '<div class="text-[11px] text-slate-400 italic">Telefon kayıtlı değil</div>'}
+            </div>
+        `;
+
+        list.innerHTML = html;
+        card.classList.remove('hidden');
     }
 
     function copyMebbisText() {
@@ -1057,9 +1366,9 @@
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // Sayfa Yüklendiğinde Ses Modülünü Hazırla
+    // Sayfa Yüklendiğinde Çevrimdışı Kuyruğu ve Durumu Denetle
     window.addEventListener('DOMContentLoaded', () => {
-        initSpeech();
+        renderOfflineBanner();
     });
 </script>
 {% endblock %}

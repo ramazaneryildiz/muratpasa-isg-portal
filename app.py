@@ -3433,7 +3433,7 @@ def saha_asistani_page(request: Request):
 
     conn = get_db()
     c = conn.cursor()
-    c.execute("SELECT id, kurum_kodu, kurum_adi FROM schools WHERE is_active_school = 1 ORDER BY kurum_adi ASC")
+    c.execute("SELECT id, kurum_kodu, kurum_adi, mudur_ad_soyad, mudur_tel, isveren_vekili_ad_soyad, isveren_vekili_tel FROM schools WHERE is_active_school = 1 ORDER BY kurum_adi ASC")
     all_schools = [dict(r) for r in c.fetchall()]
     conn.close()
 
@@ -3483,7 +3483,7 @@ async def api_field_voice_inspect(
 
     conn = get_db()
     c = conn.cursor()
-    c.execute("SELECT id, kurum_kodu, kurum_adi FROM schools WHERE is_active_school = 1")
+    c.execute("SELECT id, kurum_kodu, kurum_adi, mudur_ad_soyad, mudur_tel, isveren_vekili_ad_soyad, isveren_vekili_tel FROM schools WHERE is_active_school = 1")
     schools_cache = [dict(r) for r in c.fetchall()]
     conn.close()
 
