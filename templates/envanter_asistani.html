@@ -1,0 +1,710 @@
+{% extends "base.html" %}
+
+{% block title %}Envanter Oluşturma Asistanı | Muratpaşa İSG{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-5">
+    <!-- Üst Başlık -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200">
+        <div>
+            <div class="flex items-center gap-2">
+                <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-indigo-100 text-indigo-800 border border-indigo-200">Sadece İSG Uzmanı</span>
+                <span class="text-xs text-slate-500">Sesli & Görsel AI Sayım</span>
+            </div>
+            <h1 class="text-xl md:text-2xl font-bold text-slate-900 mt-1">Envanter Oluşturma Asistanı</h1>
+            <p class="text-xs text-slate-600">Derslikten kazan dairesine kadar her fiziki mekânı ve içindeki makine/teçhizatı sesle veya fotoğrafla hızla envantere işleyin.</p>
+        </div>
+        <a id="btnOpenMasterInventory" href="/mebbis-aktarim" class="hidden px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-lg shadow-xs transition flex items-center gap-2 self-start">
+            <i class="fa-solid fa-boxes-stacked text-indigo-400"></i>
+            <span>Okul Master Envanteri</span>
+        </a>
+    </div>
+
+    <!-- Çevrimdışı Kuyruk Bildirimi -->
+    <div id="invOfflineBanner" class="hidden bg-amber-50 border border-amber-300 rounded-xl p-3 flex items-center justify-between gap-3">
+        <div class="text-xs text-amber-900">
+            <i class="fa-solid fa-wifi text-amber-600 mr-1"></i>
+            <strong>Çevrimdışı Kuyruk:</strong> <span id="invOfflineCount">0</span> adet envanter kaydı telefon hafızasında bekliyor.
+        </div>
+        <button onclick="syncInventoryOfflineQueue()" class="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-lg transition">
+            Şimdi Senkronize Et
+        </button>
+    </div>
+
+    <!-- ADIM 1: OKUL SEÇ VE KİLİTLE -->
+    <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs space-y-3">
+        <div class="flex items-center justify-between">
+            <label class="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                <span class="w-5 h-5 rounded-full bg-slate-900 text-white text-[11px] flex items-center justify-center">1</span>
+                <span>Okul / Kurum Seçin</span>
+            </label>
+            <span id="invSchoolBadge" class="hidden text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">Kilitli</span>
+        </div>
+
+        <!-- Hızlı Seçim (Sorumlu MTAL/MESEM Okulları) -->
+        {% if quick_schools %}
+        <div class="flex items-center gap-1.5 flex-wrap">
+            <span class="text-[11px] text-slate-500 font-semibold mr-1">Hızlı Seçim:</span>
+            {% for qs in quick_schools %}
+            <button type="button" onclick="lockInventorySchool({{ qs.id }}, '{{ qs.kurum_kodu }}', '{{ qs.kurum_adi|replace("'", "") }}')"
+                    class="px-2.5 py-1 text-[11px] font-semibold rounded-lg bg-slate-100 hover:bg-indigo-100 hover:text-indigo-800 text-slate-700 border border-slate-200 transition">
+                {{ qs.kurum_adi|replace('Mesleki ve Teknik Anadolu Lisesi', 'MTAL')|replace('Ticaret Mesleki ve Teknik Anadolu Lisesi', 'Tic. MTAL') }}
+            </button>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Arama Kutusu -->
+        <div class="relative flex gap-2">
+            <div class="relative flex-1">
+                <input type="text" id="invSchoolSearch" placeholder="Okul adı veya kurum kodu yazın..."
+                       oninput="filterInvSchools(this.value)" onfocus="showInvSchoolDropdown()"
+                       class="w-full text-sm border border-slate-300 rounded-xl p-2.5 pl-9 focus:ring-2 focus:ring-indigo-500 focus:outline-hidden">
+                <i class="fa-solid fa-magnifying-glass text-slate-400 absolute left-3 top-3.5 text-xs"></i>
+                <div id="invSchoolDropdown" class="hidden absolute z-30 w-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl max-h-60 overflow-y-auto divide-y divide-slate-100"></div>
+            </div>
+            <button type="button" id="btnClearInvSchool" onclick="clearInvSchool()" class="hidden px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl border border-slate-200">
+                Değiştir
+            </button>
+        </div>
+    </div>
+
+    <!-- ADIM 2: FİZİKİ MEKÂN SEÇ VEYA EKLE -->
+    <div id="spaceSection" class="hidden bg-white rounded-2xl border border-slate-200 p-4 shadow-xs space-y-3">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <label class="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                <span class="w-5 h-5 rounded-full bg-slate-900 text-white text-[11px] flex items-center justify-center">2</span>
+                <span>Fiziki Mekân / Oda / Atölye Seçin</span>
+            </label>
+            <div class="flex items-center gap-2">
+                <span id="spaceProgressText" class="text-[11px] font-semibold text-slate-500"></span>
+                <button type="button" onclick="document.getElementById('modalAddSpace').classList.remove('hidden')" class="px-2.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg transition flex items-center gap-1">
+                    <i class="fa-solid fa-plus"></i> Yeni Mekân Ekle
+                </button>
+            </div>
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-2">
+            <select id="spaceSelect" onchange="onSpaceChanged()" class="flex-1 text-sm border border-slate-300 rounded-xl p-2.5 bg-slate-50 focus:ring-2 focus:ring-indigo-500 focus:outline-hidden">
+                <option value="">-- Önce Mekân Seçin (Derslik, Atölye, Kazan Dairesi vb.) --</option>
+            </select>
+            <button type="button" id="btnMarkSpaceDone" onclick="toggleCurrentSpaceDone()" class="hidden px-3.5 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 text-xs font-bold rounded-xl transition flex items-center gap-1.5">
+                <i class="fa-solid fa-check-double"></i>
+                <span>Mekânı Tamamlandı İşaretle</span>
+            </button>
+        </div>
+        <div id="spaceExistingInfo" class="hidden text-xs text-slate-600 bg-slate-50 px-3 py-2 rounded-lg border border-slate-200"></div>
+    </div>
+
+    <!-- ADIM 3: SESLİ & FOTOĞRAFLI AI SAYIM -->
+    <div id="captureSection" class="hidden bg-white rounded-2xl border border-slate-200 p-5 shadow-xs space-y-4">
+        <div class="flex items-center justify-between">
+            <label class="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                <span class="w-5 h-5 rounded-full bg-slate-900 text-white text-[11px] flex items-center justify-center">3</span>
+                <span>Sesli veya Fotoğraflı Envanter Girişi</span>
+            </label>
+            <span class="text-[11px] text-slate-400">Makine plakası, sınıf veya atölye</span>
+        </div>
+
+        <!-- Mikrofon -->
+        <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200 text-center space-y-2">
+            <button type="button" id="invVoiceBtn" onclick="toggleInvSpeech()" class="w-16 h-16 mx-auto rounded-full bg-indigo-600 hover:bg-indigo-700 text-white flex flex-col items-center justify-center shadow-md transition hover:scale-105 active:scale-95">
+                <i class="fa-solid fa-microphone text-xl" id="invVoiceIcon"></i>
+                <span class="text-[9px] font-bold uppercase mt-0.5" id="invVoiceLabel">Konuş</span>
+            </button>
+            <p class="text-[11px] text-slate-500">Örn: <em>"24 adet öğrenci sırası, 1 akıllı tahta, 2 adet duvara sabitlenmemiş çelik dolap ve 1 adet klima var."</em></p>
+        </div>
+
+        <textarea id="invTranscript" rows="3" placeholder="Sesli konuştuklarınız buraya yazılır veya doğrudan yazabilirsiniz..."
+                  class="w-full text-sm border border-slate-300 rounded-xl p-3 focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"></textarea>
+
+        <!-- Fotoğraf Yükleme / Kamera -->
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+            <label class="flex-1 cursor-pointer border-2 border-dashed border-slate-300 hover:border-indigo-500 rounded-xl p-3 text-center transition bg-slate-50/50">
+                <i class="fa-solid fa-camera text-indigo-600 text-lg mr-2"></i>
+                <span class="text-xs font-bold text-slate-700" id="invPhotoLabel">Makine Etiketi veya Mekân Fotoğrafı Çek / Seç</span>
+                <input type="file" id="invPhotoInput" accept="image/*" capture="environment" class="hidden" onchange="handleInvPhoto(this)">
+            </label>
+            <button type="button" id="btnAnalyzeInv" onclick="analyzeInventoryInput()" class="px-5 py-3.5 bg-slate-900 hover:bg-slate-800 text-white text-sm font-bold rounded-xl shadow-sm transition flex items-center justify-center gap-2">
+                <i class="fa-solid fa-wand-magic-sparkles text-amber-400"></i>
+                <span>AI ile Envantere Ayrıştır</span>
+            </button>
+        </div>
+        <div id="invPhotoPreviewWrap" class="hidden relative inline-block">
+            <img id="invPhotoPreview" class="h-24 rounded-lg border border-slate-300 object-cover">
+            <button type="button" onclick="clearInvPhoto()" class="absolute -top-2 -right-2 w-6 h-6 bg-rose-600 text-white rounded-full text-xs font-bold shadow">×</button>
+        </div>
+    </div>
+
+    <!-- ADIM 4: AI ÇIKTISI ÖNİZLEME & TOPLU KAYIT -->
+    <div id="previewSection" class="hidden bg-white rounded-2xl border-2 border-indigo-200 p-5 shadow-sm space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div>
+                <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                    <i class="fa-solid fa-list-check text-indigo-600"></i>
+                    <span>Ayrıştırılan Envanter Kalemleri</span>
+                </h3>
+                <p id="aiVisualNote" class="text-xs text-slate-500 mt-0.5"></p>
+            </div>
+            <button type="button" onclick="addEmptyPreviewRow()" class="px-2.5 py-1 text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg border border-slate-200">
+                + Satır Ekle
+            </button>
+        </div>
+
+        <div id="previewItemsList" class="space-y-3"></div>
+
+        <!-- Otomatik Entegrasyon Seçenekleri -->
+        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 flex flex-col sm:flex-row sm:items-center gap-4 text-xs">
+            <label class="flex items-center gap-2 font-semibold text-slate-700 cursor-pointer">
+                <input type="checkbox" id="chkSyncPeriodic" checked class="w-4 h-4 text-indigo-600 rounded">
+                <span>Periyodik kontrole tabi olanları Muayene Takvimine otomatik ekle</span>
+            </label>
+            <label class="flex items-center gap-2 font-semibold text-rose-700 cursor-pointer">
+                <input type="checkbox" id="chkSyncDof" checked class="w-4 h-4 text-rose-600 rounded">
+                <span>"Eksik / Riskli" olanları okulun DÖF listesine de kaydet</span>
+            </label>
+        </div>
+
+        <div class="flex items-center justify-end gap-2">
+            <button type="button" onclick="document.getElementById('previewSection').classList.add('hidden')" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl">Vazgeç</button>
+            <button type="button" id="btnSaveBatch" onclick="saveInventoryBatch()" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-xl shadow-sm transition flex items-center gap-2">
+                <i class="fa-solid fa-floppy-disk"></i>
+                <span>Tüm Kalemleri Envantere Kaydet</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Yeni Mekân Ekleme Modalı -->
+<div id="modalAddSpace" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-5 shadow-2xl border border-slate-200 space-y-3">
+        <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+            <h3 class="text-base font-bold text-slate-900">Yeni Fiziki Mekân Ekle</h3>
+            <button onclick="document.getElementById('modalAddSpace').classList.add('hidden')" class="text-slate-400 hover:text-slate-600">×</button>
+        </div>
+        <div class="space-y-2.5 text-xs">
+            <div class="grid grid-cols-2 gap-2">
+                <div>
+                    <label class="font-semibold text-slate-700 block mb-1">Bina Adı</label>
+                    <input type="text" id="newSpaceBina" value="Ana Bina" class="w-full border border-slate-300 rounded-lg p-2">
+                </div>
+                <div>
+                    <label class="font-semibold text-slate-700 block mb-1">Kat</label>
+                    <select id="newSpaceKat" class="w-full border border-slate-300 rounded-lg p-2 bg-white">
+                        <option value="Bodrum Kat">Bodrum Kat</option>
+                        <option value="Zemin Kat" selected>Zemin Kat</option>
+                        <option value="1. Kat">1. Kat</option>
+                        <option value="2. Kat">2. Kat</option>
+                        <option value="3. Kat">3. Kat</option>
+                        <option value="4. Kat">4. Kat</option>
+                        <option value="Çatı / Bahçe">Çatı / Bahçe</option>
+                    </select>
+                </div>
+            </div>
+            <div>
+                <label class="font-semibold text-slate-700 block mb-1">Mekân / Oda / Atölye Adı</label>
+                <input type="text" id="newSpaceName" placeholder="Örn: 102 Nolu Derslik, Kaynak Atölyesi, Arşiv Odası" class="w-full border border-slate-300 rounded-lg p-2">
+            </div>
+            <div>
+                <label class="font-semibold text-slate-700 block mb-1">Mekân Türü</label>
+                <select id="newSpaceType" class="w-full border border-slate-300 rounded-lg p-2 bg-white">
+                    <option value="Derslik">Derslik</option>
+                    <option value="Atölye">Atölye</option>
+                    <option value="Laboratuvar">Laboratuvar</option>
+                    <option value="İdari Oda">İdari Oda</option>
+                    <option value="Kazan / Isı Merkezi">Kazan / Isı Merkezi</option>
+                    <option value="Elektrik / Trafo Odası">Elektrik / Trafo Odası</option>
+                    <option value="Yemekhane / Kantin">Yemekhane / Kantin</option>
+                    <option value="Depo / Arşiv">Depo / Arşiv</option>
+                    <option value="Ortak Alan / Koridor">Ortak Alan / Koridor</option>
+                    <option value="Sığınak">Sığınak</option>
+                    <option value="Spor Salonu / Konferans">Spor Salonu / Konferans</option>
+                    <option value="Bahçe / Çatı">Bahçe / Çatı</option>
+                </select>
+            </div>
+        </div>
+        <div class="flex justify-end gap-2 pt-2">
+            <button onclick="document.getElementById('modalAddSpace').classList.add('hidden')" class="px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg">İptal</button>
+            <button onclick="createNewSpace()" class="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg">Mekânı Kaydet</button>
+        </div>
+    </div>
+</div>
+
+<script>
+const ALL_SCHOOLS = {{ all_schools|tojson }};
+const INITIAL_SCHOOL_ID = {{ initial_school_id or 'null' }};
+let lockedSchoolId = null;
+let currentSpaces = [];
+let compressedPhotoDataUrl = null;
+let compressedPhotoName = null;
+let extractedItems = [];
+let invRecognition = null;
+let isListening = false;
+
+function trNorm(s) {
+    return (s || '').toLocaleLowerCase('tr-TR').normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
+
+function showInvSchoolDropdown() {
+    filterInvSchools(document.getElementById('invSchoolSearch').value);
+}
+
+function filterInvSchools(q) {
+    const list = document.getElementById('invSchoolDropdown');
+    const nq = trNorm(q);
+    const filtered = ALL_SCHOOLS.filter(s => !nq || trNorm(s.kurum_adi).includes(nq) || trNorm(s.kurum_kodu).includes(nq)).slice(0, 30);
+    if (filtered.length === 0) {
+        list.innerHTML = '<div class="p-3 text-xs text-slate-500 text-center">Okul bulunamadı.</div>';
+    } else {
+        list.innerHTML = filtered.map(s => `
+            <div onclick="lockInventorySchool(${s.id}, '${s.kurum_kodu}', '${s.kurum_adi.replace(/'/g, '')}')"
+                 class="p-2.5 hover:bg-indigo-50 cursor-pointer flex items-center justify-between text-xs">
+                <span class="font-semibold text-slate-800">${s.kurum_adi}</span>
+                <span class="font-mono text-slate-400">${s.kurum_kodu}</span>
+            </div>
+        `).join('');
+    }
+    list.classList.remove('hidden');
+}
+
+async function lockInventorySchool(id, code, name) {
+    lockedSchoolId = id;
+    document.getElementById('invSchoolSearch').value = `${code} — ${name}`;
+    document.getElementById('invSchoolSearch').disabled = true;
+    document.getElementById('invSchoolDropdown').classList.add('hidden');
+    document.getElementById('invSchoolBadge').classList.remove('hidden');
+    document.getElementById('btnClearInvSchool').classList.remove('hidden');
+
+    const btnMaster = document.getElementById('btnOpenMasterInventory');
+    btnMaster.href = `/okul/${id}/envanter`;
+    btnMaster.classList.remove('hidden');
+
+    document.getElementById('spaceSection').classList.remove('hidden');
+    document.getElementById('captureSection').classList.remove('hidden');
+    await loadSchoolSpaces(id);
+}
+
+function clearInvSchool() {
+    lockedSchoolId = null;
+    const inp = document.getElementById('invSchoolSearch');
+    inp.value = '';
+    inp.disabled = false;
+    document.getElementById('invSchoolBadge').classList.add('hidden');
+    document.getElementById('btnClearInvSchool').classList.add('hidden');
+    document.getElementById('btnOpenMasterInventory').classList.add('hidden');
+    document.getElementById('spaceSection').classList.add('hidden');
+    document.getElementById('captureSection').classList.add('hidden');
+    document.getElementById('previewSection').classList.add('hidden');
+}
+
+async function loadSchoolSpaces(schoolId) {
+    const resp = await fetch(`/api/inventory/spaces/${schoolId}`);
+    const data = await resp.json();
+    currentSpaces = data.spaces || [];
+    const sel = document.getElementById('spaceSelect');
+    sel.innerHTML = '<option value="">-- Mekân Seçin (Derslik, Atölye, Kazan Dairesi vb.) --</option>';
+    let doneCnt = 0;
+    currentSpaces.forEach(sp => {
+        if (sp.durum === 'TAMAMLANDI') doneCnt++;
+        const opt = document.createElement('option');
+        opt.value = sp.id;
+        const badge = sp.durum === 'TAMAMLANDI' ? '✅' : '⏳';
+        opt.textContent = `${badge} [${sp.kat}] ${sp.mekan_adi} (${sp.mekan_turu}) — ${sp.item_count} kalem`;
+        sel.appendChild(opt);
+    });
+    document.getElementById('spaceProgressText').textContent = `${doneCnt} / ${currentSpaces.length} mekân tamamlandı`;
+    onSpaceChanged();
+}
+
+function onSpaceChanged() {
+    const sid = document.getElementById('spaceSelect').value;
+    const btnDone = document.getElementById('btnMarkSpaceDone');
+    const info = document.getElementById('spaceExistingInfo');
+    if (!sid) {
+        btnDone.classList.add('hidden');
+        info.classList.add('hidden');
+        return;
+    }
+    const sp = currentSpaces.find(s => String(s.id) === String(sid));
+    if (sp) {
+        btnDone.classList.remove('hidden');
+        btnDone.innerHTML = sp.durum === 'TAMAMLANDI'
+            ? '<i class="fa-solid fa-rotate-left"></i><span>Devam Ediyora Al</span>'
+            : '<i class="fa-solid fa-check-double"></i><span>Mekânı Tamamlandı İşaretle</span>';
+        info.classList.remove('hidden');
+        info.innerHTML = `<strong>Seçili Mekân:</strong> ${sp.bina_adi} / ${sp.kat} / ${sp.mekan_adi} (${sp.mekan_turu}) — Mevcut kayıtlı kalem: <strong>${sp.item_count}</strong>`;
+    }
+}
+
+async function createNewSpace() {
+    if (!lockedSchoolId) return;
+    const name = document.getElementById('newSpaceName').value.trim();
+    if (!name) { alert("Lütfen mekân adını yazın."); return; }
+    const payload = {
+        school_id: lockedSchoolId,
+        bina_adi: document.getElementById('newSpaceBina').value.trim() || 'Ana Bina',
+        kat: document.getElementById('newSpaceKat').value,
+        mekan_adi: name,
+        mekan_turu: document.getElementById('newSpaceType').value
+    };
+    const resp = await fetch('/api/inventory/space/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    });
+    const res = await resp.json();
+    if (res.success) {
+        document.getElementById('modalAddSpace').classList.add('hidden');
+        document.getElementById('newSpaceName').value = '';
+        await loadSchoolSpaces(lockedSchoolId);
+        document.getElementById('spaceSelect').value = res.space_id;
+        onSpaceChanged();
+    } else {
+        alert("Hata: " + (res.error || 'Mekân eklenemedi'));
+    }
+}
+
+async function toggleCurrentSpaceDone() {
+    const sid = document.getElementById('spaceSelect').value;
+    if (!sid) return;
+    const resp = await fetch(`/api/inventory/space/${sid}/toggle-status`, { method: 'POST' });
+    const res = await resp.json();
+    if (res.success) {
+        await loadSchoolSpaces(lockedSchoolId);
+        document.getElementById('spaceSelect').value = sid;
+        onSpaceChanged();
+    }
+}
+
+// Ses Tanıma (Web Speech API)
+function toggleInvSpeech() {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+        alert("Tarayıcınız ses tanımayı desteklemiyor.");
+        return;
+    }
+    const btn = document.getElementById('invVoiceBtn');
+    const lbl = document.getElementById('invVoiceLabel');
+    if (isListening && invRecognition) {
+        invRecognition.stop();
+        return;
+    }
+    const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+    invRecognition = new SpeechRec();
+    invRecognition.lang = 'tr-TR';
+    invRecognition.continuous = true;
+    invRecognition.interimResults = false;
+
+    invRecognition.onstart = () => {
+        isListening = true;
+        btn.classList.replace('bg-indigo-600', 'bg-rose-600');
+        btn.classList.add('animate-pulse');
+        lbl.textContent = 'Dinliyor';
+    };
+    invRecognition.onresult = (e) => {
+        let added = '';
+        for (let i = e.resultIndex; i < e.results.length; i++) {
+            if (e.results[i].isFinal) {
+                added += e.results[i][0].transcript + ' ';
+            }
+        }
+        const ta = document.getElementById('invTranscript');
+        ta.value = (ta.value ? ta.value.trim() + ' ' : '') + added.trim();
+    };
+    invRecognition.onend = () => {
+        isListening = false;
+        btn.classList.replace('bg-rose-600', 'bg-indigo-600');
+        btn.classList.remove('animate-pulse');
+        lbl.textContent = 'Konuş';
+    };
+    invRecognition.start();
+}
+
+// Fotoğraf Sıkıştırma (HTML5 Canvas)
+function handleInvPhoto(input) {
+    const file = input.files && input.files[0];
+    if (!file) return;
+    compressedPhotoName = file.name;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+        const img = new Image();
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            const maxDim = 1280;
+            let w = img.width, h = img.height;
+            if (w > maxDim || h > maxDim) {
+                if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
+                else { w = Math.round(w * maxDim / h); h = maxDim; }
+            }
+            canvas.width = w;
+            canvas.height = h;
+            canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+            compressedPhotoDataUrl = canvas.toDataURL('image/jpeg', 0.78);
+            document.getElementById('invPhotoPreview').src = compressedPhotoDataUrl;
+            document.getElementById('invPhotoPreviewWrap').classList.remove('hidden');
+            document.getElementById('invPhotoLabel').textContent = `${file.name} (Hazır)`;
+        };
+        img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+}
+
+function clearInvPhoto() {
+    compressedPhotoDataUrl = null;
+    compressedPhotoName = null;
+    document.getElementById('invPhotoInput').value = '';
+    document.getElementById('invPhotoPreviewWrap').classList.add('hidden');
+    document.getElementById('invPhotoLabel').textContent = 'Makine Etiketi veya Mekân Fotoğrafı Çek / Seç';
+}
+
+async function analyzeInventoryInput() {
+    if (!lockedSchoolId) { alert("Lütfen önce okul seçin."); return; }
+    const spaceId = document.getElementById('spaceSelect').value;
+    if (!spaceId) { alert("Lütfen önce fiziki mekân seçin veya yeni ekleyin."); return; }
+    const text = document.getElementById('invTranscript').value.trim();
+    if (!text && !compressedPhotoDataUrl) {
+        alert("Lütfen sesli/yazılı bilgi girin veya bir fotoğraf yükleyin.");
+        return;
+    }
+
+    const btn = document.getElementById('btnAnalyzeInv');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Ayrıştırılıyor...';
+
+    try {
+        const resp = await fetch('/api/inventory/analyze', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                school_id: lockedSchoolId,
+                space_id: spaceId,
+                raw_text: text,
+                photo_base64: compressedPhotoDataUrl,
+                photo_name: compressedPhotoName
+            })
+        });
+        const res = await resp.json();
+        if (res.success) {
+            extractedItems = res.data.items || [];
+            document.getElementById('aiVisualNote').textContent = res.data.gorsel_analiz_notu || '';
+            renderPreviewItems();
+            document.getElementById('previewSection').classList.remove('hidden');
+        } else {
+            alert("Ayrıştırma hatası: " + (res.error || 'Bilinmeyen hata'));
+        }
+    } catch (err) {
+        // Çevrimdışı ise kuyruğa al
+        saveInvToOfflineQueue({
+            school_id: lockedSchoolId,
+            space_id: spaceId,
+            raw_text: text,
+            photo_base64: compressedPhotoDataUrl,
+            photo_name: compressedPhotoName,
+            created_at: new Date().toISOString()
+        });
+        alert("İnternet bağlantısı yok. Kayıt telefonunuzun çevrimdışı kuyruğuna alındı.");
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles text-amber-400"></i><span>AI ile Envantere Ayrıştır</span>';
+    }
+}
+
+const CATEGORIES = [
+    "Makine / Tezgah", "Basınçlı Kap", "Kaldırma / İletme", "Elektrik / Pano / Trafo",
+    "Yangın / Acil Durum", "Kimyasal / Tehlikeli Madde", "Mobilya / Sabitleme",
+    "Havalandırma / İklimlendirme", "Güvenlik / Kamera", "Genel Demirbaş"
+];
+
+function renderPreviewItems() {
+    const container = document.getElementById('previewItemsList');
+    if (extractedItems.length === 0) {
+        container.innerHTML = '<div class="text-xs text-slate-500 text-center py-4">Kalem bulunamadı, "+ Satır Ekle" ile manuel ekleyebilirsiniz.</div>';
+        return;
+    }
+    container.innerHTML = extractedItems.map((it, idx) => `
+        <div class="p-3.5 rounded-xl border ${it.isg_guvenlik_durumu === 'Eksik / Riskli' ? 'border-rose-300 bg-rose-50/40' : 'border-slate-200 bg-slate-50/50'} space-y-2 text-xs">
+            <div class="flex items-center justify-between gap-2">
+                <span class="font-bold text-slate-700">#${idx + 1}</span>
+                <button type="button" onclick="removePreviewItem(${idx})" class="text-rose-600 hover:text-rose-800 font-bold">Sil</button>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-4 gap-2">
+                <div class="sm:col-span-2">
+                    <label class="text-[10px] font-bold text-slate-500">Ekipman / Demirbaş Adı</label>
+                    <input type="text" value="${(it.ekipman_adi || '').replace(/"/g, '&quot;')}" onchange="extractedItems[${idx}].ekipman_adi=this.value" class="w-full border border-slate-300 rounded-lg p-1.5 bg-white">
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold text-slate-500">Kategori</label>
+                    <select onchange="extractedItems[${idx}].kategori=this.value" class="w-full border border-slate-300 rounded-lg p-1.5 bg-white">
+                        ${CATEGORIES.map(c => `<option value="${c}" ${it.kategori === c ? 'selected' : ''}>${c}</option>`).join('')}
+                    </select>
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold text-slate-500">Adet</label>
+                    <input type="number" min="1" value="${it.adet || 1}" onchange="extractedItems[${idx}].adet=parseInt(this.value)||1" class="w-full border border-slate-300 rounded-lg p-1.5 bg-white">
+                </div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-4 gap-2">
+                <div>
+                    <label class="text-[10px] font-bold text-slate-500">Marka / Model / Seri</label>
+                    <input type="text" value="${(it.marka_model_seri || '').replace(/"/g, '&quot;')}" onchange="extractedItems[${idx}].marka_model_seri=this.value" class="w-full border border-slate-300 rounded-lg p-1.5 bg-white" placeholder="Varsa">
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold text-slate-500">Çalışma Durumu</label>
+                    <select onchange="extractedItems[${idx}].calisma_durumu=this.value" class="w-full border border-slate-300 rounded-lg p-1.5 bg-white">
+                        <option value="Aktif" ${it.calisma_durumu === 'Aktif' ? 'selected' : ''}>Aktif</option>
+                        <option value="Arızalı" ${it.calisma_durumu === 'Arızalı' ? 'selected' : ''}>Arızalı</option>
+                        <option value="Bakım Bekliyor" ${it.calisma_durumu === 'Bakım Bekliyor' ? 'selected' : ''}>Bakım Bekliyor</option>
+                        <option value="Atıl / Hurda" ${it.calisma_durumu === 'Atıl / Hurda' ? 'selected' : ''}>Atıl / Hurda</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold text-slate-500">İSG Güvenlik Durumu</label>
+                    <select onchange="extractedItems[${idx}].isg_guvenlik_durumu=this.value; renderPreviewItems()" class="w-full border border-slate-300 rounded-lg p-1.5 bg-white">
+                        <option value="Uygun" ${it.isg_guvenlik_durumu !== 'Eksik / Riskli' ? 'selected' : ''}>Uygun</option>
+                        <option value="Eksik / Riskli" ${it.isg_guvenlik_durumu === 'Eksik / Riskli' ? 'selected' : ''}>Eksik / Riskli</option>
+                    </select>
+                </div>
+                <div class="flex items-end pb-1.5">
+                    <label class="flex items-center gap-1.5 font-semibold text-slate-700 cursor-pointer">
+                        <input type="checkbox" ${it.periyodik_kontrol_gerekli ? 'checked' : ''} onchange="extractedItems[${idx}].periyodik_kontrol_gerekli=this.checked" class="w-4 h-4 text-indigo-600 rounded">
+                        <span>Periyodik Kontrol Tabi</span>
+                    </label>
+                </div>
+            </div>
+            <div>
+                <label class="text-[10px] font-bold text-slate-500">İSG Eksik / Not Detayı</label>
+                <input type="text" value="${(it.isg_eksik_detay || '').replace(/"/g, '&quot;')}" onchange="extractedItems[${idx}].isg_eksik_detay=this.value" class="w-full border border-slate-300 rounded-lg p-1.5 bg-white" placeholder="Örn: Koruyucu siper yok, duvara sabitlenmemiş...">
+            </div>
+        </div>
+    `).join('');
+}
+
+function removePreviewItem(idx) {
+    extractedItems.splice(idx, 1);
+    renderPreviewItems();
+}
+
+function addEmptyPreviewRow() {
+    extractedItems.push({
+        ekipman_adi: '',
+        kategori: 'Genel Demirbaş',
+        adet: 1,
+        marka_model_seri: '',
+        calisma_durumu: 'Aktif',
+        periyodik_kontrol_gerekli: false,
+        kontrol_etiketi: 'Gerekmiyor',
+        isg_guvenlik_durumu: 'Uygun',
+        isg_eksik_detay: ''
+    });
+    renderPreviewItems();
+}
+
+async function saveInventoryBatch() {
+    const spaceId = document.getElementById('spaceSelect').value;
+    const validItems = extractedItems.filter(i => i.ekipman_adi && i.ekipman_adi.trim());
+    if (validItems.length === 0) { alert("Kaydedilecek geçerli kalem yok."); return; }
+
+    const btn = document.getElementById('btnSaveBatch');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Kaydediliyor...';
+
+    try {
+        const resp = await fetch('/api/inventory/save-batch', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                school_id: lockedSchoolId,
+                space_id: parseInt(spaceId),
+                items: validItems,
+                photo_base64: compressedPhotoDataUrl,
+                photo_name: compressedPhotoName,
+                sync_periodic: document.getElementById('chkSyncPeriodic').checked,
+                sync_dof: document.getElementById('chkSyncDof').checked
+            })
+        });
+        const res = await resp.json();
+        if (res.success) {
+            alert(`Başarılı! ${res.saved_count} envanter kalemi kaydedildi.${res.periodic_added ? ' (' + res.periodic_added + ' periyodik kontrol takvimine eklendi)' : ''}${res.dof_added ? ' (' + res.dof_added + ' DÖF oluşturuldu)' : ''}`);
+            document.getElementById('invTranscript').value = '';
+            clearInvPhoto();
+            extractedItems = [];
+            document.getElementById('previewSection').classList.add('hidden');
+            await loadSchoolSpaces(lockedSchoolId);
+            document.getElementById('spaceSelect').value = spaceId;
+            onSpaceChanged();
+        } else {
+            alert("Hata: " + (res.error || 'Kaydedilemedi'));
+        }
+    } catch (e) {
+        alert("Bağlantı hatası: " + e.message);
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i><span>Tüm Kalemleri Envantere Kaydet</span>';
+    }
+}
+
+// Çevrimdışı Kuyruk
+const INV_Q_KEY = 'isg_inventory_offline_queue';
+function saveInvToOfflineQueue(entry) {
+    const q = JSON.parse(localStorage.getItem(INV_Q_KEY) || '[]');
+    q.push(entry);
+    localStorage.setItem(INV_Q_KEY, JSON.stringify(q));
+    renderInvOfflineBanner();
+}
+function renderInvOfflineBanner() {
+    const q = JSON.parse(localStorage.getItem(INV_Q_KEY) || '[]');
+    const b = document.getElementById('invOfflineBanner');
+    if (q.length > 0) {
+        document.getElementById('invOfflineCount').textContent = q.length;
+        b.classList.remove('hidden');
+    } else {
+        b.classList.add('hidden');
+    }
+}
+async function syncInventoryOfflineQueue() {
+    const q = JSON.parse(localStorage.getItem(INV_Q_KEY) || '[]');
+    if (q.length === 0) return;
+    let remaining = [];
+    for (const entry of q) {
+        try {
+            const resp = await fetch('/api/inventory/analyze', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(entry)
+            });
+            const res = await resp.json();
+            if (res.success && res.data && res.data.items) {
+                await fetch('/api/inventory/save-batch', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        school_id: entry.school_id,
+                        space_id: parseInt(entry.space_id),
+                        items: res.data.items,
+                        photo_base64: entry.photo_base64,
+                        photo_name: entry.photo_name,
+                        sync_periodic: true,
+                        sync_dof: true
+                    })
+                });
+            } else { remaining.push(entry); }
+        } catch (e) { remaining.push(entry); }
+    }
+    localStorage.setItem(INV_Q_KEY, JSON.stringify(remaining));
+    renderInvOfflineBanner();
+    alert("Çevrimdışı kuyruk senkronizasyonu tamamlandı.");
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    renderInvOfflineBanner();
+    if (INITIAL_SCHOOL_ID) {
+        const sc = ALL_SCHOOLS.find(s => s.id === INITIAL_SCHOOL_ID);
+        if (sc) lockInventorySchool(sc.id, sc.kurum_kodu, sc.kurum_adi);
+    }
+});
+document.addEventListener('click', (e) => {
+    if (!e.target.closest('#invSchoolSearch') && !e.target.closest('#invSchoolDropdown')) {
+        document.getElementById('invSchoolDropdown').classList.add('hidden');
+    }
+});
+</script>
+{% endblock %}

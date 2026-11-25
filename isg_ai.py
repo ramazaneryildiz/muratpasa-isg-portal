@@ -795,3 +795,136 @@ YANITINI SADECE AŞAĞIDAKİ JSON ŞEMASINDA DÖNDÜR:
         return {"success": True, "data": fallback_data, "fallback": True}
 
 
+def analyze_inventory_input_ai(
+    raw_text: str,
+    image_bytes: bytes = None,
+    image_filename: str = None,
+    school_name: str = "",
+    space_name: str = ""
+) -> dict:
+    """
+    Envanter Oluşturma Asistanı için sesli beyan ve/veya fotoğraftan (makine plakası, oda/atölye görseli)
+    yapılandırılmış envanter kalemleri çıkarır.
+    """
+    import re
+
+    prompt = f"""
+Sen T.C. Milli Eğitim Bakanlığı Muratpaşa İlçe MEM İSG Bürosu'nda görevli uzman bir İş Güvenliği Uzmanı ve Teknik Envanter Denetçisisin.
+Görevin: İSG Uzmanının sahada gezdiği okul ve fiziki mekân (derslik, atölye, lab, kazan dairesi, pano odası, koridor vb.) hakkında verdiği sesli/yazılı beyanı ve/veya çektiği fotoğrafı analiz edip, yapılandırılmış ENVANTER KALEMLERİNE dönüştürmektir.
+
+OKUL: {school_name or 'Belirtilmedi'}
+FİZİKİ MEKÂN / BİRİM: {space_name or 'Belirtilmedi'}
+UZMANIN SESLİ / YAZILI BEYANI:
+{raw_text or '(Sadece fotoğraf yüklendi, fotoğraftaki makine/ekipman/demirbaş ve etiketleri analiz et)'}
+
+Lütfen şu kurallara göre SADECE geçerli bir JSON nesnesi döndür:
+{{
+  "gorsel_analiz_notu": "Fotoğraf veya beyandan elde edilen kısa teknik özet (Türkçe)",
+  "items": [
+    {{
+      "ekipman_adi": "Ekipman / makine / demirbaş adı (örn: Hava Kompresörü 500L, Gazaltı Kaynak Makinesi, Sınıf Dolabı, Ana Elektrik Panosu, YSC Yangın Tüpü)",
+      "kategori": "Şu 10 kategoriden EN UYGUN olanını seç: 'Makine / Tezgah' | 'Basınçlı Kap' | 'Kaldırma / İletme' | 'Elektrik / Pano / Trafo' | 'Yangın / Acil Durum' | 'Kimyasal / Tehlikeli Madde' | 'Mobilya / Sabitleme' | 'Havalandırma / İklimlendirme' | 'Güvenlik / Kamera' | 'Genel Demirbaş'",
+      "adet": 1,
+      "marka_model_seri": "Varsa veya fotoğraftaki plakadan okunan marka/model/seri/kapasite bilgisi, yoksa boş string",
+      "uretim_yili": "Varsa yıl, yoksa boş string",
+      "calisma_durumu": "'Aktif' | 'Arızalı' | 'Bakım Bekliyor' | 'Atıl / Hurda'",
+      "periyodik_kontrol_gerekli": true veya false (Kompresör, hidrofor, kazan, lift, caraskal, asansör, elektrik panosu, topraklama, paratoner, yangın tüpü/dolabı, çeker ocak için true),
+      "kontrol_etiketi": "'Uygun' | 'Kusurlu' | 'Eksik / Yok' | 'Gerekmiyor'",
+      "isg_guvenlik_durumu": "'Uygun' veya 'Eksik / Riskli'",
+      "isg_eksik_detay": "Eğer koruyucu siper eksik, topraklama yok, duvara sabitlenmemiş, acil stop bozuk, etiket yok gibi bir sorun varsa net yaz; yoksa boş string",
+      "dof_onerisi": true veya false (isg_guvenlik_durumu 'Eksik / Riskli' ise true)
+    }}
+  ]
+}}
+"""
+
+    parts = [{"text": prompt}]
+    if image_bytes and image_filename:
+        _, inline_img = extract_file_content(image_filename, image_bytes)
+        if inline_img:
+            parts.append({"inline_data": inline_img})
+
+    try:
+        resp_text = call_gemini_multimodal(parts, json_mode=True, timeout=35)
+        parsed = json.loads(resp_text)
+        if isinstance(parsed, dict) and isinstance(parsed.get("items"), list):
+            return {"success": True, "data": parsed, "fallback": False}
+    except Exception as e:
+        logger.warning(f"Envanter AI çağrısı başarısız, akıllı kural motoruna geçiliyor: {e}")
+
+    # Kural Tabanlı Hızlı Yedek Motor (Çevrimdışı / Zaman Aşımı Durumu İçin)
+    text = (raw_text or "").strip()
+    t_low = text.lower()
+    items = []
+
+    # Cümleleri virgül, nokta veya 've' ile bölerek kalem yakala
+    segments = [s.strip() for s in re.split(r'[,.;\n]+|\bve\b', text) if len(s.strip()) > 2]
+    if not segments and image_filename:
+        segments = [f"Görselden tespit edilen ekipman ({image_filename})"]
+
+    issue_words = ["eksik", "yok", "kırık", "bozuk", "arızalı", "sabitlenmemiş", "sabitleme yok", "etiketsiz", "etiketi yok", "paspas yok", "topraklama yok", "siper yok"]
+
+    for seg in segments:
+        s_low = seg.lower()
+        qty = 1
+        m_qty = re.search(r'(\d+)\s*(?:adet|tane|x)?\b', s_low)
+        if m_qty:
+            try:
+                qty = max(1, int(m_qty.group(1)))
+            except Exception:
+                qty = 1
+
+        # Kategori ve Periyodik Kontrol Sınıflandırması
+        if any(k in s_low for k in ["kompresör", "hidrofor", "genleşme", "basınçlı", "tüp", "otoklav"]):
+            kat, pk = "Basınçlı Kap", True
+        elif any(k in s_low for k in ["kazan", "brülör", "doğalgaz", "kalorifer", "ısı merkezi"]):
+            kat, pk = "Kazan / Isı Merkezi", True
+        elif any(k in s_low for k in ["lift", "caraskal", "vinç", "asansör", "transpalet", "forklift"]):
+            kat, pk = "Kaldırma / İletme", True
+        elif any(k in s_low for k in ["pano", "trafo", "jeneratör", "topraklama", "paratoner", "şalter", "priz", "kablo"]):
+            kat, pk = "Elektrik / Pano / Trafo", True
+        elif any(k in s_low for k in ["yangın", "ysc", "söndürme", "alarm", "dedektör", "acil çıkış", "ilk yardım"]):
+            kat, pk = "Yangın / Acil Durum", True
+        elif any(k in s_low for k in ["kimyasal", "asit", "tiner", "boya", "solvents", "msds"]):
+            kat, pk = "Kimyasal / Tehlikeli Madde", False
+        elif any(k in s_low for k in ["dolap", "sıra", "masa", "raf", "kitaplık", "sandalye", "tahta", "pencere"]):
+            kat, pk = "Mobilya / Sabitleme", False
+        elif any(k in s_low for k in ["klima", "davlumbaz", "havalandırma", "aspiratör", "çeker ocak", "fan"]):
+            kat, pk = "Havalandırma / İklimlendirme", ("çeker ocak" in s_low or "davlumbaz" in s_low)
+        elif any(k in s_low for k in ["kamera", "kgys", "turnike", "güvenlik"]):
+            kat, pk = "Güvenlik / Kamera", False
+        elif any(k in s_low for k in ["torna", "freze", "cnc", "matkap", "taşlama", "kaynak", "testere", "tezgah", "makine", "fırın", "ocak"]):
+            kat, pk = "Makine / Tezgah", False
+        else:
+            kat, pk = "Genel Demirbaş", False
+
+        has_issue = any(w in s_low for w in issue_words)
+        is_broken = any(w in s_low for w in ["arızalı", "bozuk", "kırık", "çalışmıyor"])
+        calisma = "Arızalı" if is_broken else "Aktif"
+        etiket = "Eksik / Yok" if ("etiket" in s_low and ("yok" in s_low or "eksik" in s_low)) else ("Kontrol Edilecek" if pk else "Gerekmiyor")
+
+        items.append({
+            "ekipman_adi": seg[:120],
+            "kategori": kat,
+            "adet": qty,
+            "marka_model_seri": "",
+            "uretim_yili": "",
+            "calisma_durumu": calisma,
+            "periyodik_kontrol_gerekli": pk,
+            "kontrol_etiketi": etiket,
+            "isg_guvenlik_durumu": "Eksik / Riskli" if has_issue else "Uygun",
+            "isg_eksik_detay": seg if has_issue else "",
+            "dof_onerisi": has_issue
+        })
+
+    return {
+        "success": True,
+        "data": {
+            "gorsel_analiz_notu": "Çevrimdışı / Kural tabanlı envanter ayrıştırması uygulandı.",
+            "items": items
+        },
+        "fallback": True
+    }
+
+
+

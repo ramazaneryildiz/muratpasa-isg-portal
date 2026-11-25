@@ -1,0 +1,242 @@
+{% extends "base.html" %}
+
+{% block title %}{{ school.kurum_adi }} - Master Envanter Dosyası | Muratpaşa İSG{% endblock %}
+
+{% block content %}
+<div class="space-y-5">
+    <!-- Üst Başlık ve İndirme / Asistan Butonları -->
+    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <div class="space-y-1">
+            <div class="flex items-center gap-2 flex-wrap">
+                <a href="/envanter-asistani?school_id={{ school.id }}" class="text-xs text-indigo-600 hover:text-indigo-800 font-bold flex items-center gap-1">
+                    <i class="fa-solid fa-microphone-lines"></i> Envanter Asistanına Dön
+                </a>
+                <span class="text-slate-300">|</span>
+                <span class="text-xs font-mono font-bold px-2 py-0.5 bg-slate-100 text-slate-700 rounded border border-slate-200">{{ school.kurum_kodu }}</span>
+                <span class="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-semibold border border-amber-200">{{ school.tehlike_sinifi or 'Tehlikeli' }}</span>
+            </div>
+            <h1 class="text-xl md:text-2xl font-bold text-slate-900">{{ school.kurum_adi }} — Master Envanter</h1>
+            <p class="text-xs text-slate-600">
+                <strong>Müdür:</strong> {{ school.mudur_ad_soyad or '-' }} |
+                <strong>İSG Vekili:</strong> {{ school.isveren_vekili_ad_soyad or '-' }}
+                {% if meta and meta.calisan_temsilcisi %} | <strong>Çalışan Temsilcisi:</strong> {{ meta.calisan_temsilcisi }}{% endif %}
+            </p>
+        </div>
+
+        <div class="flex items-center gap-2 flex-wrap">
+            <a href="/envanter-asistani?school_id={{ school.id }}" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg shadow-xs transition flex items-center gap-1.5">
+                <i class="fa-solid fa-microphone"></i>
+                <span>Sesli / Fotoğraflı Sayım Yap</span>
+            </a>
+            <a href="/okul/{{ school.id }}/envanter/excel" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg shadow-xs transition flex items-center gap-1.5">
+                <i class="fa-solid fa-file-excel"></i>
+                <span>Excel Envanter (.xlsx)</span>
+            </a>
+            <a href="/okul/{{ school.id }}/envanter/docx" class="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-lg shadow-xs transition flex items-center gap-1.5">
+                <i class="fa-solid fa-file-word text-blue-400"></i>
+                <span>Word Dosyası (.docx)</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- İlerleme ve Özet Metrikleri -->
+    <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+        <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-2xs">
+            <div class="text-[11px] font-semibold text-slate-500 uppercase">Tanımlı Mekân</div>
+            <div class="text-xl font-bold text-slate-900 mt-1">{{ metrics.toplam_mekan }}</div>
+            <div class="text-[10px] text-slate-400">Derslik, atölye, oda vb.</div>
+        </div>
+        <div class="bg-emerald-50/70 p-3.5 rounded-xl border border-emerald-200 shadow-2xs">
+            <div class="text-[11px] font-semibold text-emerald-800 uppercase">Tamamlanan Mekân</div>
+            <div class="text-xl font-bold text-emerald-700 mt-1">{{ metrics.tamamlanan_mekan }} <span class="text-xs font-normal">(%{{ metrics.tamamlanma_yuzde }})</span></div>
+            <div class="w-full bg-emerald-200 h-1.5 rounded-full mt-1.5 overflow-hidden">
+                <div class="bg-emerald-600 h-full" style="width: {{ metrics.tamamlanma_yuzde }}%"></div>
+            </div>
+        </div>
+        <div class="bg-indigo-50/70 p-3.5 rounded-xl border border-indigo-200 shadow-2xs">
+            <div class="text-[11px] font-semibold text-indigo-800 uppercase">Toplam Ekipman</div>
+            <div class="text-xl font-bold text-indigo-700 mt-1">{{ metrics.toplam_ekipman }}</div>
+            <div class="text-[10px] text-indigo-600">Kayıtlı kalem</div>
+        </div>
+        <div class="bg-amber-50/70 p-3.5 rounded-xl border border-amber-200 shadow-2xs cursor-pointer hover:bg-amber-100/70" onclick="filterItems('PERIODIC')">
+            <div class="text-[11px] font-semibold text-amber-800 uppercase">Periyodik Kontrol</div>
+            <div class="text-xl font-bold text-amber-700 mt-1">{{ metrics.periyodik_sayisi }}</div>
+            <div class="text-[10px] text-amber-600">Muayeneye tabi</div>
+        </div>
+        <div class="bg-rose-50/70 p-3.5 rounded-xl border border-rose-200 shadow-2xs cursor-pointer hover:bg-rose-100/70" onclick="filterItems('RISKY')">
+            <div class="text-[11px] font-semibold text-rose-800 uppercase">İSG Eksikli / Riskli</div>
+            <div class="text-xl font-bold text-rose-700 mt-1">{{ metrics.riskli_sayisi }}</div>
+            <div class="text-[10px] text-rose-600">Müdahale bekleyen</div>
+        </div>
+    </div>
+
+    <!-- Drive Kurumsal & Fiziki Güvenlik Özeti (Varsa) -->
+    {% if meta %}
+    <div class="bg-slate-50 rounded-xl border border-slate-200 p-4 text-xs space-y-2">
+        <div class="font-bold text-slate-800 flex items-center gap-2">
+            <i class="fa-solid fa-building-shield text-indigo-600"></i>
+            <span>Kurumsal Alanlar & Fiziki Güvenlik Özeti (Drive Envanterinden Aktarılan)</span>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-slate-600">
+            <div><strong>Meslek Alanları ({{ meta.resmi_alan_sayisi or 0 }}):</strong> {{ meta.dogrulanmis_meslek_alanlari or '-' }}</div>
+            <div><strong>Güvenlik / Kamera:</strong> {{ meta.guvenlik_oncelik or '-' }} | Kamera: {{ meta.kamera_durumu or '-' }} | KGYS: {{ meta.kgys_durumu or '-' }}</div>
+            <div><strong>Operasyonel Not:</strong> {{ meta.operasyonel_not or '-' }}</div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Ana Grid: Sol Mekân Listesi + Sağ Ekipman Tablosu -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        <!-- Sol: Fiziki Mekânlar -->
+        <div class="lg:col-span-4 bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden flex flex-col max-h-[700px]">
+            <div class="p-3.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+                <h2 class="text-sm font-bold text-slate-800">Fiziki Mekânlar ({{ spaces|length }})</h2>
+                <button onclick="filterBySpace('ALL')" class="text-xs text-indigo-600 font-bold hover:underline">Tümünü Göster</button>
+            </div>
+            <div class="p-2 border-b border-slate-100">
+                <input type="text" id="spaceSearchInp" oninput="filterSpaceList(this.value)" placeholder="Derslik, atölye veya kat ara..." class="w-full text-xs border border-slate-200 rounded-lg p-2 focus:outline-hidden">
+            </div>
+            <div class="divide-y divide-slate-100 overflow-y-auto flex-1" id="spaceSidebarList">
+                {% for sp in spaces %}
+                <div class="space-row p-3 hover:bg-indigo-50/50 cursor-pointer flex items-center justify-between gap-2 transition"
+                     data-space-id="{{ sp.id }}" data-name="{{ sp.mekan_adi }} {{ sp.kat }} {{ sp.mekan_turu }}"
+                     onclick="filterBySpace('{{ sp.id }}')">
+                    <div class="min-w-0">
+                        <div class="text-xs font-bold text-slate-800 truncate">{{ sp.mekan_adi }}</div>
+                        <div class="text-[11px] text-slate-500">{{ sp.bina_adi }} • {{ sp.kat }} • {{ sp.mekan_turu }}</div>
+                    </div>
+                    <div class="flex items-center gap-1.5 shrink-0">
+                        <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-700">{{ sp.item_count }}</span>
+                        <button type="button" onclick="event.stopPropagation(); toggleSpaceStatus({{ sp.id }})"
+                                title="Durumu Değiştir"
+                                class="text-xs px-1.5 py-0.5 rounded border {% if sp.durum == 'TAMAMLANDI' %}bg-emerald-100 text-emerald-700 border-emerald-300{% else %}bg-amber-50 text-amber-700 border-amber-200{% endif %}">
+                            {% if sp.durum == 'TAMAMLANDI' %}✅{% else %}⏳{% endif %}
+                        </button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Sağ: Ekipman & Demirbaş Listesi -->
+        <div class="lg:col-span-8 bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden flex flex-col">
+            <div class="p-3.5 bg-slate-50 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div class="flex items-center gap-1.5 flex-wrap text-xs font-semibold">
+                    <button onclick="filterItems('ALL')" class="item-flt-btn px-2.5 py-1 rounded-lg bg-slate-800 text-white" data-flt="ALL">Tümü</button>
+                    <button onclick="filterItems('PERIODIC')" class="item-flt-btn px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-slate-700" data-flt="PERIODIC">Periyodik Kontrol</button>
+                    <button onclick="filterItems('RISKY')" class="item-flt-btn px-2.5 py-1 rounded-lg bg-white border border-rose-200 text-rose-700" data-flt="RISKY">İSG Eksikli</button>
+                </div>
+                <input type="text" id="itemSearchInp" oninput="applyItemFilters()" placeholder="Ekipman veya marka ara..." class="text-xs border border-slate-300 rounded-lg p-1.5 w-full sm:w-48 focus:outline-hidden">
+            </div>
+
+            <div class="divide-y divide-slate-100 overflow-y-auto max-h-[640px]" id="itemsListContainer">
+                {% if not items %}
+                <div class="p-8 text-center text-xs text-slate-500">
+                    Henüz ekipman kaydı yok. Yukarıdaki <strong>"Sesli / Fotoğraflı Sayım Yap"</strong> butonuna tıklayarak envanter oluşturmaya başlayabilirsiniz.
+                </div>
+                {% endif %}
+                {% for it in items %}
+                <div class="inv-item-row p-3.5 hover:bg-slate-50 transition flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                     data-space="{{ it.space_id or 'NONE' }}"
+                     data-periodic="{{ it.periyodik_kontrol_gerekli or 0 }}"
+                     data-risk="{{ '1' if it.isg_guvenlik_durumu == 'Eksik / Riskli' else '0' }}"
+                     data-text="{{ it.ekipman_adi }} {{ it.kategori }} {{ it.marka_model_seri or '' }} {{ it.mekan_adi or '' }}">
+                    <div class="space-y-1 flex-1">
+                        <div class="flex items-center gap-2 flex-wrap text-xs">
+                            <span class="font-bold px-2 py-0.5 rounded bg-indigo-50 text-indigo-800 border border-indigo-200">{{ it.adet }} Adet</span>
+                            <span class="text-sm font-bold text-slate-900">{{ it.ekipman_adi }}</span>
+                            <span class="text-[11px] px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200">{{ it.kategori }}</span>
+                            {% if it.periyodik_kontrol_gerekli %}
+                            <span class="text-[11px] px-2 py-0.5 rounded bg-amber-100 text-amber-800 font-semibold border border-amber-200">Periyodik Kontrol</span>
+                            {% endif %}
+                            {% if it.isg_guvenlik_durumu == 'Eksik / Riskli' %}
+                            <span class="text-[11px] px-2 py-0.5 rounded bg-rose-100 text-rose-800 font-bold border border-rose-200">İSG Eksik / Riskli</span>
+                            {% endif %}
+                        </div>
+                        <div class="text-xs text-slate-500 flex items-center gap-3 flex-wrap">
+                            <span><i class="fa-solid fa-location-dot text-slate-400"></i> {{ it.mekan_adi or 'Okul Geneli / Mekân Bağlanmamış' }}</span>
+                            {% if it.marka_model_seri %}<span><strong>Model/Seri:</strong> {{ it.marka_model_seri }}</span>{% endif %}
+                            <span><strong>Durum:</strong> {{ it.calisma_durumu }}</span>
+                        </div>
+                        {% if it.isg_eksik_detay %}
+                        <div class="text-xs text-rose-700 bg-rose-50 px-2.5 py-1 rounded border border-rose-200">
+                            <strong>Eksiklik:</strong> {{ it.isg_eksik_detay }}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="flex items-center gap-2 shrink-0">
+                        <button type="button" onclick="deleteInventoryItem({{ it.id }})" class="px-2.5 py-1 text-xs font-semibold text-rose-600 hover:bg-rose-50 rounded-lg border border-transparent hover:border-rose-200 transition">
+                            <i class="fa-solid fa-trash-can"></i> Sil
+                        </button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let selectedSpaceFilter = 'ALL';
+let selectedModeFilter = 'ALL';
+
+function filterSpaceList(q) {
+    const lq = q.toLowerCase();
+    document.querySelectorAll('.space-row').forEach(r => {
+        r.classList.toggle('hidden', lq && !r.getAttribute('data-name').toLowerCase().includes(lq));
+    });
+}
+
+function filterBySpace(spaceId) {
+    selectedSpaceFilter = spaceId;
+    document.querySelectorAll('.space-row').forEach(r => {
+        if (r.getAttribute('data-space-id') === spaceId) r.classList.add('bg-indigo-50', 'border-l-4', 'border-indigo-600');
+        else r.classList.remove('bg-indigo-50', 'border-l-4', 'border-indigo-600');
+    });
+    applyItemFilters();
+}
+
+function filterItems(mode) {
+    selectedModeFilter = mode;
+    document.querySelectorAll('.item-flt-btn').forEach(b => {
+        if (b.getAttribute('data-flt') === mode) {
+            b.className = "item-flt-btn px-2.5 py-1 rounded-lg bg-slate-800 text-white";
+        } else {
+            b.className = "item-flt-btn px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-slate-700";
+        }
+    });
+    applyItemFilters();
+}
+
+function applyItemFilters() {
+    const q = document.getElementById('itemSearchInp').value.toLowerCase();
+    document.querySelectorAll('.inv-item-row').forEach(row => {
+        const sp = row.getAttribute('data-space');
+        const pk = row.getAttribute('data-periodic');
+        const rk = row.getAttribute('data-risk');
+        const txt = row.getAttribute('data-text').toLowerCase();
+
+        let okSpace = (selectedSpaceFilter === 'ALL') || (sp === selectedSpaceFilter);
+        let okMode = (selectedModeFilter === 'ALL') ||
+                     (selectedModeFilter === 'PERIODIC' && pk === '1') ||
+                     (selectedModeFilter === 'RISKY' && rk === '1');
+        let okSearch = !q || txt.includes(q);
+        row.classList.toggle('hidden', !(okSpace && okMode && okSearch));
+    });
+}
+
+async function toggleSpaceStatus(spaceId) {
+    const resp = await fetch(`/api/inventory/space/${spaceId}/toggle-status`, { method: 'POST' });
+    const res = await resp.json();
+    if (res.success) window.location.reload();
+}
+
+async function deleteInventoryItem(itemId) {
+    if (!confirm("Bu envanter kalemini silmek istediğinize emin misiniz?")) return;
+    const resp = await fetch(`/api/inventory/item/${itemId}`, { method: 'DELETE' });
+    const res = await resp.json();
+    if (res.success) window.location.reload();
+}
+</script>
+{% endblock %}

@@ -36,6 +36,7 @@ templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
 
 from mebbis_parser import parse_mebbis_xls, parse_mebbis_xlsx, import_mebbis_parsed_data, auto_import_local_reports
 from dof_report_generator import generate_mevcut_durum_docx, generate_dof_docx
+from inventory_exporter import generate_inventory_excel, generate_inventory_docx
 
 def clean_phone_filter(val):
     if not val:
@@ -3953,6 +3954,471 @@ def download_mevcut_durum_report(request: Request, school_id: int):
     )
 
 
+# ==============================================================================
+# ENVANTER OLUŞTURMA ASİSTANI & MASTER ENVANTER YÖNETİMİ (YALNIZCA UZMANLAR)
+# ==============================================================================
+
+def _require_expert_user(request: Request):
+    """Yalnızca İSG Uzmanı / Koordinatör kullanıcıların erişimine izin verir."""
+    user_row = get_current_user(request)
+    if not user_row:
+        return None
+    u = dict(user_row)
+    if u.get("role") not in ("koordinator", "uzman", "admin", None, ""):
+        # Okul kullanıcıları veya yetkisiz roller envanter veri girişi yapamaz
+        if u.get("role") == "okul":
+            raise HTTPException(status_code=403, detail="Envanter veri girişi yalnızca İSG Uzmanları tarafından yapılabilir.")
+    return u
+
+
+@app.get("/envanter-asistani", response_class=HTMLResponse)
+def inventory_assistant_page(request: Request, school_id: Optional[int] = None):
+    user = _require_expert_user(request)
+    if not user:
+        return RedirectResponse("/login", status_code=303)
+
+    conn = get_db()
+    c = conn.cursor()
+
+    # Sorumlu olunan okullar (hızlı seçim)
+    c.execute("""
+        SELECT id, kurum_kodu, kurum_adi
+        FROM schools
+        WHERE is_active_school = 1 AND sorumlu_uzman_id = ?
+        ORDER BY kurum_adi ASC
+    """, (user["id"],))
+    quick_schools = [dict(r) for r in c.fetchall()]
+
+    # Tüm aktif okullar
+    c.execute("""
+        SELECT id, kurum_kodu, kurum_adi
+        FROM schools
+        WHERE is_active_school = 1
+        ORDER BY kurum_adi ASC
+    """)
+    all_schools = [dict(r) for r in c.fetchall()]
+    conn.close()
+
+    return templates.TemplateResponse(request=request, name="envanter_asistani.html", context={
+        "user": user,
+        "active_page": "envanter_asistani",
+        "quick_schools": quick_schools,
+        "all_schools": all_schools,
+        "initial_school_id": school_id
+    })
+
+
+@app.get("/api/inventory/spaces/{school_id}")
+def api_get_school_spaces(request: Request, school_id: int):
+    user = _require_expert_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Oturum açmanız gerekiyor.")
+
+    conn = get_db()
+    c = conn.cursor()
+    c.execute("""
+        SELECT sp.*, COUNT(it.id) as item_count
+        FROM school_spaces sp
+        LEFT JOIN school_inventory_items it ON sp.id = it.space_id
+        WHERE sp.school_id = ?
+        GROUP BY sp.id
+        ORDER BY sp.kat ASC, sp.mekan_adi ASC
+    """, (school_id,))
+    spaces = [dict(r) for r in c.fetchall()]
+    conn.close()
+    return {"success": True, "spaces": spaces}
+
+
+@app.post("/api/inventory/space/create")
+async def api_create_school_space(request: Request):
+    user = _require_expert_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Oturum açmanız gerekiyor.")
+
+    body = await request.json()
+    school_id = body.get("school_id")
+    mekan_adi = (body.get("mekan_adi") or "").strip()
+    if not school_id or not mekan_adi:
+        return {"success": False, "error": "Okul ve mekân adı zorunludur."}
+
+    bina_adi = (body.get("bina_adi") or "Ana Bina").strip()
+    kat = (body.get("kat") or "Zemin Kat").strip()
+    mekan_turu = (body.get("mekan_turu") or "Genel Mekân").strip()
+
+    conn = get_db()
+    c = conn.cursor()
+    c.execute("""
+        INSERT OR IGNORE INTO school_spaces (school_id, bina_adi, kat, mekan_adi, mekan_turu, kaynak, guncelleyen_uzman)
+        VALUES (?, ?, ?, ?, ?, 'UZMAN_GIRISI', ?)
+    """, (school_id, bina_adi, kat, mekan_adi, mekan_turu, user.get("full_name", "İGU")))
+    if c.rowcount == 0:
+        c.execute("SELECT id FROM school_spaces WHERE school_id = ? AND bina_adi = ? AND kat = ? AND mekan_adi = ?",
+                  (school_id, bina_adi, kat, mekan_adi))
+        space_id = c.fetchone()[0]
+    else:
+        space_id = c.lastrowid
+    conn.commit()
+    conn.close()
+    return {"success": True, "space_id": space_id}
+
+
+@app.post("/api/inventory/space/{space_id}/toggle-status")
+def api_toggle_space_status(request: Request, space_id: int):
+    user = _require_expert_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Oturum açmanız gerekiyor.")
+
+    conn = get_db()
+    c = conn.cursor()
+    c.execute("SELECT durum FROM school_spaces WHERE id = ?", (space_id,))
+    row = c.fetchone()
+    if not row:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Mekân bulunamadı.")
+
+    new_durum = "TAMAMLANDI" if row[0] != "TAMAMLANDI" else "DEVAM_EDIYOR"
+    c.execute("""
+        UPDATE school_spaces SET durum = ?, son_guncelleme = CURRENT_TIMESTAMP, guncelleyen_uzman = ?
+        WHERE id = ?
+    """, (new_durum, user.get("full_name", "İGU"), space_id))
+    conn.commit()
+    conn.close()
+    return {"success": True, "durum": new_durum}
+
+
+@app.post("/api/inventory/analyze")
+async def api_analyze_inventory(request: Request):
+    user = _require_expert_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Oturum açmanız gerekiyor.")
+
+    body = await request.json()
+    school_id = body.get("school_id")
+    space_id = body.get("space_id")
+    raw_text = body.get("raw_text") or ""
+    photo_b64 = body.get("photo_base64")
+    photo_name = body.get("photo_name") or "envanter_foto.jpg"
+
+    image_bytes = None
+    if photo_b64 and "," in photo_b64:
+        import base64
+        try:
+            image_bytes = base64.b64decode(photo_b64.split(",", 1)[1])
+        except Exception:
+            image_bytes = None
+
+    conn = get_db()
+    c = conn.cursor()
+    school_name = ""
+    space_name = ""
+    if school_id:
+        c.execute("SELECT kurum_adi FROM schools WHERE id = ?", (school_id,))
+        sr = c.fetchone()
+        if sr:
+            school_name = sr[0]
+    if space_id:
+        c.execute("SELECT kat, mekan_adi FROM school_spaces WHERE id = ?", (space_id,))
+        spr = c.fetchone()
+        if spr:
+            space_name = f"{spr[0]} - {spr[1]}"
+    conn.close()
+
+    res = isg_ai.analyze_inventory_input_ai(
+        raw_text=raw_text,
+        image_bytes=image_bytes,
+        image_filename=photo_name,
+        school_name=school_name,
+        space_name=space_name
+    )
+    return res
+
+
+@app.post("/api/inventory/save-batch")
+async def api_save_inventory_batch(request: Request):
+    user = _require_expert_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Oturum açmanız gerekiyor.")
+
+    body = await request.json()
+    school_id = body.get("school_id")
+    space_id = body.get("space_id")
+    items = body.get("items") or []
+    photo_b64 = body.get("photo_base64")
+    photo_name = body.get("photo_name") or "envanter.jpg"
+    sync_periodic = bool(body.get("sync_periodic", True))
+    sync_dof = bool(body.get("sync_dof", True))
+
+    if not school_id or not items:
+        return {"success": False, "error": "Okul ve en az bir envanter kalemi zorunludur."}
+
+    # Fotoğraf varsa diske kaydet
+    saved_photo_url = None
+    if photo_b64 and "," in photo_b64:
+        import base64
+        try:
+            img_bytes = base64.b64decode(photo_b64.split(",", 1)[1])
+            up_dir = os.path.join(BASE_DIR, "static", "uploads", "inventory")
+            os.makedirs(up_dir, exist_ok=True)
+            fname = f"inv_{school_id}_{int(time.time())}.jpg"
+            with open(os.path.join(up_dir, fname), "wb") as f:
+                f.write(img_bytes)
+            saved_photo_url = f"/static/uploads/inventory/{fname}"
+        except Exception:
+            saved_photo_url = None
+
+    conn = get_db()
+    c = conn.cursor()
+
+    space_label = "Okul Geneli"
+    if space_id:
+        c.execute("SELECT mekan_adi FROM school_spaces WHERE id = ?", (space_id,))
+        sr = c.fetchone()
+        if sr:
+            space_label = sr[0]
+
+    saved_count = 0
+    periodic_added = 0
+    dof_added = 0
+    today_str = datetime.now().strftime("%d.%m.%Y")
+    today_iso = datetime.now().strftime("%Y-%m-%d")
+    expert_name = user.get("full_name", "Ramazan ERYILDIZ")
+
+    for it in items:
+        ekipman = (it.get("ekipman_adi") or "").strip()
+        if not ekipman:
+            continue
+        kategori = it.get("kategori") or "Genel Demirbaş"
+        adet = int(it.get("adet") or 1)
+        marka = (it.get("marka_model_seri") or "").strip()
+        calisma = it.get("calisma_durumu") or "Aktif"
+        pk_req = 1 if it.get("periyodik_kontrol_gerekli") else 0
+        etiket = it.get("kontrol_etiketi") or ("Kontrol Edilecek" if pk_req else "Gerekmiyor")
+        isg_durum = it.get("isg_guvenlik_durumu") or "Uygun"
+        eksik_detay = (it.get("isg_eksik_detay") or "").strip()
+
+        linked_periodic_id = None
+        linked_risk_id = None
+
+        # Periyodik Kontrol Takvimine Otomatik Ekle
+        if sync_periodic and pk_req:
+            c.execute("""
+                INSERT INTO periodic_controls (
+                    school_id, ekipman_turu, son_kontrol_tarihi, gecerlilik_ayi,
+                    sonraki_kontrol_tarihi, rapor_sonucu, alarm_seviyesi, notlar
+                ) VALUES (?, ?, ?, 12, ?, ?, 'Kontrol Bekliyor', ?)
+            """, (
+                school_id,
+                f"{ekipman} ({space_label})",
+                today_iso,
+                (datetime.now() + timedelta(days=365)).strftime("%Y-%m-%d"),
+                etiket,
+                f"Envanter Asistanı ile otomatik eklendi ({expert_name})"
+            ))
+            linked_periodic_id = c.lastrowid
+            periodic_added += 1
+
+        # İSG Eksiği varsa DÖF / Risk Listesine Otomatik Aktar
+        if sync_dof and isg_durum == "Eksik / Riskli":
+            c.execute("SELECT COUNT(*) FROM risk_assessments WHERE school_id = ? AND kaynak = 'SAHA_TESPITI'", (school_id,))
+            cnt = c.fetchone()[0] + 1
+            dof_no = f"DÖF-{cnt:02d}"
+            c.execute("""
+                INSERT INTO risk_assessments (
+                    school_id, barkod_no, kontrol_edilen_birim, bolum_unite,
+                    tehlike, tehlike_unsurlari, riskler,
+                    risk_puani, risk_skoru, risk_seviyesi,
+                    alinan_onlemler, alinmasi_gereken_dof_onlem, dayanak_mevzuat,
+                    termin_tarihi, sorumlular, dof_durumu, kaynak, saha_durumu,
+                    dof_no, dof_acilis_tarihi, son_denetim_tarihi, denetleyen_uzman, saha_fotograf_yolu
+                ) VALUES (
+                    ?, ?, ?, ?,
+                    ?, ?, 'İş Kazası / Yaralanma / Teknik Arıza',
+                    15, 15, 'YÜKSEK',
+                    ?, ?, '6331 s. Kanun & İş Ekipmanları Yönetmeliği',
+                    '15 Gün', 'Okul İdaresi', 'Açık', 'SAHA_TESPITI', 'YENI_TESPIT',
+                    ?, ?, ?, ?, ?
+                )
+            """, (
+                school_id, dof_no, space_label, space_label,
+                f"{ekipman} — {eksik_detay or 'İSG Uygunsuzluğu'}", eksik_detay,
+                f"{ekipman} ile ilgili tespit edilen uygunsuzluk ({eksik_detay}) giderilmelidir.",
+                f"{ekipman} ile ilgili tespit edilen uygunsuzluk ({eksik_detay}) giderilmelidir.",
+                dof_no, today_str, today_str, expert_name, saved_photo_url
+            ))
+            linked_risk_id = c.lastrowid
+            dof_added += 1
+
+        c.execute("""
+            INSERT INTO school_inventory_items (
+                school_id, space_id, ekipman_adi, kategori, adet, marka_model_seri,
+                calisma_durumu, periyodik_kontrol_gerekli, kontrol_etiketi,
+                isg_guvenlik_durumu, isg_eksik_detay, fotograf_yolu,
+                linked_risk_id, linked_periodic_id, kaynak, ekleyen_uzman
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'SESLI_ASISTAN', ?)
+        """, (
+            school_id, space_id, ekipman, kategori, adet, marka,
+            calisma, pk_req, etiket,
+            isg_durum, eksik_detay, saved_photo_url,
+            linked_risk_id, linked_periodic_id, expert_name
+        ))
+        saved_count += 1
+
+    conn.commit()
+    conn.close()
+    return {
+        "success": True,
+        "saved_count": saved_count,
+        "periodic_added": periodic_added,
+        "dof_added": dof_added
+    }
+
+
+@app.get("/okul/{school_id}/envanter", response_class=HTMLResponse)
+def school_master_inventory_page(request: Request, school_id: int):
+    user = _require_expert_user(request)
+    if not user:
+        return RedirectResponse("/login", status_code=303)
+
+    conn = get_db()
+    c = conn.cursor()
+    c.execute("SELECT * FROM schools WHERE id = ?", (school_id,))
+    s_row = c.fetchone()
+    if not s_row:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Okul bulunamadı.")
+    school = dict(s_row)
+
+    c.execute("SELECT * FROM school_inventory_meta WHERE school_id = ?", (school_id,))
+    m_row = c.fetchone()
+    meta = dict(m_row) if m_row else None
+
+    c.execute("""
+        SELECT sp.*, COUNT(it.id) as item_count
+        FROM school_spaces sp
+        LEFT JOIN school_inventory_items it ON sp.id = it.space_id
+        WHERE sp.school_id = ?
+        GROUP BY sp.id
+        ORDER BY sp.kat ASC, sp.mekan_adi ASC
+    """, (school_id,))
+    spaces = [dict(r) for r in c.fetchall()]
+
+    c.execute("""
+        SELECT it.*, sp.mekan_adi, sp.kat
+        FROM school_inventory_items it
+        LEFT JOIN school_spaces sp ON it.space_id = sp.id
+        WHERE it.school_id = ?
+        ORDER BY it.isg_guvenlik_durumu DESC, it.periyodik_kontrol_gerekli DESC, it.id DESC
+    """, (school_id,))
+    items = [dict(r) for r in c.fetchall()]
+    conn.close()
+
+    tot_sp = len(spaces)
+    done_sp = sum(1 for s in spaces if s.get("durum") == "TAMAMLANDI")
+    pct = round((done_sp / tot_sp) * 100) if tot_sp > 0 else 0
+
+    metrics = {
+        "toplam_mekan": tot_sp,
+        "tamamlanan_mekan": done_sp,
+        "tamamlanma_yuzde": pct,
+        "toplam_ekipman": len(items),
+        "periyodik_sayisi": sum(1 for i in items if i.get("periyodik_kontrol_gerekli")),
+        "riskli_sayisi": sum(1 for i in items if i.get("isg_guvenlik_durumu") == "Eksik / Riskli")
+    }
+
+    return templates.TemplateResponse(request=request, name="okul_envanter.html", context={
+        "user": user,
+        "active_page": "envanter_asistani",
+        "school": school,
+        "meta": meta,
+        "spaces": spaces,
+        "items": items,
+        "metrics": metrics
+    })
+
+
+@app.delete("/api/inventory/item/{item_id}")
+def api_delete_inventory_item(request: Request, item_id: int):
+    user = _require_expert_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Oturum açmanız gerekiyor.")
+    conn = get_db()
+    c = conn.cursor()
+    c.execute("DELETE FROM school_inventory_items WHERE id = ?", (item_id,))
+    conn.commit()
+    conn.close()
+    return {"success": True}
+
+
+@app.get("/okul/{school_id}/envanter/excel")
+def download_inventory_excel(request: Request, school_id: int):
+    user = _require_expert_user(request)
+    if not user:
+        return RedirectResponse("/login", status_code=303)
+
+    conn = get_db()
+    c = conn.cursor()
+    c.execute("SELECT * FROM schools WHERE id = ?", (school_id,))
+    s_row = c.fetchone()
+    if not s_row:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Okul bulunamadı.")
+    school = dict(s_row)
+
+    c.execute("SELECT * FROM school_inventory_meta WHERE school_id = ?", (school_id,))
+    m_row = c.fetchone()
+    meta = dict(m_row) if m_row else {}
+
+    c.execute("SELECT * FROM school_spaces WHERE school_id = ? ORDER BY kat ASC, mekan_adi ASC", (school_id,))
+    spaces = [dict(r) for r in c.fetchall()]
+
+    c.execute("SELECT * FROM school_inventory_items WHERE school_id = ? ORDER BY id ASC", (school_id,))
+    items = [dict(r) for r in c.fetchall()]
+    conn.close()
+
+    bio = generate_inventory_excel(school, meta, spaces, items, user_name=user.get("full_name", "Ramazan ERYILDIZ"))
+    filename = f"{school['kurum_adi'].replace(' ', '_')}_Master_Envanter.xlsx"
+    return StreamingResponse(
+        bio,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f"attachment; filename*=UTF-8''{requests.utils.quote(filename)}"}
+    )
+
+
+@app.get("/okul/{school_id}/envanter/docx")
+def download_inventory_docx(request: Request, school_id: int):
+    user = _require_expert_user(request)
+    if not user:
+        return RedirectResponse("/login", status_code=303)
+
+    conn = get_db()
+    c = conn.cursor()
+    c.execute("SELECT * FROM schools WHERE id = ?", (school_id,))
+    s_row = c.fetchone()
+    if not s_row:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Okul bulunamadı.")
+    school = dict(s_row)
+
+    c.execute("SELECT * FROM school_inventory_meta WHERE school_id = ?", (school_id,))
+    m_row = c.fetchone()
+    meta = dict(m_row) if m_row else {}
+
+    c.execute("SELECT * FROM school_spaces WHERE school_id = ? ORDER BY kat ASC, mekan_adi ASC", (school_id,))
+    spaces = [dict(r) for r in c.fetchall()]
+
+    c.execute("SELECT * FROM school_inventory_items WHERE school_id = ? ORDER BY id ASC", (school_id,))
+    items = [dict(r) for r in c.fetchall()]
+    conn.close()
+
+    bio = generate_inventory_docx(school, meta, spaces, items, user_name=user.get("full_name", "Ramazan ERYILDIZ"))
+    filename = f"{school['kurum_adi'].replace(' ', '_')}_Master_Envanter_Dosyasi.docx"
+    return StreamingResponse(
+        bio,
+        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        headers={"Content-Disposition": f"attachment; filename*=UTF-8''{requests.utils.quote(filename)}"}
+    )
+
+
 @app.get("/okul/{school_id}/dof-raporu/indir")
 def download_dof_report(request: Request, school_id: int):
     user_row = get_current_user(request)
@@ -3983,6 +4449,471 @@ def download_dof_report(request: Request, school_id: int):
     bio = generate_dof_docx(school, active_risks, user_name=user.get("full_name", "Ramazan ERYILDIZ"))
     filename = f"{school['kurum_adi'].replace(' ', '_')}_Saha_Denetim_DOF_Raporu.docx"
 
+    return StreamingResponse(
+        bio,
+        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        headers={"Content-Disposition": f"attachment; filename*=UTF-8''{requests.utils.quote(filename)}"}
+    )
+
+
+# ==============================================================================
+# ENVANTER OLUŞTURMA ASİSTANI & MASTER ENVANTER YÖNETİMİ (YALNIZCA UZMANLAR)
+# ==============================================================================
+
+def _require_expert_user(request: Request):
+    """Yalnızca İSG Uzmanı / Koordinatör kullanıcıların erişimine izin verir."""
+    user_row = get_current_user(request)
+    if not user_row:
+        return None
+    u = dict(user_row)
+    if u.get("role") not in ("koordinator", "uzman", "admin", None, ""):
+        # Okul kullanıcıları veya yetkisiz roller envanter veri girişi yapamaz
+        if u.get("role") == "okul":
+            raise HTTPException(status_code=403, detail="Envanter veri girişi yalnızca İSG Uzmanları tarafından yapılabilir.")
+    return u
+
+
+@app.get("/envanter-asistani", response_class=HTMLResponse)
+def inventory_assistant_page(request: Request, school_id: Optional[int] = None):
+    user = _require_expert_user(request)
+    if not user:
+        return RedirectResponse("/login", status_code=303)
+
+    conn = get_db()
+    c = conn.cursor()
+
+    # Sorumlu olunan okullar (hızlı seçim)
+    c.execute("""
+        SELECT id, kurum_kodu, kurum_adi
+        FROM schools
+        WHERE is_active_school = 1 AND sorumlu_uzman_id = ?
+        ORDER BY kurum_adi ASC
+    """, (user["id"],))
+    quick_schools = [dict(r) for r in c.fetchall()]
+
+    # Tüm aktif okullar
+    c.execute("""
+        SELECT id, kurum_kodu, kurum_adi
+        FROM schools
+        WHERE is_active_school = 1
+        ORDER BY kurum_adi ASC
+    """)
+    all_schools = [dict(r) for r in c.fetchall()]
+    conn.close()
+
+    return templates.TemplateResponse(request=request, name="envanter_asistani.html", context={
+        "user": user,
+        "active_page": "envanter_asistani",
+        "quick_schools": quick_schools,
+        "all_schools": all_schools,
+        "initial_school_id": school_id
+    })
+
+
+@app.get("/api/inventory/spaces/{school_id}")
+def api_get_school_spaces(request: Request, school_id: int):
+    user = _require_expert_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Oturum açmanız gerekiyor.")
+
+    conn = get_db()
+    c = conn.cursor()
+    c.execute("""
+        SELECT sp.*, COUNT(it.id) as item_count
+        FROM school_spaces sp
+        LEFT JOIN school_inventory_items it ON sp.id = it.space_id
+        WHERE sp.school_id = ?
+        GROUP BY sp.id
+        ORDER BY sp.kat ASC, sp.mekan_adi ASC
+    """, (school_id,))
+    spaces = [dict(r) for r in c.fetchall()]
+    conn.close()
+    return {"success": True, "spaces": spaces}
+
+
+@app.post("/api/inventory/space/create")
+async def api_create_school_space(request: Request):
+    user = _require_expert_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Oturum açmanız gerekiyor.")
+
+    body = await request.json()
+    school_id = body.get("school_id")
+    mekan_adi = (body.get("mekan_adi") or "").strip()
+    if not school_id or not mekan_adi:
+        return {"success": False, "error": "Okul ve mekân adı zorunludur."}
+
+    bina_adi = (body.get("bina_adi") or "Ana Bina").strip()
+    kat = (body.get("kat") or "Zemin Kat").strip()
+    mekan_turu = (body.get("mekan_turu") or "Genel Mekân").strip()
+
+    conn = get_db()
+    c = conn.cursor()
+    c.execute("""
+        INSERT OR IGNORE INTO school_spaces (school_id, bina_adi, kat, mekan_adi, mekan_turu, kaynak, guncelleyen_uzman)
+        VALUES (?, ?, ?, ?, ?, 'UZMAN_GIRISI', ?)
+    """, (school_id, bina_adi, kat, mekan_adi, mekan_turu, user.get("full_name", "İGU")))
+    if c.rowcount == 0:
+        c.execute("SELECT id FROM school_spaces WHERE school_id = ? AND bina_adi = ? AND kat = ? AND mekan_adi = ?",
+                  (school_id, bina_adi, kat, mekan_adi))
+        space_id = c.fetchone()[0]
+    else:
+        space_id = c.lastrowid
+    conn.commit()
+    conn.close()
+    return {"success": True, "space_id": space_id}
+
+
+@app.post("/api/inventory/space/{space_id}/toggle-status")
+def api_toggle_space_status(request: Request, space_id: int):
+    user = _require_expert_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Oturum açmanız gerekiyor.")
+
+    conn = get_db()
+    c = conn.cursor()
+    c.execute("SELECT durum FROM school_spaces WHERE id = ?", (space_id,))
+    row = c.fetchone()
+    if not row:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Mekân bulunamadı.")
+
+    new_durum = "TAMAMLANDI" if row[0] != "TAMAMLANDI" else "DEVAM_EDIYOR"
+    c.execute("""
+        UPDATE school_spaces SET durum = ?, son_guncelleme = CURRENT_TIMESTAMP, guncelleyen_uzman = ?
+        WHERE id = ?
+    """, (new_durum, user.get("full_name", "İGU"), space_id))
+    conn.commit()
+    conn.close()
+    return {"success": True, "durum": new_durum}
+
+
+@app.post("/api/inventory/analyze")
+async def api_analyze_inventory(request: Request):
+    user = _require_expert_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Oturum açmanız gerekiyor.")
+
+    body = await request.json()
+    school_id = body.get("school_id")
+    space_id = body.get("space_id")
+    raw_text = body.get("raw_text") or ""
+    photo_b64 = body.get("photo_base64")
+    photo_name = body.get("photo_name") or "envanter_foto.jpg"
+
+    image_bytes = None
+    if photo_b64 and "," in photo_b64:
+        import base64
+        try:
+            image_bytes = base64.b64decode(photo_b64.split(",", 1)[1])
+        except Exception:
+            image_bytes = None
+
+    conn = get_db()
+    c = conn.cursor()
+    school_name = ""
+    space_name = ""
+    if school_id:
+        c.execute("SELECT kurum_adi FROM schools WHERE id = ?", (school_id,))
+        sr = c.fetchone()
+        if sr:
+            school_name = sr[0]
+    if space_id:
+        c.execute("SELECT kat, mekan_adi FROM school_spaces WHERE id = ?", (space_id,))
+        spr = c.fetchone()
+        if spr:
+            space_name = f"{spr[0]} - {spr[1]}"
+    conn.close()
+
+    res = isg_ai.analyze_inventory_input_ai(
+        raw_text=raw_text,
+        image_bytes=image_bytes,
+        image_filename=photo_name,
+        school_name=school_name,
+        space_name=space_name
+    )
+    return res
+
+
+@app.post("/api/inventory/save-batch")
+async def api_save_inventory_batch(request: Request):
+    user = _require_expert_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Oturum açmanız gerekiyor.")
+
+    body = await request.json()
+    school_id = body.get("school_id")
+    space_id = body.get("space_id")
+    items = body.get("items") or []
+    photo_b64 = body.get("photo_base64")
+    photo_name = body.get("photo_name") or "envanter.jpg"
+    sync_periodic = bool(body.get("sync_periodic", True))
+    sync_dof = bool(body.get("sync_dof", True))
+
+    if not school_id or not items:
+        return {"success": False, "error": "Okul ve en az bir envanter kalemi zorunludur."}
+
+    # Fotoğraf varsa diske kaydet
+    saved_photo_url = None
+    if photo_b64 and "," in photo_b64:
+        import base64
+        try:
+            img_bytes = base64.b64decode(photo_b64.split(",", 1)[1])
+            up_dir = os.path.join(BASE_DIR, "static", "uploads", "inventory")
+            os.makedirs(up_dir, exist_ok=True)
+            fname = f"inv_{school_id}_{int(time.time())}.jpg"
+            with open(os.path.join(up_dir, fname), "wb") as f:
+                f.write(img_bytes)
+            saved_photo_url = f"/static/uploads/inventory/{fname}"
+        except Exception:
+            saved_photo_url = None
+
+    conn = get_db()
+    c = conn.cursor()
+
+    space_label = "Okul Geneli"
+    if space_id:
+        c.execute("SELECT mekan_adi FROM school_spaces WHERE id = ?", (space_id,))
+        sr = c.fetchone()
+        if sr:
+            space_label = sr[0]
+
+    saved_count = 0
+    periodic_added = 0
+    dof_added = 0
+    today_str = datetime.now().strftime("%d.%m.%Y")
+    today_iso = datetime.now().strftime("%Y-%m-%d")
+    expert_name = user.get("full_name", "Ramazan ERYILDIZ")
+
+    for it in items:
+        ekipman = (it.get("ekipman_adi") or "").strip()
+        if not ekipman:
+            continue
+        kategori = it.get("kategori") or "Genel Demirbaş"
+        adet = int(it.get("adet") or 1)
+        marka = (it.get("marka_model_seri") or "").strip()
+        calisma = it.get("calisma_durumu") or "Aktif"
+        pk_req = 1 if it.get("periyodik_kontrol_gerekli") else 0
+        etiket = it.get("kontrol_etiketi") or ("Kontrol Edilecek" if pk_req else "Gerekmiyor")
+        isg_durum = it.get("isg_guvenlik_durumu") or "Uygun"
+        eksik_detay = (it.get("isg_eksik_detay") or "").strip()
+
+        linked_periodic_id = None
+        linked_risk_id = None
+
+        # Periyodik Kontrol Takvimine Otomatik Ekle
+        if sync_periodic and pk_req:
+            c.execute("""
+                INSERT INTO periodic_controls (
+                    school_id, ekipman_turu, son_kontrol_tarihi, gecerlilik_ayi,
+                    sonraki_kontrol_tarihi, rapor_sonucu, alarm_seviyesi, notlar
+                ) VALUES (?, ?, ?, 12, ?, ?, 'Kontrol Bekliyor', ?)
+            """, (
+                school_id,
+                f"{ekipman} ({space_label})",
+                today_iso,
+                (datetime.now() + timedelta(days=365)).strftime("%Y-%m-%d"),
+                etiket,
+                f"Envanter Asistanı ile otomatik eklendi ({expert_name})"
+            ))
+            linked_periodic_id = c.lastrowid
+            periodic_added += 1
+
+        # İSG Eksiği varsa DÖF / Risk Listesine Otomatik Aktar
+        if sync_dof and isg_durum == "Eksik / Riskli":
+            c.execute("SELECT COUNT(*) FROM risk_assessments WHERE school_id = ? AND kaynak = 'SAHA_TESPITI'", (school_id,))
+            cnt = c.fetchone()[0] + 1
+            dof_no = f"DÖF-{cnt:02d}"
+            c.execute("""
+                INSERT INTO risk_assessments (
+                    school_id, barkod_no, kontrol_edilen_birim, bolum_unite,
+                    tehlike, tehlike_unsurlari, riskler,
+                    risk_puani, risk_skoru, risk_seviyesi,
+                    alinan_onlemler, alinmasi_gereken_dof_onlem, dayanak_mevzuat,
+                    termin_tarihi, sorumlular, dof_durumu, kaynak, saha_durumu,
+                    dof_no, dof_acilis_tarihi, son_denetim_tarihi, denetleyen_uzman, saha_fotograf_yolu
+                ) VALUES (
+                    ?, ?, ?, ?,
+                    ?, ?, 'İş Kazası / Yaralanma / Teknik Arıza',
+                    15, 15, 'YÜKSEK',
+                    ?, ?, '6331 s. Kanun & İş Ekipmanları Yönetmeliği',
+                    '15 Gün', 'Okul İdaresi', 'Açık', 'SAHA_TESPITI', 'YENI_TESPIT',
+                    ?, ?, ?, ?, ?
+                )
+            """, (
+                school_id, dof_no, space_label, space_label,
+                f"{ekipman} — {eksik_detay or 'İSG Uygunsuzluğu'}", eksik_detay,
+                f"{ekipman} ile ilgili tespit edilen uygunsuzluk ({eksik_detay}) giderilmelidir.",
+                f"{ekipman} ile ilgili tespit edilen uygunsuzluk ({eksik_detay}) giderilmelidir.",
+                dof_no, today_str, today_str, expert_name, saved_photo_url
+            ))
+            linked_risk_id = c.lastrowid
+            dof_added += 1
+
+        c.execute("""
+            INSERT INTO school_inventory_items (
+                school_id, space_id, ekipman_adi, kategori, adet, marka_model_seri,
+                calisma_durumu, periyodik_kontrol_gerekli, kontrol_etiketi,
+                isg_guvenlik_durumu, isg_eksik_detay, fotograf_yolu,
+                linked_risk_id, linked_periodic_id, kaynak, ekleyen_uzman
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'SESLI_ASISTAN', ?)
+        """, (
+            school_id, space_id, ekipman, kategori, adet, marka,
+            calisma, pk_req, etiket,
+            isg_durum, eksik_detay, saved_photo_url,
+            linked_risk_id, linked_periodic_id, expert_name
+        ))
+        saved_count += 1
+
+    conn.commit()
+    conn.close()
+    return {
+        "success": True,
+        "saved_count": saved_count,
+        "periodic_added": periodic_added,
+        "dof_added": dof_added
+    }
+
+
+@app.get("/okul/{school_id}/envanter", response_class=HTMLResponse)
+def school_master_inventory_page(request: Request, school_id: int):
+    user = _require_expert_user(request)
+    if not user:
+        return RedirectResponse("/login", status_code=303)
+
+    conn = get_db()
+    c = conn.cursor()
+    c.execute("SELECT * FROM schools WHERE id = ?", (school_id,))
+    s_row = c.fetchone()
+    if not s_row:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Okul bulunamadı.")
+    school = dict(s_row)
+
+    c.execute("SELECT * FROM school_inventory_meta WHERE school_id = ?", (school_id,))
+    m_row = c.fetchone()
+    meta = dict(m_row) if m_row else None
+
+    c.execute("""
+        SELECT sp.*, COUNT(it.id) as item_count
+        FROM school_spaces sp
+        LEFT JOIN school_inventory_items it ON sp.id = it.space_id
+        WHERE sp.school_id = ?
+        GROUP BY sp.id
+        ORDER BY sp.kat ASC, sp.mekan_adi ASC
+    """, (school_id,))
+    spaces = [dict(r) for r in c.fetchall()]
+
+    c.execute("""
+        SELECT it.*, sp.mekan_adi, sp.kat
+        FROM school_inventory_items it
+        LEFT JOIN school_spaces sp ON it.space_id = sp.id
+        WHERE it.school_id = ?
+        ORDER BY it.isg_guvenlik_durumu DESC, it.periyodik_kontrol_gerekli DESC, it.id DESC
+    """, (school_id,))
+    items = [dict(r) for r in c.fetchall()]
+    conn.close()
+
+    tot_sp = len(spaces)
+    done_sp = sum(1 for s in spaces if s.get("durum") == "TAMAMLANDI")
+    pct = round((done_sp / tot_sp) * 100) if tot_sp > 0 else 0
+
+    metrics = {
+        "toplam_mekan": tot_sp,
+        "tamamlanan_mekan": done_sp,
+        "tamamlanma_yuzde": pct,
+        "toplam_ekipman": len(items),
+        "periyodik_sayisi": sum(1 for i in items if i.get("periyodik_kontrol_gerekli")),
+        "riskli_sayisi": sum(1 for i in items if i.get("isg_guvenlik_durumu") == "Eksik / Riskli")
+    }
+
+    return templates.TemplateResponse(request=request, name="okul_envanter.html", context={
+        "user": user,
+        "active_page": "envanter_asistani",
+        "school": school,
+        "meta": meta,
+        "spaces": spaces,
+        "items": items,
+        "metrics": metrics
+    })
+
+
+@app.delete("/api/inventory/item/{item_id}")
+def api_delete_inventory_item(request: Request, item_id: int):
+    user = _require_expert_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Oturum açmanız gerekiyor.")
+    conn = get_db()
+    c = conn.cursor()
+    c.execute("DELETE FROM school_inventory_items WHERE id = ?", (item_id,))
+    conn.commit()
+    conn.close()
+    return {"success": True}
+
+
+@app.get("/okul/{school_id}/envanter/excel")
+def download_inventory_excel(request: Request, school_id: int):
+    user = _require_expert_user(request)
+    if not user:
+        return RedirectResponse("/login", status_code=303)
+
+    conn = get_db()
+    c = conn.cursor()
+    c.execute("SELECT * FROM schools WHERE id = ?", (school_id,))
+    s_row = c.fetchone()
+    if not s_row:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Okul bulunamadı.")
+    school = dict(s_row)
+
+    c.execute("SELECT * FROM school_inventory_meta WHERE school_id = ?", (school_id,))
+    m_row = c.fetchone()
+    meta = dict(m_row) if m_row else {}
+
+    c.execute("SELECT * FROM school_spaces WHERE school_id = ? ORDER BY kat ASC, mekan_adi ASC", (school_id,))
+    spaces = [dict(r) for r in c.fetchall()]
+
+    c.execute("SELECT * FROM school_inventory_items WHERE school_id = ? ORDER BY id ASC", (school_id,))
+    items = [dict(r) for r in c.fetchall()]
+    conn.close()
+
+    bio = generate_inventory_excel(school, meta, spaces, items, user_name=user.get("full_name", "Ramazan ERYILDIZ"))
+    filename = f"{school['kurum_adi'].replace(' ', '_')}_Master_Envanter.xlsx"
+    return StreamingResponse(
+        bio,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f"attachment; filename*=UTF-8''{requests.utils.quote(filename)}"}
+    )
+
+
+@app.get("/okul/{school_id}/envanter/docx")
+def download_inventory_docx(request: Request, school_id: int):
+    user = _require_expert_user(request)
+    if not user:
+        return RedirectResponse("/login", status_code=303)
+
+    conn = get_db()
+    c = conn.cursor()
+    c.execute("SELECT * FROM schools WHERE id = ?", (school_id,))
+    s_row = c.fetchone()
+    if not s_row:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Okul bulunamadı.")
+    school = dict(s_row)
+
+    c.execute("SELECT * FROM school_inventory_meta WHERE school_id = ?", (school_id,))
+    m_row = c.fetchone()
+    meta = dict(m_row) if m_row else {}
+
+    c.execute("SELECT * FROM school_spaces WHERE school_id = ? ORDER BY kat ASC, mekan_adi ASC", (school_id,))
+    spaces = [dict(r) for r in c.fetchall()]
+
+    c.execute("SELECT * FROM school_inventory_items WHERE school_id = ? ORDER BY id ASC", (school_id,))
+    items = [dict(r) for r in c.fetchall()]
+    conn.close()
+
+    bio = generate_inventory_docx(school, meta, spaces, items, user_name=user.get("full_name", "Ramazan ERYILDIZ"))
+    filename = f"{school['kurum_adi'].replace(' ', '_')}_Master_Envanter_Dosyasi.docx"
     return StreamingResponse(
         bio,
         media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
